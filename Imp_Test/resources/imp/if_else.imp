@@ -1,0 +1,10 @@
+﻿var topping = "hello"
+var frog = 1
+
+if (topping == null)
+		return
+else if (frog == 0) {
+
+}
+else
+	frog = 2

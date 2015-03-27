@@ -1,0 +1,2 @@
+﻿if (topping == null)
+		return

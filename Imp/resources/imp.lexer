@@ -1,0 +1,60 @@
+﻿spaces(ignore) = /[ \t]+/
+newlines(optional) = /(\s*\n)+\s*/
+comma = ","
+path_separator = "."
+comma_or_newline = newlines | comma
+semicolon_or_newline = newlines | ";"
+line_comment(ignore) = "//[^\r\n]*"
+string_value = /"[^"]*"|'[^']*'/
+bool_value = "true" | "false"
+int_value = /-?[0-9]+/
+float_value = /-?([0-9]*\.)?[0-9]+f?/
+arrow = "=>"
+operator = '+' | '-' | '/' | '*' | '<=' | '>=' | '<' | '>' | '==' | '!=' | '&&' | '||' | /\$\w+/
+equals = "="
+set_operator = equals | '+=' | '-=' | '*=' | '/=' | '@='
+
+null = "null"
+
+keyword =
+	  "abstract"
+	| "break"
+	| "catch"
+	| "class"
+	| "continue"
+	| "delete"
+	| "do"
+	| "else"
+	| "enum"
+	| "if"
+	| "in"
+	| "finally"
+	| "for"
+	| "namespace"
+	| "new" 
+	| "private"
+	| "public"
+	| "return"
+	| "static"
+	| "throw"
+	| "while"
+	| "var"
+
+type =
+	  "bool"
+	| "int"
+	| "float"
+	| "string"
+
+block_start = "{"
+block_end = "}"
+
+group_start = "("
+group_end = ")"
+
+array_start = "["
+array_end = "]"
+
+colon = ":"
+
+id = /[\$a-zA-Z0-9_]+/

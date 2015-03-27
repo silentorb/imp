@@ -1,0 +1,121 @@
+﻿start = trim @(namespace_class, newlines, 1, 0) final_trim
+
+namespace_class = namespace | class
+snippet_entry = trim @(snippet_function, semicolon_or_newline, 1, 0) final_trim
+
+none = /&*/
+ws = /\s+/
+trim = /\s*/
+final_trim = /\s*$/
+newlines = /(\s*\n)+\s*/
+one_or_no_newline = /[ \t]*(\r\n)?[ \t]*/
+comma = trim "," trim
+spaces = /[ \t]+/
+dot = "."
+path_separator = "."
+id = /[\$a-zA-Z0-9_]+/
+comma_or_newline = /\s*((\s*\n)+|,)\s*/
+semicolon_or_newline = /\s*((\s*\n)+|;)\s*/
+
+string = ('"' /[^"]*/ '"') | ("'" /[^']*/ "'")
+bool = "true" | "false"
+int = /-?[0-9]+/
+float = /-?([0-9]*\.)?[0-9]+f?/
+operator = '+' | '-' | '/' | '*' | '<=' | '>=' | '<' | '>' | '==' | '!=' | '&&' | '||' | /\$\w+/
+set_operator = '=' | '+=' | '-=' | '*=' | '/=' | '@='
+value = string | bool | int | float
+operation_separator = trim operator trim
+
+arguments = "(" trim @(expression, comma_or_newline, 0, 0) trim ")"
+
+optional_arguments = trim arguments
+
+reference_token = id @(arguments, none, 0, 1)
+
+optional_array = "[" trim expression trim "]"
+
+id_with_optional_array = id @(optional_array, none, 0, 1)
+
+reference = @(id_with_optional_array, path_separator, 1, 0) @(optional_arguments, none, 0, 1)
+
+declare_symbol = id @(type_info, none, 0, 1)
+
+type_info = trim ":" trim type
+
+type = @(id, path_separator, 1, 0) @(optional_list_suffix, none, 0, 1)
+
+optional_list_suffix = trim "[" trim "]"
+
+statement =
+	declare_variable
+	| if
+	| while
+	| return
+	| for
+	| assignment
+	| expression
+
+
+expression_part =
+	  instantiate
+	| value
+	| lambda
+	| reference	
+	| closed_expression
+
+
+closed_expression = "(" trim expression ")"
+
+expression = @(expression_part, operation_separator, 1, 0)
+
+namespace = "namespace" ws id trim "{" trim @(class, newlines, 0, 0) trim "}"
+
+function_definition = @(function_attribute, none, 0, 1) id trim "(" @(declare_symbol, comma, 0, 0) ")" @(type_info, none, 0, 1) @(optional_long_block, none, 0, 1)
+
+snippet_function = @(function_attribute, none, 0, 1) id trim "(" @(declare_symbol, comma, 0, 0) ")" @(type_info, none, 0, 1) trim long_block_any
+
+function_attribute =  "private" ws
+
+class_statements = function_definition | property_declaration
+
+property_declaration = id type_info
+
+class = @(class_attribute, ws, 0, 0) trim "class" ws id trim @(optional_parent_classes, none, 0, 1) "{" trim @(class_statements, newlines, 0, 0) trim "}"
+
+class_attribute = "abstract"
+
+optional_parent_classes = ":" trim @(id, comma_or_newline, 1, 0) trim
+
+block = long_block | short_block
+
+optional_long_block = trim long_block
+
+short_block = one_or_no_newline statement
+
+long_block = "{" trim @(statement, semicolon_or_newline, 0, 0) trim "}"
+
+long_block_any = "{" trim any_statement trim "}"
+
+any_statement = class | statements
+
+statements = @(statement, semicolon_or_newline, 0, 0)
+
+if = "if" trim "(" trim expression trim ")" trim block
+
+while = "while" trim "(" trim expression trim ")" trim block
+
+optional_expression = spaces expression
+
+return = "return" @(optional_expression, none, 0, 1)
+
+optional_assignment = trim "=" trim expression
+
+declare_variable = "var" ws id @(type_info, none, 0, 1) @(optional_assignment, none, 0, 1)
+
+assignment = reference trim set_operator trim expression
+
+for = "for" trim "(" trim "var" ws id ws "in" ws reference trim ")" trim long_block
+
+instantiate = "new" ws type trim arguments
+
+lambda = "(" trim @(declare_symbol, comma, 0, 0) trim ")" trim "=>" trim block

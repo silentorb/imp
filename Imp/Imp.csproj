@@ -1,0 +1,152 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{72BB0D03-764D-4799-9380-BBA1A8BE7243}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>imperative</RootNamespace>
+    <AssemblyName>Imp</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="expressions\Jewel.cs" />
+    <Compile Include="expressions\Treasury_Definition.cs" />
+    <Compile Include="expressions\If.cs" />
+    <Compile Include="expressions\Dynamic_Function_Call.cs" />
+    <Compile Include="expressions\Profession_Expression.cs" />
+    <Compile Include="Overlord.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="render\Common_Target.cs" />
+    <Compile Include="render\Generator.cs" />
+    <Compile Include="render\Renderer.cs" />
+    <Compile Include="render\Target.cs" />
+    <Compile Include="render\targets\Cpp.cs" />
+    <Compile Include="render\targets\Csharp.cs" />
+    <Compile Include="render\targets\Java.cs" />
+    <Compile Include="render\targets\JavaScript.cs" />
+    <Compile Include="render\targets\PHP.cs" />
+    <Compile Include="render\Target_Configuration.cs" />
+    <Compile Include="render\Transmuter.cs" />
+    <Compile Include="schema\Accordian.cs" />
+    <Compile Include="schema\Configuration.cs" />
+    <Compile Include="schema\Dependency.cs" />
+    <Compile Include="schema\Division.cs" />
+    <Compile Include="schema\Dungeon.cs" />
+    <Compile Include="schema\Ethereal_Minion.cs" />
+    <Compile Include="schema\IDungeon.cs" />
+    <Compile Include="schema\Minion.cs" />
+    <Compile Include="schema\Minion_Base.cs" />
+    <Compile Include="schema\Platform_Function_Info.cs" />
+    <Compile Include="schema\Portal.cs" />
+    <Compile Include="schema\Profession.cs" />
+    <Compile Include="schema\Property_Addition.cs" />
+    <Compile Include="schema\Realm.cs" />
+    <Compile Include="schema\Scope.cs" />
+    <Compile Include="schema\Symbol.cs" />
+    <Compile Include="schema\Treasury.cs" />
+    <Compile Include="schema\Used_Function.cs" />
+    <Compile Include="summoner\Context.cs" />
+    <Compile Include="summoner\Summoner2.cs" />
+    <Compile Include="summoner\expressions\Snippet.cs" />
+    <Compile Include="expressions\Block.cs" />
+    <Compile Include="summoner\Pre_Summoner.cs" />
+    <Compile Include="summoner\Summoner.cs" />
+    <Compile Include="summoner\Template.cs" />
+    <Compile Include="expressions\Anonymous_Function.cs" />
+    <Compile Include="expressions\Assignment.cs" />
+    <Compile Include="expressions\Class_Definition.cs" />
+    <Compile Include="expressions\Method_Call.cs" />
+    <Compile Include="expressions\Comment.cs" />
+    <Compile Include="expressions\Create_Array.cs" />
+    <Compile Include="expressions\Declare_Variable.cs" />
+    <Compile Include="expressions\Expression.cs" />
+    <Compile Include="expressions\Expression_Type.cs" />
+    <Compile Include="expressions\Flow_Control.cs" />
+    <Compile Include="expressions\Abstract_Function_Call.cs" />
+    <Compile Include="expressions\Function_Definition.cs" />
+    <Compile Include="expressions\Insert.cs" />
+    <Compile Include="expressions\Instantiate.cs" />
+    <Compile Include="expressions\Iterator.cs" />
+    <Compile Include="expressions\Literal.cs" />
+    <Compile Include="expressions\Namespace.cs" />
+    <Compile Include="expressions\Null_Value.cs" />
+    <Compile Include="expressions\Operation.cs" />
+    <Compile Include="expressions\Parameter.cs" />
+    <Compile Include="expressions\Parent_Class.cs" />
+    <Compile Include="expressions\Platform_Function.cs" />
+    <Compile Include="expressions\Portal_Expression.cs" />
+    <Compile Include="expressions\Property_Function_Call.cs" />
+    <Compile Include="expressions\Self.cs" />
+    <Compile Include="expressions\Statement.cs" />
+    <Compile Include="expressions\Variable.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\runic\Runic\Runic.csproj">
+      <Project>{B29C3F78-B6F4-462F-88E6-5965513D345E}</Project>
+      <Name>Runic</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Kind\Kind.csproj">
+      <Project>{777BFC47-2DF6-4E8E-8545-A2DE56A8620D}</Project>
+      <Name>Kind</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="resources\imp2.grammar" />
+    <None Include="resources\imp.lexer" />
+    <None Include="resources\imp.grammar" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

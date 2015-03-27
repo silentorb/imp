@@ -1,0 +1,26 @@
+﻿namespace test {
+
+	enum Crust {
+		crispy,
+		soft
+		burnt
+		missing
+	}
+
+	class Pizza {
+		toppings:string[]
+		crust:Crust
+
+		add(topping:string) {
+			var x = 0
+			if (topping == null)
+				return
+			else
+				x = 1
+				
+
+			toppings.add(topping)
+			crust = Crust.burnt
+		}
+	}
+}
