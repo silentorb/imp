@@ -26,6 +26,8 @@ keyword =
 	| "do"
 	| "else"
 	| "enum"
+	| "export"
+	| "external"
 	| "if"
 	| "in"
 	| "finally"

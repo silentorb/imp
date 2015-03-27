@@ -1,4 +1,10 @@
-﻿namespace test {
+﻿namespace outerspace {
+	external class Mars {
+
+	}
+}
+
+namespace test {
 
 	enum Crust {
 		crispy,

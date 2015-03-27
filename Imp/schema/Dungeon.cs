@@ -29,6 +29,7 @@ namespace imperative.schema
         public Dictionary<string, Portal> core_portals = new Dictionary<string, Portal>();
         public Dictionary<string, Used_Function> used_functions = new Dictionary<string, Used_Function>();
         public Dictionary<string, Dependency> dependencies = new Dictionary<string, Dependency>();
+        public List<Realm> needed_realms = new List<Realm>();
         public bool is_external = false;
         public bool is_abstract = false;
         public string source_file { get; set; }
@@ -136,6 +137,9 @@ namespace imperative.schema
 
             if (!dependencies.ContainsKey(dungeon.name))
                 dependencies[dungeon.name] = new Dependency(dungeon);
+
+            if (dungeon.realm != realm && !needed_realms.Contains(dungeon.realm))
+                needed_realms.Add(dungeon.realm);
 
             return dependencies[dungeon.name];
         }

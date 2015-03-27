@@ -33,7 +33,7 @@ namespace imperative.render.targets
 
         public string generate_enum_file_contents(Treasury treasury)
         {
-            return render_realm(treasury.realm, ()=> render_treasury(treasury));
+            return render_realm(treasury.realm, () => render_treasury(treasury));
         }
 
         virtual protected string render_dependencies(Dungeon dungeon)
@@ -44,7 +44,7 @@ namespace imperative.render.targets
                     "System.Collections.Generic",
                     "System.Linq",
                     "System.Text"
-                };
+                }.Concat(dungeon.needed_realms.Select(r => r.name));
 
             return dependencies.Select(d =>
                 line(config.dependency_keyword + " " + d + terminate_statement())

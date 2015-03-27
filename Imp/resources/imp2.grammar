@@ -67,7 +67,7 @@ property_declaration = id type_info
 
 class_definition = @(class_attribute, 0, 0) class id @(optional_parent_classes, 0, 0) block_start @(class_statements, newlines, 0, 0) block_end
 
-class_attribute = abstract
+class_attribute = abstract | external
 
 optional_parent_classes = colon @(id, comma_or_newline, 1, 0)
 

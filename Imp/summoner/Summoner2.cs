@@ -115,7 +115,11 @@ namespace imperative.summoner
             {
                 var dungeon = context.realm.create_dungeon(name);
                 if (source.children[0].children.Count > 0)
-                    dungeon.is_abstract = source.children[0].children.Any(p => p.text == "abstract");
+                {
+                    var attributes = source.children[0].children;
+                    dungeon.is_external = attributes.Any(p => p.text == "external");
+                    dungeon.is_abstract = attributes.Any(p => p.text == "abstract");
+                }
 
                 var parent_dungeons = source.children[2].children;
                 if (parent_dungeons.Count > 0)
