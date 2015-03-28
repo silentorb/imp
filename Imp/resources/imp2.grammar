@@ -2,7 +2,7 @@
 
 namespace_class = namespace_statement | class_definition | enum_definition
 
-snippet_entry = @(snippet_function, semicolon_or_newline, 1, 0)
+snippets = @(snippet_function, semicolon_or_newline, 1, 0)
 
 comma_or_newline = comma | newlines
 

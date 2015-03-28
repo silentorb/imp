@@ -799,10 +799,10 @@ namespace imperative.summoner
 
         private Expression process_function_snippet(List<Legend> parts, Summoner_Context context)
         {
-            var name = parts[0].text;
-            var body = parts[2];
-            var parameters = parts[1].children.Select(p => p.text).ToArray();
-            return new Snippet2(name, body, parameters);
+            var name = parts[1].text;
+            var body = parts[4];
+            var parameters = parts[2].children.Select(p => p.text).ToArray();
+            return new Snippet(name, body, parameters);
         }
 
         private Expression process_lambda(List<Legend> parts, Summoner_Context context)

@@ -26,24 +26,4 @@ namespace metahub.jackolantern.expressions
            get { return new List<Expression>(); }
        }
     }
-
-   public class Snippet2 : Expression
-   {
-       public string name;
-       public Legend source;
-       public string[] parameters;
-
-       public Snippet2(string name, Legend source, string[] parameters)
-           : base(Expression_Type.snippet)
-       {
-           this.name = name;
-           this.source = source;
-           this.parameters = parameters;
-       }
-
-       public override IEnumerable<Expression> children
-       {
-           get { return new List<Expression>(); }
-       }
-   }
 }

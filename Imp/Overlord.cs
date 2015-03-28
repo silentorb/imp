@@ -144,7 +144,7 @@ namespace imperative
 
 //            var pre_summoner = pre_summon(code, Pre_Summoner.Mode.snippet);
             var runes = Summoner2.read_runes(code);
-            var legend = Summoner2.translate_runes(runes);
+            var legend = Summoner2.translate_runes(runes, "snippets");
             var summoner = new Summoner2(this);
 
             var context = new Summoner_Context();

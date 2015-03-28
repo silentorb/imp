@@ -10,9 +10,23 @@ bool_value = "true" | "false"
 int_value = /-?[0-9]+/
 float_value = /-?([0-9]*\.)?[0-9]+f?/
 arrow = "=>"
-operator = '+' | '-' | '/' | '*' | '<=' | '>=' | '<' | '>' | '==' | '!=' | '&&' | '||' | /\$\w+/
+complex_set_operator = '+=' | '-=' | '*=' | '/=' | '@='
+operator = '+' | '-' | '/' | '*' | '<=' | '>=' | '<' | '>' | '==' | '!=' | '&&' | '||'
+set_operator = equals | complex_set_operator
 equals = "="
-set_operator = equals | '+=' | '-=' | '*=' | '/=' | '@='
+
+block_start = "{"
+block_end = "}"
+
+group_start = "("
+group_end = ")"
+
+array_start = "["
+array_end = "]"
+
+colon = ":"
+
+id = /[\$a-zA-Z0-9_]+/ | null | keyword
 
 null = "null"
 
@@ -47,16 +61,3 @@ type =
 	| "int"
 	| "float"
 	| "string"
-
-block_start = "{"
-block_end = "}"
-
-group_start = "("
-group_end = ")"
-
-array_start = "["
-array_end = "]"
-
-colon = ":"
-
-id = /[\$a-zA-Z0-9_]+/
