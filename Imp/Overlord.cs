@@ -5,13 +5,10 @@ using System.Text.RegularExpressions;
 using imperative.schema;
 using imperative.summoner;
 using imperative.expressions;
-using metahub.jackolantern;
 using metahub.jackolantern.expressions;
 
 using metahub.render;
-using metahub.schema;
-using runic.parser;
-using Literal = imperative.expressions.Literal;
+using runic.retreat;
 
 namespace imperative
 {
@@ -100,8 +97,9 @@ namespace imperative
 
         Legend summon_legend(string code)
         {
-            var runes = Summoner2.read_runes(code);
-            return Summoner2.translate_runes(runes);
+//            var runes = Summoner2.read_runes(code);
+//            return Summoner2.translate_runes(runes);
+            return Summoner2.translate(code);
         }
 
         public void summon_many(IEnumerable<string> codes)
@@ -143,8 +141,8 @@ namespace imperative
             //}
 
 //            var pre_summoner = pre_summon(code, Pre_Summoner.Mode.snippet);
-            var runes = Summoner2.read_runes(code);
-            var legend = Summoner2.translate_runes(runes, "snippets");
+//            var runes = Summoner2.read_runes(code);
+            var legend = Summoner2.translate(code, "snippets");
             var summoner = new Summoner2(this);
 
             var context = new Summoner_Context();

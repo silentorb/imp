@@ -131,6 +131,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="resources\imp3.grammar" />
     <None Include="resources\imp2.grammar" />
     <None Include="resources\imp.lexer" />
     <None Include="resources\imp.grammar" />

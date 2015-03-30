@@ -9,17 +9,18 @@ using imperative.expressions;
 using metahub.jackolantern.expressions;
 
 using metahub.schema;
-using runic.lexer;
-using runic.parser;
-using Parser = runic.parser.Parser;
+using runic.retreat;
+
+//using runic.lexer;
+//using runic.parser;
+//using Parser = runic.parser.Parser;
 
 namespace imperative.summoner
 {
     public class Summoner2
     {
         private Overlord overlord;
-        private static Lexer lexer;
-        private static Parser parser;
+        private static Grammar grammar;
 
         public Summoner2(Overlord overlord)
         {
@@ -817,20 +818,29 @@ namespace imperative.summoner
             return new Anonymous_Function(minion);
         }
 
-        public static List<Rune> read_runes(string input)
+        public static Legend translate(string input, string start = "start")
         {
-            if (lexer == null)
-                lexer = new Lexer(Resources.imp_lexer);
+            if (grammar == null)
+                grammar = new Loaded_Grammar(Resources.imp3);
 
-            return lexer.read(input);
+            var parser = new Parser(input, grammar);
+            var legend = parser.read();
+            return parser.read(start);
         }
-
-        public static Legend translate_runes(List<Rune> runes, string start = null)
-        {
-            if (parser == null)
-                parser = new Parser(lexer, Resources.imp2_grammar);
-
-            return parser.read(runes, start);
-        }
+//        public static List<Rune> read_runes(string input)
+//        {
+//            if (lexer == null)
+//                lexer = new Lexer(Resources.imp_lexer);
+//
+//            return lexer.read(input);
+//        }
+//
+//        public static Legend translate_runes(List<Rune> runes, string start = "start")
+//        {
+//            if (parser == null)
+//                parser = new Parser(lexer, Resources.imp2_grammar);
+//
+//            return parser.read(runes, start);
+//        }
     }
 }

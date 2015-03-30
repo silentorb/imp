@@ -1,0 +1,175 @@
+﻿start = @(namespace_class, newlines, 1, 0)
+
+namespace_class = namespace_statement | class_definition | enum_definition
+
+snippets = @(snippet_function, semicolon_or_newline, 1, 0)
+
+spaces = /[ \t]+/
+newlines  = /(\s*\n)+\s*/
+comma = ","
+path_separator = "."
+comma_or_newline = newlines | comma
+semicolon_or_newline = newlines | ";"
+line_comment(ignore) = "//[^\r\n]*"
+string_value = /"[^"]*"|'[^']*'/
+bool_value = "true" | "false"
+int_value = /-?[0-9]+/
+float_value = /-?([0-9]*\.)?[0-9]+f?/
+arrow = "=>"
+complex_set_operator = '+=' | '-=' | '*=' | '/=' | '@='
+operator = '+' | '-' | '/' | '*' | '<=' | '>=' | '<' | '>' | '==' | '!=' | '&&' | '||'
+set_operator = equals | complex_set_operator
+equals = "="
+
+block_start = "{"
+block_end = "}"
+
+group_start = "("
+group_end = ")"
+
+array_start = "["
+array_end = "]"
+
+colon = ":"
+
+id = /[\$\w]+/
+
+null = "null"
+
+keyword =
+	  "abstract"
+	| "break"
+	| "catch"
+	| "class"
+	| "continue"
+	| "delete"
+	| "do"
+	| "else"
+	| "enum"
+	| "export"
+	| "external"
+	| "if"
+	| "in"
+	| "finally"
+	| "for"
+	| "namespace"
+	| "new" 
+	| "private"
+	| "public"
+	| "return"
+	| "static"
+	| "throw"
+	| "while"
+	| "var"
+
+type =
+	  "bool"
+	| "int"
+	| "float"
+	| "string"
+
+
+comma_or_newline = comma | newlines
+
+value_type = string | bool | int | float | id
+
+value = string_value | bool_value | int_value | float_value
+ 
+arguments = group_start @(expression, comma_or_newline, 0, 0) group_end
+
+reference_token = id @(arguments, 0, 1)
+
+index = array_start expression array_end
+
+id_with_optional_index = id @(index, 0, 1)
+
+reference = @(id_with_optional_index, path_separator, 1, 0) @(arguments, 0, 1)
+
+declare_symbol = id @(type_info, 0, 1)
+
+type_info = colon signature
+
+signature = @(value_type, path_separator, 1, 0) @(empty_array, 0, 1)
+
+empty_array = array_start array_end
+
+statement =
+	declare_variable
+	| if_chain
+	| while_statement
+	| return_statement
+	| for_statement
+	| assignment
+	| expression
+
+
+expression_part =
+	  instantiate
+	| value
+	| lambda
+	| reference	
+	| closed_expression
+	| null
+	| empty_array
+
+closed_expression = group_start expression group_end
+
+expression = @(expression_part, operator, 1, 0)
+
+namespace_statement = namespace id block_start @(class_or_enum, newlines, 0, 0) block_end
+
+class_or_enum = class_definition | enum_definition
+
+function_definition = @(function_attribute, 0, 1) id group_start @(declare_symbol, comma, 0, 0) group_end @(type_info, 0, 1) @(long_block, 0, 1)
+
+snippet_function = @(function_attribute, 0, 1) id group_start @(declare_symbol, comma, 0, 0) group_end @(type_info, 0, 1) long_block_any
+
+function_attribute = private
+
+class_statements = function_definition | property_declaration
+
+property_declaration = id type_info
+
+class_definition = @(class_attribute, 0, 0) class id @(optional_parent_classes, 0, 0) block_start @(class_statements, newlines, 0, 0) block_end
+
+class_attribute = abstract | external
+
+optional_parent_classes = colon @(id, comma_or_newline, 1, 0)
+
+block = long_block | @(statement, 1, 1)
+
+long_block = block_start @(statement, semicolon_or_newline, 0, 0) block_end
+
+long_block_any = block_start any_statement block_end
+
+any_statement = class_definition | statements
+
+statements = @(statement, semicolon_or_newline, 0, 0)
+
+if_chain = @(if_statement, else, 1, 0) @(else_statement, 0, 1)
+
+if_statement = if group_start expression group_end block 
+
+else_statement = else block
+
+while_statement = while group_start expression group_end block
+
+return_statement = return @(expression, 0, 1)
+
+optional_assignment = equals expression
+
+declare_variable = var id @(type_info, 0, 1) @(optional_assignment, 0, 1)
+
+assignment = reference set_operator expression
+
+for_statement = for group_start var id in reference group_end long_block
+
+instantiate = new signature arguments
+
+lambda = group_start @(declare_symbol, comma, 0, 0) group_end arrow block
+
+enum_definition = enum id block_start @(enum_entry, comma_or_newline, 1, 0) block_end
+
+enum_entry = id @(optional_enum_assignment, 0, 1)
+
+optional_enum_assignment = equals int_value

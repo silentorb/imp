@@ -7,7 +7,7 @@ using imperative.expressions;
 using imperative.schema;
 using imperative.summoner;
 using metahub.render;
-using runic.parser;
+using runic.retreat;
 
 namespace imp_test.fixtures
 {
