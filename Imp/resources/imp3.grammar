@@ -1,11 +1,14 @@
-﻿start = @(namespace_class, newlines, 1, 0) 
+﻿start = @(namespace_class, newlines, 1, 0) final_trim
 
 namespace_class = namespace_statement | class_definition | enum_definition
 
-snippets = @(snippet_function, semicolon_or_newline, 1, 0)
+snippets = @(snippet_function, semicolon_or_newline, 1, 0) final_trim
 
 spaces(global) = /[ \t]+/
 newlines(global)  = /(\s*\n)+\s*/
+
+final_trim = /\s*$/
+
 comma = ","
 path_separator = "."
 comma_or_newline = newlines | comma
