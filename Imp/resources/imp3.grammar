@@ -1,16 +1,16 @@
-﻿start = @(namespace_class, newlines, 1, 0)
+﻿start = @(namespace_class, newlines, 1, 0) 
 
 namespace_class = namespace_statement | class_definition | enum_definition
 
 snippets = @(snippet_function, semicolon_or_newline, 1, 0)
 
-spaces = /[ \t]+/
-newlines  = /(\s*\n)+\s*/
+spaces(global) = /[ \t]+/
+newlines(global)  = /(\s*\n)+\s*/
 comma = ","
 path_separator = "."
 comma_or_newline = newlines | comma
 semicolon_or_newline = newlines | ";"
-line_comment(ignore) = "//[^\r\n]*"
+line_comment(global) = "//[^\r\n]*"
 string_value = /"[^"]*"|'[^']*'/
 bool_value = "true" | "false"
 int_value = /-?[0-9]+/
@@ -124,7 +124,7 @@ function_definition = @(function_attribute, 0, 1) id group_start @(declare_symbo
 
 snippet_function = @(function_attribute, 0, 1) id group_start @(declare_symbol, comma, 0, 0) group_end @(type_info, 0, 1) long_block_any
 
-function_attribute = private
+function_attribute = private | public
 
 class_statements = function_definition | property_declaration
 

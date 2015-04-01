@@ -824,7 +824,6 @@ namespace imperative.summoner
                 grammar = new Loaded_Grammar(Resources.imp3);
 
             var parser = new Parser(input, grammar);
-            var legend = parser.read();
             return parser.read(start);
         }
 //        public static List<Rune> read_runes(string input)
