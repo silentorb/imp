@@ -26,11 +26,9 @@ array_end = "]"
 
 colon = ":"
 
-id = /[\$a-zA-Z0-9_]+/ | null | keyword
+id = /[\$a-zA-Z0-9_]+/
 
-null = "null"
-
-keyword =
+keyword(id>) =
 	  "abstract"
 	| "break"
 	| "catch"
@@ -47,7 +45,8 @@ keyword =
 	| "finally"
 	| "for"
 	| "namespace"
-	| "new" 
+	| "new"
+	| "null"
 	| "private"
 	| "public"
 	| "return"
