@@ -7,7 +7,7 @@ snippets = @(snippet_function, semicolon_or_newline, 1, 0) final_trim
 spaces(global) = /[ \t]+/
 newlines(global)  = /(\s*\n)+\s*/
 
-final_trim = /\s*$/
+final_trim(empty) = /\s*$/
 
 comma = ","
 path_separator = "."
@@ -35,9 +35,7 @@ array_end = "]"
 
 colon = ":"
 
-id = /[\$\w]+/
-
-null = "null"
+id = /[A-Za-z_\$]\w*/
 
 keyword =
 	  "abstract"
@@ -56,7 +54,8 @@ keyword =
 	| "finally"
 	| "for"
 	| "namespace"
-	| "new" 
+	| "new"
+	| "null"
 	| "private"
 	| "public"
 	| "return"
@@ -108,14 +107,16 @@ statement =
 
 expression_part =
 	  instantiate
+	| null
 	| value
 	| lambda
-	| reference	
 	| closed_expression
-	| null
 	| empty_array
+	| reference	
 
 closed_expression = group_start expression group_end
+
+expression = @(expression_part, operator, 1, 0)
 
 expression = @(expression_part, operator, 1, 0)
 

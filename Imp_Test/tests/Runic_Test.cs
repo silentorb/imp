@@ -22,7 +22,7 @@ namespace imp_test.tests
 
             var overlord = new Overlord();
             var summoner = new Summoner2(overlord);
-            summoner.summon((Group_Legend)legend);
+            summoner.summon((Group_Legend)legend.children[0]);
         }
 
         [Test]

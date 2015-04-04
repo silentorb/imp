@@ -304,7 +304,7 @@ namespace imperative.summoner
                 case "return_statement":
                     return new Statement("return", parts[0] == null
                                                        ? null
-                                                       : process_expression(parts[0].children[0], context)
+                                                       : process_expression(parts[0], context)
                         );
 
                 case "declare_variable":
