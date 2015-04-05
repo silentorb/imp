@@ -825,7 +825,7 @@ namespace imperative.summoner
             return lexer.read(input);
         }
 
-        public static Legend translate_runes(List<Rune> runes, string start = null)
+        public static Legend translate_runes(List<Rune> runes, string start = "start")
         {
             if (parser == null)
                 parser = new Parser(lexer, Resources.imp2_grammar);

@@ -16,6 +16,7 @@ namespace test {
 	class Pizza {
 		toppings:string[]
 		crust:Crust
+		variation:bool
 
 		add(topping:string) {
 			var x = 0

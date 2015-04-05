@@ -9,6 +9,7 @@ namespace test
     {
         public List<string> toppings = new List<string>();
         public Crust crust = Crust.crispy;
+        public bool variation;
 
         public void add(string topping)
         {
