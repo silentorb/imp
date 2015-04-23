@@ -825,12 +825,12 @@ namespace imperative.summoner
             return lexer.read(input);
         }
 
-        public static Legend translate_runes(List<Rune> runes, string start = "start")
+        public static Legend translate_runes(string source, List<Rune> runes, string start = "start")
         {
             if (parser == null)
                 parser = new Parser(lexer, Resources.imp2_grammar);
 
-            return parser.read(runes, start);
+            return parser.read(source, runes, start);
         }
     }
 }

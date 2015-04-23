@@ -12,7 +12,7 @@ float_value = /-?([0-9]*\.)?[0-9]+f?/
 arrow = "=>"
 insert = /\$\w+/
 complex_set_operator = '+=' | '-=' | '*=' | '/=' | '@='
-operator(insert>) = '+' | '-' | '/' | '*' | '<=' | '>=' | '<' | '>' | '==' | '!=' | '&&' | '||'
+operator_token = '+' | '-' | '/' | '*' | '<=' | '>=' | '<' | '>' | '==' | '!=' | '&&' | '||'
 set_operator = equals | complex_set_operator
 equals = "="
 
@@ -27,9 +27,9 @@ array_end = "]"
 
 colon = ":"
 
-id(insert>) = /[\$a-zA-Z0-9_]+/
+id_token = /[a-zA-Z0-9_]+/
 
-keyword(id>) =
+keyword(id_token>) =
 	  "abstract"
 	| "break"
 	| "catch"
@@ -61,3 +61,5 @@ type =
 	| "int"
 	| "float"
 	| "string"
+
+ws(tween) = /[ \t]+/
