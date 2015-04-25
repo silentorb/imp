@@ -58,5 +58,14 @@ namespace metahub.render
         {
             File.WriteAllText(url, contents);
         }
+
+        public static void clear_folder(string path)
+        {
+            var files = Directory.GetFiles(path);
+            foreach (var file in files)
+            {
+                File.Delete(file);
+            }
+        }
     }
 }

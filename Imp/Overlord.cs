@@ -1,14 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using imperative.schema;
 using imperative.summoner;
 using imperative.expressions;
+using imperative.render.targets;
 using metahub.jackolantern;
 using metahub.jackolantern.expressions;
 
 using metahub.render;
+using metahub.render.targets;
 using metahub.schema;
 using runic.parser;
 using Literal = imperative.expressions.Literal;
@@ -23,6 +26,16 @@ namespace imperative
 
         public Overlord(Target target = null)
         {
+            initialize(target);
+        }
+
+        public Overlord(string target)
+        {
+            initialize(create_target(target));
+        }
+
+        private void initialize(Target target)
+        {
             if (Platform_Function_Info.functions == null)
                 Platform_Function_Info.initialize();
 
@@ -31,6 +44,20 @@ namespace imperative
                 target.overlord = this;
 
             realms[""] = new Realm("", this);
+        }
+
+        public static Target create_target(string name)
+        {
+            switch (name)
+            {
+                case "js":
+                    return new JavaScript();
+
+                case "cs":
+                    return new Csharp();
+            }
+
+            throw new Exception("Invalid imp target: " + name + ".");
         }
 
         public void post_analyze()
@@ -154,6 +181,18 @@ namespace imperative
                 templates[snippet.name] = snippet;
             }
             return templates;
+        }
+
+        public static List<string> aggregate_files(string path)
+        {
+            var result = new List<string>();
+            result.AddRange(Directory.GetFiles(path));
+            foreach (var directory in Directory.GetDirectories(path))
+            {
+                result.AddRange(aggregate_files(directory));
+            }
+
+            return result;
         }
     }
 }

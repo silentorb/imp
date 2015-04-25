@@ -25,6 +25,18 @@ namespace imperative.render.targets
                 };
         }
 
+        override public void run(string output_folder)
+        {
+            foreach (var dungeon in overlord.dungeons)
+            {
+                if (dungeon.is_external || (dungeon.is_abstract && dungeon.is_external))
+                    continue;
+
+                var contents = generate_dungeon_file_contents(dungeon);
+                Generator.create_file(output_folder + "/" + dungeon.name + ".cs", contents);
+            }
+        }
+
         public string generate_dungeon_file_contents(Dungeon dungeon)
         {
             return render_dependencies(dungeon) + newline()
