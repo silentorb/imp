@@ -29,5 +29,9 @@ namespace test {
 			toppings.add(topping)
 			crust = Crust.burnt
 		}
+
+		get_eaten():const string[] {
+			return toppings
+		}
 	}
 }

@@ -220,7 +220,7 @@ namespace imperative.summoner
             {
                 var return_type = parts[3];
                 if (return_type != null)
-                    minion.return_type = parse_type(return_type.children[0], context);
+                    minion.return_type = parse_type2(return_type, context);
             }
             else
             {
@@ -303,7 +303,7 @@ namespace imperative.summoner
                 case "return_statement":
                     return new Statement("return", parts[0] == null
                                                        ? null
-                                                       : process_expression(parts[0].children[0], context)
+                                                       : process_expression(parts[0], context)
                         );
 
                 case "declare_variable":
@@ -594,56 +594,60 @@ namespace imperative.summoner
             return new Parameter(new Symbol(source.children[0].text, type, null));
         }
 
-        private Profession parse_type(Legend source, Summoner_Context context)
-        {
-            source = source.children[2];
-            var text = source.children.Last().text;
-
-            if (source.children.Count == 1)
-            {
-                switch (text)
-                {
-                    case "bool":
-                        return new Profession(Kind.Bool);
-                    case "string":
-                        return new Profession(Kind.String);
-                    case "float":
-                        return new Profession(Kind.Float);
-                    case "int":
-                        return new Profession(Kind.Int);
-                }
-            }
-
-            Realm realm = null;
-            for (var i = 0; i < source.children.Count - 1; ++i)
-            {
-                if (realm == null)
-                    realm = overlord.realms[source.children[i].text];
-                else
-                    throw new Exception("embedded namespaces are not supported yet.");
-            }
-
-            if (realm == null)
-                realm = context.realm;
-
-            if (realm.dungeons.ContainsKey(text))
-                return new Profession(Kind.reference, realm.dungeons[text]);
-
-            var dungeon = overlord.get_dungeon(text);
-            if (dungeon != null)
-                return new Profession(Kind.reference, dungeon);
-
-            throw new Exception("Invalid type: " + text + ".");
-        }
+//        private Profession parse_type(Legend source, Summoner_Context context)
+//        {
+////            source = source.children[2];
+//            var text = source.children.Last().text;
+//
+//            if (source.children.Count == 1)
+//            {
+//                switch (text)
+//                {
+//                    case "bool":
+//                        return new Profession(Kind.Bool);
+//                    case "string":
+//                        return new Profession(Kind.String);
+//                    case "float":
+//                        return new Profession(Kind.Float);
+//                    case "int":
+//                        return new Profession(Kind.Int);
+//                }
+//            }
+//
+//            Realm realm = null;
+//            for (var i = 0; i < source.children.Count - 1; ++i)
+//            {
+//                if (realm == null)
+//                    realm = overlord.realms[source.children[i].text];
+//                else
+//                    throw new Exception("embedded namespaces are not supported yet.");
+//            }
+//
+//            if (realm == null)
+//                realm = context.realm;
+//
+//            if (realm.dungeons.ContainsKey(text))
+//                return new Profession(Kind.reference, realm.dungeons[text]);
+//
+//            var dungeon = overlord.get_dungeon(text);
+//            if (dungeon != null)
+//                return new Profession(Kind.reference, dungeon);
+//
+//            throw new Exception("Invalid type: " + text + ".");
+//        }
 
         private Profession parse_type2(Legend source, Summoner_Context context)
         {
-            var path = source.children[0].children.Select(p => p.text).ToArray();
-            var is_list = source.children.Count > 1 && source.children[1] != null;
-            return parse_type2(path, context, is_list);
+            var path = source.children[1].children.Select(p => p.text).ToArray();
+            var is_list = source.children.Count > 2 && source.children[2] != null;
+            var result = parse_type2(path, context, source, is_list);
+            if (source.children[0] != null)
+                result.is_const = true;
+
+            return result;
         }
 
-        private Profession parse_type2(string[] path, Summoner_Context context, bool is_list = false)
+        private Profession parse_type2(string[] path, Summoner_Context context, Legend source, bool is_list = false)
         {
             var text = path.Last();
             if (path.Length == 1)
@@ -698,7 +702,7 @@ namespace imperative.summoner
             if (dungeon != null)
                 return new Profession(Kind.reference, dungeon);
 
-            throw new Exception("Invalid type: " + text + ".");
+            throw new Parser_Exception("Invalid type: " + text + ".", source.position.meadow.filename, source.position);
         }
 
         private Expression process_assignment(List<Legend> parts, Summoner_Context context)
@@ -817,12 +821,12 @@ namespace imperative.summoner
             return new Anonymous_Function(minion);
         }
 
-        public static List<Rune> read_runes(string input)
+        public static List<Rune> read_runes(string input, string filename)
         {
             if (lexer == null)
                 lexer = new Lexer(Resources.imp_lexer);
 
-            return lexer.read(input);
+            return lexer.read(input, filename);
         }
 
         public static Legend translate_runes(string source, List<Rune> runes, string start = "start")

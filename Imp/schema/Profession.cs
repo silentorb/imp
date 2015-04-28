@@ -11,6 +11,7 @@ namespace imperative.schema
         public Kind type;
         public bool is_list = false;
         public IDungeon dungeon;
+        public bool is_const = false;
 
         public Profession(Kind type, IDungeon dungeon = null)
         {

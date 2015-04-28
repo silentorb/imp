@@ -126,9 +126,11 @@ namespace imperative.render.targets
             }
         }
 
-        protected override string listify(string type)
+        protected override string listify(string type, bool is_const)
         {
-            return "List<" + type + ">";
+            return is_const
+            ? type + "[]"
+            : "List<" + type + ">";
         }
 
         protected override string instantiate_list(Portal portal)

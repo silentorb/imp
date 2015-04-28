@@ -18,7 +18,7 @@ namespace imp_test.fixtures
            var code = Utility.load_resource(script_name);
            var overlord = new Overlord(target);
 
-           overlord.summon2(code);
+           overlord.summon2(code, script_name);
            overlord.flatten();
            overlord.post_analyze();
            return overlord;

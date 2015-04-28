@@ -9,7 +9,7 @@ namespace test
     {
         public List<string> toppings = new List<string>();
         public Crust crust = Crust.crispy;
-        public bool variation;
+        public bool variation = false;
 
         public void add(string topping)
         {
@@ -22,5 +22,10 @@ namespace test
             toppings.Add(topping);
             crust = Crust.burnt;
         }
+
+        public string[] get_eaten()
+        {
+            return toppings;
+        } 
     }
 }

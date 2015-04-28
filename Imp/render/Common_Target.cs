@@ -577,11 +577,11 @@ namespace imperative.render
                 : types[signature.type.ToString().ToLower()];
 
             return signature.is_list
-                ? listify(name)
+                ? listify(name, signature.is_const)
                 : name;
         }
 
-        virtual protected string listify(string type)
+        virtual protected string listify(string type, bool is_const)
         {
             return type + "[]";
         }

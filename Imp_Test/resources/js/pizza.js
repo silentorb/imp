@@ -4,6 +4,7 @@ test.Pizza = function() {}
 test.Pizza.prototype = {
 	toppings: [],
 	crust: 0,
+	variation: false,
 	add: function(topping) {
 		var x = 0
 		if (topping == null)
@@ -13,5 +14,8 @@ test.Pizza.prototype = {
 
 		this.toppings.push(topping)
 		this.crust = 2
+	},
+	get_eaten: function() {
+		return this.toppings
 	}
 }

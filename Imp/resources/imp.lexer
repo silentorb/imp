@@ -34,6 +34,7 @@ keyword(id_token>) =
 	| "break"
 	| "catch"
 	| "class"
+	| "const"
 	| "continue"
 	| "delete"
 	| "do"

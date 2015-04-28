@@ -18,6 +18,13 @@ using Literal = imperative.expressions.Literal;
 
 namespace imperative
 {
+    public class Overlord_Configuration
+    {
+        public string input = "";
+        public string output = "";
+        public string target = "";
+    }
+
     public class Overlord
     {
         public List<Dungeon> dungeons = new List<Dungeon>();
@@ -113,28 +120,29 @@ namespace imperative
 //            summoner.summon(pre_summoner.output);
 //        }
 
-        public void summon(string code)
+        public void summon(string code, string filename)
         {
-            summon2(code);
+            summon2(code, filename);
         }
 
-        public void summon2(string code)
+        public void summon2(string code, string filename)
         {
-            var legend = summon_legend(code);
+            var legend = summon_legend(code, filename);
             var summoner = new Summoner2(this);
             summoner.summon(legend);
         }
 
-        Legend summon_legend(string code)
+        Legend summon_legend(string code, string filename)
         {
-            var runes = Summoner2.read_runes(code);
+            var runes = Summoner2.read_runes(code, filename);
             return Summoner2.translate_runes(code, runes);
         }
 
-        public void summon_many(IEnumerable<string> codes)
+        public void summon_many(IEnumerable<string> files)
         {
-
-            var pre_summoners = codes.Select(summon_legend);
+            var pre_summoners = files.Select(file =>
+                summon_legend(File.ReadAllText(file), file)
+            );
             var summoner = new Summoner2(this);
             summoner.summon_many(pre_summoners);
         }
@@ -152,7 +160,7 @@ namespace imperative
             return summoner.summon_statement(template.source, context);
         }
 
-        public Dictionary<string, Snippet> summon_snippets(string code)
+        public Dictionary<string, Snippet> summon_snippets(string code, string filename)
         {
             var templates = new Dictionary<string, Snippet>();
             //var match = Regex.Matches(code,
@@ -170,7 +178,7 @@ namespace imperative
             //}
 
 //            var pre_summoner = pre_summon(code, Pre_Summoner.Mode.snippet);
-            var runes = Summoner2.read_runes(code);
+            var runes = Summoner2.read_runes(code, filename);
             var legend = Summoner2.translate_runes(code, runes, "snippets");
             var summoner = new Summoner2(this);
 
@@ -193,6 +201,21 @@ namespace imperative
             }
 
             return result;
+        }
+
+        public static void run(Overlord_Configuration config)
+        {
+            var overlord = new Overlord(config.target);
+            var files = Directory.Exists(config.input)
+                ? Overlord.aggregate_files(config.input)
+                : new List<string> { config.input };
+
+            overlord.summon_many(files);
+
+            overlord.flatten();
+            overlord.post_analyze();
+
+            overlord.target.run(config.output);
         }
     }
 }
