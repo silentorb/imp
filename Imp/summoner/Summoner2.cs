@@ -33,74 +33,64 @@ namespace imperative.summoner
 
         public void summon(Group_Legend source)
         {
-            ack(source, process_dungeon1);
-            ack(source, process_dungeon2);
-            ack(source, process_dungeon3);
+            var context = new Summoner_Context(overlord.root);
+            ack(source, context, 0, process_dungeon1);
+            ack(source, context, 1, process_dungeon2);
+            ack(source, context, 2, process_dungeon3);
         }
 
         public void summon_many(IEnumerable<Legend> sources)
         {
+            var contexts = new Summoner_Context[sources.Count()];
+            var i = 0;
             foreach (Group_Legend source in sources)
             {
-                ack(source, process_dungeon1);
+                var context = contexts[i++] = new Summoner_Context(overlord.root);
+                ack(source, context, 0, process_dungeon1);
             }
 
+            i = 0;
             foreach (Group_Legend source in sources)
             {
-                ack(source, process_dungeon2);
+                ack(source, contexts[i++], 1, process_dungeon2);
             }
 
+            i = 0;
             foreach (Group_Legend source in sources)
             {
-                ack(source, process_dungeon3);
+                ack(source, contexts[i++], 2, process_dungeon3);
             }
         }
 
-        private void ack(Group_Legend source,
+        private void ack(Group_Legend source, Summoner_Context context, int step,
                          Func<Legend, Summoner_Context, Dungeon> second)
         {
             foreach (var pattern in source.children)
             {
-                if (pattern.type == "namespace_statement")
+                switch (pattern.type)
                 {
-                    var context = create_realm_context(pattern);
-                    var statements = pattern.children[1].children;
-                    process_namespace(statements, context, second);
-                }
-                else if (pattern.type == "class_definition")
-                {
-                    var context = new Summoner_Context(overlord.realms[""]);
-                    second(pattern, context);
-                }
-                else
-                {
-                    throw new Exception("Not supported.");
-                }
-            }
-        }
+                    case "import_statement":
+                        if (step > 0)
+                            break;
 
-        private Summoner_Context create_realm_context(Legend source)
-        {
-            var name = source.children[0].text;
-            if (!overlord.realms.ContainsKey(name))
-            {
-                overlord.realms[name] = new Realm(name, overlord);
-            }
-            var realm = overlord.realms[name];
-            var context = new Summoner_Context(realm);
+                        var tokens = pattern.children[0].children.Select(p => p.text);
+                        context.imported_realms.Add(overlord.root.get_realm(tokens));
+                        break;
 
-            return context;
-        }
+                    case "namespace_statement":
 
-        private void process_namespace(IEnumerable<Legend> statements, Summoner_Context context,
-                                       Func<Legend, Summoner_Context, Dungeon> dungeon_step)
-        {
-            foreach (var statement in statements)
-            {
-                if (statement.type == "class_definition")
-                    dungeon_step(statement, context);
-                else if (!context.realm.treasuries.ContainsKey(statement.children[0].text))
-                    summon_enum(statement.children, context);
+                        var context2 = create_realm_context(pattern, context);
+                        var statements = pattern.children[1].children;
+                        process_namespace(statements, context2, second);
+                        break;
+
+                    case "class_definition":
+                        second(pattern, context);
+                        break;
+
+                    default:
+                        throw new Exception("Not supported.");
+                }
             }
         }
 
@@ -123,7 +113,7 @@ namespace imperative.summoner
 
                 var parent_dungeons = source.children[2].children;
                 if (parent_dungeons.Count > 0)
-                    dungeon.parent = overlord.get_dungeon(parent_dungeons[0].children[0].text);
+                    dungeon.parent = (Dungeon)get_dungeon(parent_dungeons[0].children);
 
                 dungeon.generate_code();
                 return dungeon;
@@ -168,6 +158,37 @@ namespace imperative.summoner
             }
 
             return dungeon;
+        }
+
+        private void process_namespace(IEnumerable<Legend> statements, Summoner_Context context,
+                                       Func<Legend, Summoner_Context, Dungeon> dungeon_step)
+        {
+            foreach (var statement in statements)
+            {
+                if (statement.type == "class_definition")
+                    dungeon_step(statement, context);
+                else if (!context.realm.treasuries.ContainsKey(statement.children[0].text))
+                    summon_enum(statement.children, context);
+            }
+        }
+
+        public IDungeon get_dungeon(List<Legend> path)
+        {
+            return overlord.root.get_dungeon(path.Select(p => p.text));
+        }
+
+        private Summoner_Context create_realm_context(Legend source, Summoner_Context parent_context)
+        {
+            //            var name = source.children[0].text;
+            //            if (!overlord.root.children.ContainsKey(name))
+            //            {
+            //                overlord.root.children[name] = new Realm(name, overlord);
+            //            }
+            //            var realm = overlord.root.children[name];
+            var context = new Summoner_Context(parent_context);
+            context.realm = overlord.root.get_or_create_realm(source.children[0].children.Select(p => p.text));
+
+            return context;
         }
 
         private void process_dungeon_statement(Legend source, Summoner_Context context, bool as_stub = false)
@@ -284,6 +305,10 @@ namespace imperative.summoner
 
                 case "if_chain":
                     return summon_if_chain(parts, context);
+
+                case "import_statement":
+                    process_import(parts, context);
+                    return null;
 
                 case "if_statement":
                     return new Flow_Control(Flow_Control_Type.If,
@@ -546,7 +571,7 @@ namespace imperative.summoner
                 path_context.dungeon = dungeon;
                 return new Profession_Expression(new Profession(Kind.reference, dungeon));
             }
-            
+
             if (context.realm.treasuries.ContainsKey(token))
             {
                 if (path_context.index >= patterns.Count - 1)
@@ -565,7 +590,7 @@ namespace imperative.summoner
 
         private Expression process_function_call(string token, Path_Context path_context, List<Expression> args)
         {
-            var dungeon = (Dungeon) path_context.dungeon;
+            var dungeon = (Dungeon)path_context.dungeon;
             var minion = path_context.dungeon != null
                              ? dungeon.summon_minion(token, true)
                              : null;
@@ -576,7 +601,7 @@ namespace imperative.summoner
             if (Minion.platform_specific_functions.Contains(token))
             {
                 if (token == "add" || token == "setter")
-                    return new Property_Function_Call(Property_Function_Type.set, 
+                    return new Property_Function_Call(Property_Function_Type.set,
                         ((Portal_Expression)path_context.last).portal, args);
 
                 return new Platform_Function(token, path_context.result, args);
@@ -594,47 +619,47 @@ namespace imperative.summoner
             return new Parameter(new Symbol(source.children[0].text, type, null));
         }
 
-//        private Profession parse_type(Legend source, Summoner_Context context)
-//        {
-////            source = source.children[2];
-//            var text = source.children.Last().text;
-//
-//            if (source.children.Count == 1)
-//            {
-//                switch (text)
-//                {
-//                    case "bool":
-//                        return new Profession(Kind.Bool);
-//                    case "string":
-//                        return new Profession(Kind.String);
-//                    case "float":
-//                        return new Profession(Kind.Float);
-//                    case "int":
-//                        return new Profession(Kind.Int);
-//                }
-//            }
-//
-//            Realm realm = null;
-//            for (var i = 0; i < source.children.Count - 1; ++i)
-//            {
-//                if (realm == null)
-//                    realm = overlord.realms[source.children[i].text];
-//                else
-//                    throw new Exception("embedded namespaces are not supported yet.");
-//            }
-//
-//            if (realm == null)
-//                realm = context.realm;
-//
-//            if (realm.dungeons.ContainsKey(text))
-//                return new Profession(Kind.reference, realm.dungeons[text]);
-//
-//            var dungeon = overlord.get_dungeon(text);
-//            if (dungeon != null)
-//                return new Profession(Kind.reference, dungeon);
-//
-//            throw new Exception("Invalid type: " + text + ".");
-//        }
+        //        private Profession parse_type(Legend source, Summoner_Context context)
+        //        {
+        ////            source = source.children[2];
+        //            var text = source.children.Last().text;
+        //
+        //            if (source.children.Count == 1)
+        //            {
+        //                switch (text)
+        //                {
+        //                    case "bool":
+        //                        return new Profession(Kind.Bool);
+        //                    case "string":
+        //                        return new Profession(Kind.String);
+        //                    case "float":
+        //                        return new Profession(Kind.Float);
+        //                    case "int":
+        //                        return new Profession(Kind.Int);
+        //                }
+        //            }
+        //
+        //            Realm realm = null;
+        //            for (var i = 0; i < source.children.Count - 1; ++i)
+        //            {
+        //                if (realm == null)
+        //                    realm = overlord.realms[source.children[i].text];
+        //                else
+        //                    throw new Exception("embedded namespaces are not supported yet.");
+        //            }
+        //
+        //            if (realm == null)
+        //                realm = context.realm;
+        //
+        //            if (realm.dungeons.ContainsKey(text))
+        //                return new Profession(Kind.reference, realm.dungeons[text]);
+        //
+        //            var dungeon = overlord.get_dungeon(text);
+        //            if (dungeon != null)
+        //                return new Profession(Kind.reference, dungeon);
+        //
+        //            throw new Exception("Invalid type: " + text + ".");
+        //        }
 
         private Profession parse_type2(Legend source, Summoner_Context context)
         {
@@ -673,34 +698,33 @@ namespace imperative.summoner
                 }
             }
 
-            Realm realm = null;
-            for (var i = 0; i < path.Length - 1; ++i)
-            {
-                if (realm == null)
-                {
-                    var realm_name = path[i];
-                    if (!overlord.realms.ContainsKey(realm_name))
-                        throw new Exception("Could not find realm: " + realm_name + ".");
+            //            Realm realm = null;
+            //            for (var i = 0; i < path.Length - 1; ++i)
+            //            {
+            //                if (realm == null)
+            //                {
+            //                    var realm_name = path[i];
+            //                    if (!overlord.root.children.ContainsKey(realm_name))
+            //                        throw new Exception("Could not find realm: " + realm_name + ".");
+            //
+            //                    realm = overlord.root.children[realm_name];
+            //                }
+            //                else
+            //                    throw new Exception("embedded namespaces are not supported yet.");
+            //            }
+            //
+            //            if (realm == null)
+            //                realm = context.realm;
+            //
+            //            if (realm.dungeons.ContainsKey(text))
+            //                return new Profession(Kind.reference, realm.dungeons[text]) { is_list = is_list };
+            //
+            //            if (realm.treasuries.ContainsKey(text))
+            //                return new Profession(Kind.reference, realm.treasuries[text]) { is_list = is_list };
 
-                    realm = overlord.realms[realm_name];
-                }
-                else
-                    throw new Exception("embedded namespaces are not supported yet.");
-            }
-
-            if (realm == null)
-                realm = context.realm;
-
-            if (realm.dungeons.ContainsKey(text))
-                return new Profession(Kind.reference, realm.dungeons[text]) { is_list = is_list };
-
-            if (realm.treasuries.ContainsKey(text))
-                return new Profession(Kind.reference, realm.treasuries[text]) { is_list = is_list };
-
-
-            var dungeon = overlord.get_dungeon(text);
+            var dungeon = context.get_dungeon(path);
             if (dungeon != null)
-                return new Profession(Kind.reference, dungeon);
+                return new Profession(Kind.reference, dungeon) { is_list = is_list };
 
             throw new Parser_Exception("Invalid type: " + text + ".", source.position.meadow.filename, source.position);
         }
@@ -835,6 +859,12 @@ namespace imperative.summoner
                 parser = new Parser(lexer, Resources.imp2_grammar);
 
             return parser.read(source, runes, start);
+        }
+
+        public void process_import(List<Legend> parts, Summoner_Context context)
+        {
+
+
         }
     }
 }

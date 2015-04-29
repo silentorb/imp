@@ -9,6 +9,7 @@ namespace imperative.summoner
 {
     public class Summoner_Context
     {
+        public List<Realm> imported_realms = new List<Realm>(); 
         public Realm realm;
         public Dungeon dungeon;
         public Scope scope;
@@ -47,6 +48,7 @@ namespace imperative.summoner
             realm = parent.realm;
             dungeon = parent.dungeon;
             scope = parent.scope;
+            this.imported_realms = parent.imported_realms;
         }
 
         public Profession set_pattern(string name, Profession profession)
@@ -108,6 +110,22 @@ namespace imperative.summoner
                 return parent.get_expression_pattern(name, context);
 
             return null;
+        }
+
+        public IDungeon get_dungeon(string[] path)
+        {
+            var result = realm.get_dungeon(path);
+            if (result != null)
+                return result;
+
+            foreach (var imported_realm in imported_realms)
+            {
+                result = imported_realm.get_dungeon(path);
+                if (result != null)
+                    return result;
+            }
+
+            return realm.overlord.root.get_dungeon(path);
         }
     }
 }

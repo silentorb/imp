@@ -1,6 +1,6 @@
 ﻿start = @(namespace_class, newlines, 1, 0)
 
-namespace_class = namespace_statement | class_definition | enum_definition
+namespace_class = namespace_statement | class_definition | enum_definition | import_statement
 
 snippets = @(snippet_function, semicolon_or_newline, 1, 0)
 
@@ -55,7 +55,9 @@ closed_expression = group_start expression group_end
 
 expression = @(expression_part, operator, 1, 0)
 
-namespace_statement = namespace id block_start @(class_or_enum, newlines, 0, 0) block_end
+import_statement = import @(id, path_separator, 1, 0)
+
+namespace_statement = namespace @(id, path_separator, 1, 0) block_start @(class_or_enum, newlines, 0, 0) block_end
 
 class_or_enum = class_definition | enum_definition
 

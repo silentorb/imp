@@ -56,10 +56,13 @@ namespace imperative.render.targets
                     "System.Collections.Generic",
                     "System.Linq",
                     "System.Text"
-                }.Concat(dungeon.needed_realms.Select(r => r.name));
+                };
 
             return dependencies.Select(d =>
                 line(config.dependency_keyword + " " + d + terminate_statement())
+            ).join("")
+            + dungeon.needed_realms.Select(d =>
+                line(config.dependency_keyword + " " + render_realm_path(d) + terminate_statement())
             ).join("");
         }
 

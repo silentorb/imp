@@ -1,0 +1,8 @@
+﻿import dark.fortress
+
+namespace light.citadel {
+	
+	class Courier {
+		bastion:Bastion
+	}
+}

@@ -6,6 +6,7 @@ using System.Text;
 namespace metahub.render
 {
     public delegate string String_Delegate();
+    public delegate string String_Delegate2(string input);
 
     public static class String_Extensions
     {

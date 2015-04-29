@@ -47,6 +47,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="resources\cs\pizza.cs" />
     <EmbeddedResource Include="resources\cs\crust.cs" />
+    <EmbeddedResource Include="resources\cs\namespaces2.cs" />
     <Compile Include="tests\Csharp_Test.cs" />
     <Compile Include="tests\Cpp_Test.cs" />
     <Compile Include="tests\Expression_Test.cs" />
@@ -62,6 +63,8 @@
     <EmbeddedResource Include="resources\imp\empty_array.imp" />
     <EmbeddedResource Include="resources\imp\anonymous_pizza.imp" />
     <EmbeddedResource Include="resources\imp\if_else.imp" />
+    <EmbeddedResource Include="resources\imp\namespaces2.imp" />
+    <EmbeddedResource Include="resources\imp\namespaces1.imp" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="resources\js\pizza.js" />

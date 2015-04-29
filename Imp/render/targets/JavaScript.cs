@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using imperative;
@@ -57,52 +58,6 @@ namespace metahub.render.targets
             return result;
         }
 
-//        string render_statement(Expression statement)
-//        {
-//            Expression_Type type = statement.type;
-//            switch (type)
-//            {
-//                case Expression_Type.space:
-//                    var space = (Namespace)statement;
-//                    return render_realm(space.realm, () => render_statements(space.children));
-//
-//                case Expression_Type.class_definition:
-//                    var definition = (Class_Definition)statement;
-//                    return class_definition(definition.dungeon, definition.children);
-//
-//                case Expression_Type.function_definition:
-//                    return render_function_definition((Function_Definition)statement);
-//
-//                case Expression_Type.flow_control:
-//                    return render_flow_control((Flow_Control)statement);
-//
-//                case Expression_Type.iterator:
-//                    return render_iterator_block((Iterator)statement);
-//
-//                case Expression_Type.function_call:
-//                    return line(render_function_call((Class_Function_Call)statement, null));
-//
-//                case Expression_Type.assignment:
-//                    return render_assignment((Assignment)statement);
-//
-//                case Expression_Type.declare_variable:
-//                    return render_variable_declaration((Declare_Variable)statement);
-//
-//                case Expression_Type.statement:
-//                    var state = (Statement)statement;
-//                    return line(state.name + (state.next != null
-//                        ? " " + render_expression(state.next)
-//                        : ""));
-//
-//                case Expression_Type.insert:
-//                    return line(((Insert)statement).code);
-//
-//                default:
-//                    return line(render_expression(statement));
-//                //                    throw new Exception("Unsupported statement type: " + statement.type + ".");
-//            }
-//        }
-
         override protected string render_dungeon(Dungeon dungeon, IEnumerable<Expression> statements)
         {
             if (dungeon.is_abstract)
@@ -110,11 +65,22 @@ namespace metahub.render.targets
 
             current_dungeon = dungeon;
 
+            var i = 0;
+            var total = dungeon.core_portals.Count + statements.Count();
+            String_Delegate2 render_line = text => ++i < total
+                    ? text + "," + newline()
+                    : text;
+
             var result = line(render_dungeon_path(dungeon) + " = function() {}");
             var intro = render_dungeon_path(dungeon) + ".prototype =";
             result += add(intro) + render_scope(() =>
-                render_properties(dungeon)
-                + render_statements(statements, newline())
+                dungeon.core_portals.Values.Select(portal => 
+                    render_line(add(portal.name + ": " + get_default_value(portal))))
+                .join("")
+                +
+                statements.Select(s => render_line(render_statement(s)))
+                .join("")
+                + newline()
             );
 
             current_dungeon = null;
@@ -127,29 +93,21 @@ namespace metahub.render.targets
             var result = "";
             foreach (var portal in dungeon.core_portals.Values)
             {
-                result += line(portal.name + ": " + get_default_value(portal) + ",");
+                result += line(portal.name + ": " + get_default_value(portal));
             }
 
             return result;
         }
 
-//        override protected string get_default_value(Portal portal)
-//        {
-//            if (portal.is_list)
-//                return "[]";
-//
-//            return render_literal(portal.get_default_value(), portal.get_target_profession());
-//        }
-
         override protected string render_variable_declaration(Declare_Variable declaration)
         {
             var profession = declaration.symbol.get_profession(overlord);
-            var first = "var " + declaration.symbol.name;
+            var first = add("var " + declaration.symbol.name);
             if (declaration.expression != null)
                 first += " = " + render_expression(declaration.expression);
 
             current_scope[declaration.symbol.name] = profession;
-            return line(first);
+            return first + newline();
         }
 
         override protected string render_function_definition(Function_Definition definition)
@@ -161,7 +119,7 @@ namespace metahub.render.targets
 
             // Search for any case of "this" inside an anonymous function.
             var minions = definition.find(Expression_Type.anonymous_function);
-            if (minions.Any(m => m.find(e=>e.type == Expression_Type.self || e.type == Expression_Type.property_function_call).Any()))
+            if (minions.Any(m => m.find(e => e.type == Expression_Type.self || e.type == Expression_Type.property_function_call).Any()))
             {
                 var self = minion.scope.create_symbol("self", new Profession(Kind.reference, current_dungeon));
                 minion.expressions.Insert(0, new Declare_Variable(self, new Self(minion.dungeon)));
@@ -173,172 +131,13 @@ namespace metahub.render.targets
 
         protected override string render_this()
         {
-            return current_minion.GetType() == typeof(Ethereal_Minion) 
+            return current_minion.GetType() == typeof(Ethereal_Minion)
                 && current_minion.scope.find_or_null("self") != null
-                ? "self" 
+                ? "self"
                 : "this";
         }
 
-//        private string render_expression(Expression expression, Expression parent = null)
-//        {
-//            string result;
-//            switch (expression.type)
-//            {
-//                case Expression_Type.literal:
-//                    var literal = (Literal) expression;
-//                    return render_literal(literal.value, literal.profession);
-//
-//                case Expression_Type.operation:
-//                    return render_operation((Operation)expression);
-//
-//                case Expression_Type.portal:
-//                    var portal_expression = (Portal_Expression)expression;
-//                    result = portal_expression.portal.name;
-//                    if (portal_expression.parent.next == null)
-//                        result = "this." + result;
-//
-//                    if (portal_expression.index != null)
-//                        result += "[" + render_expression(portal_expression.index) + "]";
-//
-//                    break;
-//
-//                case Expression_Type.function_call:
-//                    result = render_function_call((Class_Function_Call)expression, parent);
-//                    break;
-//
-//                case Expression_Type.property_function_call:
-//                    result = render_property_function_call((Property_Function_Call)expression, parent);
-//                    break;
-//
-//                case Expression_Type.platform_function:
-//                    return render_platform_function_call((Platform_Function)expression, null);
-//
-//                case Expression_Type.instantiate:
-//                    result = render_instantiation((Instantiate)expression);
-//                    break;
-//
-//                case Expression_Type.self:
-//                    result = "this";
-//                    break;
-//
-//                case Expression_Type.null_value:
-//                    return "null";
-//
-//                case Expression_Type.profession:
-//                    result = expression.get_profession().dungeon.name;
-//                    break;
-//
-//                case Expression_Type.create_array:
-//                    result = "FOOO";
-//                    break;
-//
-//                case Expression_Type.anonymous_function:
-//                    return render_anonymous_function((Anonymous_Function)expression);
-//
-//                case Expression_Type.comment:
-//                    return render_comment((Comment)expression);
-//
-//                case Expression_Type.variable:
-//                    var variable_expression = (Variable)expression;
-//                    //if (find_variable(variable_expression.symbol.name) == null)
-//                    //    throw new Exception("Could not find variable: " + variable_expression.symbol.name + ".");
-//
-//                    result = variable_expression.symbol.name;
-//                    if (variable_expression.index != null)
-//                        result += "[" + render_expression(variable_expression.index) + "]";
-//
-//                    break;
-//
-//                case Expression_Type.parent_class:
-//                    result = current_dungeon.parent.name;
-//                    break;
-//
-//                case Expression_Type.insert:
-//                    result = ((Insert)expression).code;
-//                    break;
-//
-//                default:
-//                    throw new Exception("Unsupported Expression type: " + expression.type + ".");
-//            }
-//
-//            if (expression.next != null)
-//            {
-//                result += "." + render_expression(expression.next, expression);
-//            }
-//
-//            return result;
-//        }
-
-//        string render_literal(Object value, Profession profession)
-//        {
-//            if (profession == null)
-//                return value.ToString();
-//
-//            switch (profession.type)
-//            {
-//                case Kind.unknown:
-//                    return value.ToString();
-//
-//                case Kind.Float:
-//                    return value.ToString();
-//
-//                case Kind.Int:
-//                    return value.ToString();
-//
-//                case Kind.String:
-//                    return "\"" + value + "\"";
-//
-//                case Kind.Bool:
-//                    return (bool)value ? "true" : "false";
-//
-//                case Kind.reference:
-//                    if (!profession.dungeon.is_value)
-//                        throw new Exception("Literal expressions must be scalar values.");
-//
-//                    if (value != null)
-//                        return value.ToString();
-//
-//                    return render_trellis_name(profession.dungeon) + "()";
-//
-//                default:
-//                    throw new Exception("Invalid literal " + value + " type " + profession.type + ".");
-//            }
-//        }
-//
-//        string render_trellis_name(Dungeon dungeon)
-//        {
-//            if (dungeon.realm != current_realm)
-//                return render_realm_name(dungeon.realm) + "." + dungeon.name;
-//
-//            return dungeon.name;
-//        }
-
-//        string render_realm_name(Realm realm)
-//        {
-//            var path = Generator.get_namespace_path(realm);
-//            return path.join(".");
-//        }
-
-//        public string render_scope2(string intro, List<Expression> statements, bool minimal = false)
-//        {
-//            indent();
-//            push_scope();
-//            var lines = line_count;
-//            var block = render_statements(statements);
-//            pop_scope();
-//            unindent();
-//
-//            if (minimal)
-//            {
-//                minimal = line_count == lines + 1;
-//            }
-//            var result = line(intro + (minimal ? "" : " {"));
-//            result += block;
-//            result += line((minimal ? "" : "}"));
-//            return result;
-//        }
-
-       override protected string render_iterator_block(Iterator statement)
+        override protected string render_iterator_block(Iterator statement)
         {
             var parameter = statement.parameter;
             var it = parameter.scope.create_symbol("it", parameter.profession);
@@ -351,16 +150,16 @@ namespace metahub.render.targets
             return result;
         }
 
-//        string render_operation(Operation operation)
-//        {
-//            return operation.children.Select(c =>
-//                c.type == Expression_Type.operation && ((Operation)c).is_condition() == operation.is_condition()
-//                ? "(" + render_expression(c) + ")"
-//                : render_expression(c)
-//            ).join(" " + operation.op + " ");
-//        }
+        //        string render_operation(Operation operation)
+        //        {
+        //            return operation.children.Select(c =>
+        //                c.type == Expression_Type.operation && ((Operation)c).is_condition() == operation.is_condition()
+        //                ? "(" + render_expression(c) + ")"
+        //                : render_expression(c)
+        //            ).join(" " + operation.op + " ");
+        //        }
 
-      override protected  string render_iterator(Symbol parameter, Expression expression)
+        override protected string render_iterator(Symbol parameter, Expression expression)
         {
             var path_string = render_expression(expression);
             return
@@ -369,25 +168,20 @@ namespace metahub.render.targets
                 + path_string + ".end(); " + parameter.name + "++";
         }
 
+        override protected string render_scope(String_Delegate action)
+        {
+            push_scope();
+            var result = config.block_brace_same_line
+                ? " {" + newline()
+                : newline() + line("{");
 
-//        private string render_property_function_call(Property_Function_Call expression, Expression parent)
-//        {
-//            var ref_full = expression.reference != null
-//                ? render_expression(expression.reference) + "."
-//                : "";
-//
-//            ref_full = "this." + ref_full;
-//
-//            var args = expression.args.Select(e => render_expression(e)).join(", ");
-//            var portal = expression.portal;
-//            var setter = portal.setter;
-//            if (setter != null)
-//                return ref_full + setter.name + "(" + args + ")";
-//
-//            return expression.portal.is_list
-//                ? ref_full + portal.name + "." + "push(" + args + ")"
-//                : ref_full + portal.name + " = " + args;
-//        }
+            indent();
+            result += action();
+            unindent();
+            result += add("}");
+            pop_scope();
+            return result;
+        }
 
         override protected string render_platform_function_call(Platform_Function expression, Expression parent)
         {
@@ -452,38 +246,38 @@ namespace metahub.render.targets
             }
         }
 
-//        string render_function_call(Class_Function_Call expression, Expression parent)
-//        {
-//            var ref_string = expression.reference != null
-//               ? render_expression(expression.reference)
-//               : "";
-//
-//            var ref_full = ref_string.Length > 0
-//                ? ref_string + "."
-//                : "";
-//
-//            return ref_full + expression.name + "(" +
-//                expression.args.Select(a => render_expression(a))
-//                .join(", ") + ")";
-//        }
-//
-//        string render_assignment(Assignment statement)
-//        {
-//            return line(render_expression(statement.target) + " " + statement.op + " " + render_expression(statement.expression));
-//        }
-//
-//        string render_comment(Comment comment)
-//        {
-//            return comment.is_multiline
-//                ? "/* " + comment.text + "*/"
-//                : "// " + comment.text;
-//        }
-//
-//        string render_instantiation(Instantiate expression)
-//        {
-//            var args = expression.args.Select(a => render_expression(a)).join(", ");
-//            return "new " + full_dungeon_name(expression.dungeon) + "(" + args + ")";
-//        }
+        //        string render_function_call(Class_Function_Call expression, Expression parent)
+        //        {
+        //            var ref_string = expression.reference != null
+        //               ? render_expression(expression.reference)
+        //               : "";
+        //
+        //            var ref_full = ref_string.Length > 0
+        //                ? ref_string + "."
+        //                : "";
+        //
+        //            return ref_full + expression.name + "(" +
+        //                expression.args.Select(a => render_expression(a))
+        //                .join(", ") + ")";
+        //        }
+        //
+        //        string render_assignment(Assignment statement)
+        //        {
+        //            return line(render_expression(statement.target) + " " + statement.op + " " + render_expression(statement.expression));
+        //        }
+        //
+        //        string render_comment(Comment comment)
+        //        {
+        //            return comment.is_multiline
+        //                ? "/* " + comment.text + "*/"
+        //                : "// " + comment.text;
+        //        }
+        //
+        //        string render_instantiation(Instantiate expression)
+        //        {
+        //            var args = expression.args.Select(a => render_expression(a)).join(", ");
+        //            return "new " + full_dungeon_name(expression.dungeon) + "(" + args + ")";
+        //        }
 
         override protected string render_realm(Realm realm, String_Delegate action)
         {

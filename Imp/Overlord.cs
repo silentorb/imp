@@ -28,7 +28,8 @@ namespace imperative
     public class Overlord
     {
         public List<Dungeon> dungeons = new List<Dungeon>();
-        public Dictionary<string, Realm> realms = new Dictionary<string, Realm>();
+//        public Dictionary<string, Realm> realms = new Dictionary<string, Realm>();
+        public Realm root;
         public Target target;
 
         public Overlord(Target target = null)
@@ -50,7 +51,7 @@ namespace imperative
             if (target != null)
                 target.overlord = this;
 
-            realms[""] = new Realm("", this);
+            root = new Realm("", this);
         }
 
         public static Target create_target(string name)
@@ -84,41 +85,6 @@ namespace imperative
                 dungeon.flatten();
             }
         }
-
-        public Dungeon get_dungeon(string name)
-        {
-            foreach (var realm in realms.Values)
-            {
-                if (realm.dungeons.ContainsKey(name))
-                    return realm.dungeons[name];
-            }
-            
-            return null;
-        } 
-
-        //Node create_lambda_constraint (metahub Node.meta.types.Constraint, Scope scope) {
-        //throw "";
-        //var rail = get_rail(scope.trellis);
-        //metahub.logic.schema.Constraint constraint = new metahub.logic.schema.Constraint(Node, this);
-        //var tie = Parse.get_end_tie(constraint.reference);
-        //trace("tie", tie.rail.name + "." + tie.name);
-        //tie.constraints.Add(constraint);
-        //constraints.Add(constraint);
-        //return null;
-        //}
-
-//        public Pre_Summoner pre_summon(string code, Pre_Summoner.Mode mode = Pre_Summoner.Mode.full)
-//        {
-//            var pre_summoner = new Pre_Summoner();
-//            pre_summoner.summon(code, mode);
-//            return pre_summoner;
-//        }
-
-//        public void summon(Pre_Summoner pre_summoner)
-//        {
-//            var summoner = new Summoner(this);
-//            summoner.summon(pre_summoner.output);
-//        }
 
         public void summon(string code, string filename)
         {

@@ -16,11 +16,20 @@ namespace imperative.schema
         public Dictionary<string, Dungeon_Additional> trellis_additional = new Dictionary<string, Dungeon_Additional>();
         public bool is_external;
         public string class_export = "";
+        public Realm parent;
+        public Dictionary<string, Realm> children = new Dictionary<string, Realm>();
 
         public Realm(string name, Overlord overlord)
         {
             this.name = name;
             this.overlord = overlord;
+        }
+
+        public Realm add_child(Realm realm)
+        {
+            children[realm.name] = realm;
+            realm.parent = this;
+            return realm;
         }
 
         public Dungeon create_dungeon(string name)
@@ -31,16 +40,21 @@ namespace imperative.schema
 
         public Treasury create_treasury(string treasury_name, List<string> jewels)
         {
-            if (get_child(treasury_name) != null)
+            if (get_dungeon(treasury_name) != null)
                 throw new Exception("Realm " + name + " already contains a type named " + treasury_name + ".");
 
             var treasury = new Treasury(treasury_name, jewels, this);
             treasuries[treasury_name] = treasury;
-            
+
             return treasury;
         }
 
-        public IDungeon get_child(string child_name)
+        public IDungeon get_dungeon_from_path(string path)
+        {
+            return get_dungeon(path.Split('.'));
+        }
+
+        public IDungeon get_dungeon(string child_name)
         {
             if (dungeons.ContainsKey(child_name))
                 return dungeons[child_name];
@@ -49,7 +63,30 @@ namespace imperative.schema
                 return treasuries[child_name];
 
             return null;
-//            throw new Exception("Realm " + name + " does not have symbol: " + child_name + ".");
+        }
+
+        public IDungeon get_dungeon(IEnumerable<string> original_path, bool throw_error = true)
+        {
+            var realm = this;
+            var path = original_path.ToArray();
+            var tokens = path.Take(path.Length - 1).ToArray();
+            foreach (var token in tokens)
+            {
+                if (!realm.children.ContainsKey(token))
+                {
+                    if (!throw_error)
+                        return null;
+
+                    if (realm.name == "")
+                        throw new Exception("Invalid namespace: " + token + ".");
+                    else
+                        throw new Exception("Namespace " + realm.name + " does not have a child named " + token + ".");
+                }
+
+                realm = realm.children[token];
+            }
+
+            return realm.get_dungeon(path.Last());
         }
 
         public void load_additional(Region_Additional additional)
@@ -70,6 +107,43 @@ namespace imperative.schema
                     trellis_additional[item.Key] = item.Value;
                 }
             }
+        }
+
+        public Realm get_or_create_realm(IEnumerable<string> original_path)
+        {
+            var realm = this;
+            var path = original_path.ToArray();
+            foreach (var token in path)
+            {
+                if (!realm.children.ContainsKey(token))
+                {
+                    realm.add_child(new Realm(token, overlord));
+                }
+
+                realm = realm.children[token];
+            }
+
+            return realm;
+        }
+
+        public Realm get_realm(IEnumerable<string> original_path)
+        {
+            var realm = this;
+            var path = original_path.ToArray();
+            foreach (var token in path)
+            {
+                if (!realm.children.ContainsKey(token))
+                {
+                    if (realm.name == "")
+                        throw new Exception("Invalid namespace: " + token + ".");
+                    else
+                        throw new Exception("Namespace " + realm.name + " does not have a child named " + token + ".");
+                }
+
+                realm = realm.children[token];
+            }
+
+            return realm;
         }
     }
 }

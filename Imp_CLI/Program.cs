@@ -75,12 +75,11 @@ namespace imp
                 Console.WriteLine("Imp sucessfully stormed the Keep.");
             }
 
-
             catch (Parser_Exception ex)
             {
-                //                Console.WriteLine(ex.filename);
-                                Console.WriteLine(ex.filename + "(" + ex.position.y + ", " + ex.position.x + 
-                                    "): error Imp Error: Imp Error: " + ex.Message);
+                //                Console.WriteLine(ex.filename); Path.GetFullPath(ex.filename)
+                                Console.WriteLine(ex.filename + "(" + ex.position.y + "," + ex.position.x + 
+                                    "): error Imp Error: " + ex.Message);
             }
             catch (Exception ex)
             {

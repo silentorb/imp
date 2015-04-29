@@ -5,6 +5,7 @@ using System.Text;
 using NUnit.Framework;
 using imp_test.fixtures;
 using imperative.render.targets;
+using imperative.schema;
 using metahub.render.targets;
 
 namespace imp_test.tests
@@ -17,7 +18,7 @@ namespace imp_test.tests
         {
             var target = new Csharp();
             var overlord = Imp_Fixture.create_overlord(target, "imp.pizza.imp");
-            var dungeon = overlord.get_dungeon("Pizza");
+            var dungeon = (Dungeon)overlord.root.get_dungeon_from_path("test.Pizza");
             {
                 var output = target.generate_dungeon_file_contents(dungeon);
                 var goal = Utility.load_resource("cs.pizza.cs");
@@ -25,9 +26,22 @@ namespace imp_test.tests
             }
 
             {
-                var treasury = overlord.realms["test"].treasuries["Crust"];
+                var treasury = overlord.root.children["test"].treasuries["Crust"];
                 var output = target.generate_enum_file_contents(treasury);
                 var goal = Utility.load_resource("cs.crust.cs");
+                Utility.diff(goal, output);
+            }
+        }
+
+        [Test]
+        public void namespace_test()
+        {
+            var target = new Csharp();
+            var overlord = Imp_Fixture.create_overlord(target, new[] { "imp.namespaces1.imp", "imp.namespaces2.imp" });
+            var dungeon = (Dungeon)overlord.root.get_dungeon_from_path("light.citadel.Courier");
+            {
+                var output = target.generate_dungeon_file_contents(dungeon);
+                var goal = Utility.load_resource("cs.namespaces2.cs");
                 Utility.diff(goal, output);
             }
         }

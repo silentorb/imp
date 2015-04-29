@@ -82,7 +82,7 @@ namespace imperative.render
                     break;
 
                 case Expression_Type.null_value:
-                    return "null";
+                    return render_null();
 
                 case Expression_Type.profession:
                     result = expression.get_profession().dungeon.name;
@@ -133,6 +133,11 @@ namespace imperative.render
             return result;
         }
 
+        virtual protected string render_null()
+        {
+            return "null";
+        }
+
         virtual protected string render_this()
         {
             return "this";
@@ -141,7 +146,9 @@ namespace imperative.render
         virtual protected string render_portal(Portal_Expression portal_expression)
         {
             var result = portal_expression.portal.name;
-            if (!config.implicit_this && (portal_expression.parent == null || portal_expression.parent.next == null))
+            if (!config.implicit_this && (portal_expression.parent == null 
+                || portal_expression.parent.type == Expression_Type.statement
+                || portal_expression.parent.next == null))
                 result = render_this() + "." + result;
 
             if (portal_expression.index != null)
@@ -294,6 +301,9 @@ namespace imperative.render
                     return (bool)value ? "true" : "false";
 
                 case Kind.reference:
+                    if (value == null)
+                        return render_null();
+
                     if (!profession.dungeon.is_value)
                         throw new Exception("Literal expressions must be scalar values.");
 
@@ -489,12 +499,18 @@ namespace imperative.render
 
         virtual protected string render_realm(Realm realm, String_Delegate action)
         {
-            var space = Generator.get_namespace_path(realm);
             current_realm = realm;
-            var result = add(config.namespace_keyword + " " + space.join(config.namespace_separator)) + render_scope(action);
+            var result = add(config.namespace_keyword + " " + render_realm_path(realm) + render_scope(action));
 
             current_realm = null;
             return result;
+        }
+
+        protected string render_realm_path(Realm realm)
+        {
+            return realm.parent != null && realm.parent.name != ""
+                ? render_realm_path(realm.parent) + config.namespace_separator + realm.name
+                : realm.name;
         }
 
         virtual protected string render_scope(String_Delegate action)

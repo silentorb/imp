@@ -64,7 +64,7 @@ namespace imp_test.tests
             var code = Utility.load_resource("imp.anonymous_function.imp");
             var runes = Summoner2.read_runes(code, "imp.anonymous_function.imp");
             var legend = Summoner2.translate_runes(code, runes, "statement");
-            Assert.AreEqual("lambda", legend.children[2].children[0].children[0].rhyme.name);
+            Assert.AreEqual("lambda", legend.children[2].children[0].rhyme.name);
         }
     }
 }
