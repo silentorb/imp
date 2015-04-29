@@ -70,7 +70,7 @@ namespace imperative.summoner
                 switch (pattern.type)
                 {
                     case "import_statement":
-                        if (step > 0)
+                        if (step != 1)
                             break;
 
                         var tokens = pattern.children[0].children.Select(p => p.text);
