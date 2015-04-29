@@ -118,7 +118,7 @@ namespace imperative.render
                     break;
 
                 case Expression_Type.jewel:
-                    var jewel = (Jewel) expression;
+                    var jewel = (Jewel)expression;
                     return render_enum_value(jewel.treasury, jewel.value);
 
                 default:
@@ -146,7 +146,7 @@ namespace imperative.render
         virtual protected string render_portal(Portal_Expression portal_expression)
         {
             var result = portal_expression.portal.name;
-            if (!config.implicit_this && (portal_expression.parent == null 
+            if (!config.implicit_this && (portal_expression.parent == null
                 || portal_expression.parent.type == Expression_Type.statement
                 || portal_expression.parent.next == null))
                 result = render_this() + "." + result;
@@ -256,14 +256,18 @@ namespace imperative.render
         virtual protected string get_default_value(Portal portal)
         {
             if (portal.is_list)
-                return instantiate_list(portal);
+                return render_new_list(portal.profession, null);
 
             return render_literal(portal.get_default_value(), portal.get_target_profession());
         }
 
-        protected virtual string instantiate_list(Portal portal)
+        protected virtual string render_new_list(Profession profession, List<Expression> args)
         {
-            return "[]";
+            if (args == null)
+                return "[]";
+
+            var arg_string = args.Select(a => render_expression(a)).join(", ");
+            return "[" + arg_string + "]";
         }
 
         virtual protected string render_variable_declaration(Declare_Variable declaration)
@@ -307,7 +311,7 @@ namespace imperative.render
                     if (!profession.dungeon.is_value)
                         throw new Exception("Literal expressions must be scalar values.");
 
-                    if (profession.dungeon.GetType() == typeof (Treasury))
+                    if (profession.dungeon.GetType() == typeof(Treasury))
                         return render_enum_value((Treasury)profession.dungeon, (int)value);
 
                     if (value != null)
@@ -459,8 +463,11 @@ namespace imperative.render
                 : "// " + comment.text;
         }
 
-        virtual protected string render_instantiation(Instantiate expression)
+        private string render_instantiation(Instantiate expression)
         {
+            if (expression.profession.is_list)
+                return render_new_list(expression.profession, expression.args);
+
             var args = expression.args.Select(a => render_expression(a)).join(", ");
             return "new " + render_profession(expression.profession) + "(" + args + ")";
         }
@@ -532,7 +539,7 @@ namespace imperative.render
         {
             var i = treasury.jewels.Count;
             return add("enum " + treasury.name) + render_scope(() =>
-                treasury.jewels.Select(j => 
+                treasury.jewels.Select(j =>
                     add(j + (--i > 0 ? "," : "")) + newline()).join("")
                 );
         }
@@ -565,12 +572,12 @@ namespace imperative.render
         virtual protected string render_dungeon_path(IDungeon dungeon)
         {
             var name = dungeon.name;
-//            if (dungeon.realm.external_name != null)
-//            {
-//                name = dungeon.realm.external_name + config.namespace_separator + name;
-//            }
-//            else 
-                if (dungeon.realm != current_realm || !config.supports_namespaces)
+            //            if (dungeon.realm.external_name != null)
+            //            {
+            //                name = dungeon.realm.external_name + config.namespace_separator + name;
+            //            }
+            //            else 
+            if (dungeon.realm != current_realm || !config.supports_namespaces)
             {
                 name = dungeon.realm.name + config.namespace_separator + name;
             }

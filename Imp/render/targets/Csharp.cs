@@ -136,9 +136,15 @@ namespace imperative.render.targets
             : "List<" + type + ">";
         }
 
-        protected override string instantiate_list(Portal portal)
+        protected override string render_new_list(Profession profession, List<Expression> args)
         {
-            return "new " + render_profession(portal.profession) + "()";
+            var arg_string = args != null
+                ? args.Select(a => render_expression(a)).join(", ")
+                : "";
+
+            return profession.is_const
+                ? "new " + render_profession(profession) + "[" + arg_string + "]"
+                : "new " + render_profession(profession) + "(" + arg_string + ")";
         }
     }
 }
