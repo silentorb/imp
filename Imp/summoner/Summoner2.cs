@@ -726,7 +726,7 @@ namespace imperative.summoner
             if (dungeon != null)
                 return new Profession(Kind.reference, dungeon) { is_list = is_list };
 
-            throw new Parser_Exception("Invalid type: " + text + ".", source.position.meadow.filename, source.position);
+            throw new Parser_Exception("Invalid type: " + text + ".", source.position);
         }
 
         private Expression process_assignment(List<Legend> parts, Summoner_Context context)
