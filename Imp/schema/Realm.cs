@@ -72,18 +72,7 @@ namespace imperative.schema
             var tokens = path.Take(path.Length - 1).ToArray();
             foreach (var token in tokens)
             {
-                if (!realm.children.ContainsKey(token))
-                {
-                    if (!throw_error)
-                        return null;
-
-                    if (realm.name == "")
-                        throw new Exception("Invalid namespace: " + token + ".");
-                    else
-                        throw new Exception("Namespace " + realm.name + " does not have a child named " + token + ".");
-                }
-
-                realm = realm.children[token];
+                realm = realm.get_child_realm(token);
             }
 
             return realm.get_dungeon(path.Last());
@@ -109,6 +98,27 @@ namespace imperative.schema
             }
         }
 
+        public Realm get_child_realm(string token)
+        {
+             if (!children.ContainsKey(token))
+                {
+                    if (name == "")
+                    {
+                        if (token == "metahub")
+                        {
+                            
+                        }
+                        throw new Exception("Invalid namespace: " + token + ".");
+                    }
+                    else
+                    {
+                        throw new Exception("Namespace " + realm.name + " does not have a child named " + token + ".");
+                    }
+                }
+
+                return children[token];
+        }
+
         public Realm get_or_create_realm(IEnumerable<string> original_path)
         {
             var realm = this;
@@ -132,15 +142,7 @@ namespace imperative.schema
             var path = original_path.ToArray();
             foreach (var token in path)
             {
-                if (!realm.children.ContainsKey(token))
-                {
-                    if (realm.name == "")
-                        throw new Exception("Invalid namespace: " + token + ".");
-                    else
-                        throw new Exception("Namespace " + realm.name + " does not have a child named " + token + ".");
-                }
-
-                realm = realm.children[token];
+                realm = realm.get_child_realm(token);
             }
 
             return realm;

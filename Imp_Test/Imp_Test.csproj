@@ -48,6 +48,7 @@
     <EmbeddedResource Include="resources\cs\pizza.cs" />
     <EmbeddedResource Include="resources\cs\crust.cs" />
     <EmbeddedResource Include="resources\cs\namespaces2.cs" />
+    <EmbeddedResource Include="resources\cs\generic.cs" />
     <Compile Include="tests\Csharp_Test.cs" />
     <Compile Include="tests\Cpp_Test.cs" />
     <Compile Include="tests\Expression_Test.cs" />
@@ -65,6 +66,7 @@
     <EmbeddedResource Include="resources\imp\if_else.imp" />
     <EmbeddedResource Include="resources\imp\namespaces2.imp" />
     <EmbeddedResource Include="resources\imp\namespaces1.imp" />
+    <EmbeddedResource Include="resources\imp\generic.imp" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="resources\js\pizza.js" />

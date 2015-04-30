@@ -45,5 +45,18 @@ namespace imp_test.tests
                 Utility.diff(goal, output);
             }
         }
+
+        [Test]
+        public void generic_test()
+        {
+            var target = new Csharp();
+            var overlord = Imp_Fixture.create_overlord(target, "imp.generic.imp");
+            var dungeon = (Dungeon)overlord.root.get_dungeon_from_path("magic.lore.Mage");
+            {
+                var output = target.generate_dungeon_file_contents(dungeon);
+                var goal = Utility.load_resource("cs.generic.cs");
+                Utility.diff(goal, output);
+            }
+        }
     }
 }

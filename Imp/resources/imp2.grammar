@@ -28,7 +28,9 @@ declare_symbol = id @(type_info, 0, 1)
 
 type_info = colon signature
 
-signature = @(const, 0, 1) @(value_type, path_separator, 1, 0) @(empty_array, 0, 1)
+signature = @(const, 0, 1) @(value_type, path_separator, 1, 0) @(generic_info, 0, 1) @(empty_array, 0, 1)
+
+generic_info = < @(signature, comma, 1, 0) >
 
 empty_array = array_start array_end
 

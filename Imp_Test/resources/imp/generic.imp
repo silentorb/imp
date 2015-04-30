@@ -1,0 +1,9 @@
+﻿import metahub.collections
+
+namespace magic.lore
+{
+	class Mage
+	{
+		spells:Fixed_Array<string>
+	}
+}
