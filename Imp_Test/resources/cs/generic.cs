@@ -8,5 +8,6 @@ namespace magic.lore
     public class Mage
     {
         public string[] spells = null;
+
     }
 }

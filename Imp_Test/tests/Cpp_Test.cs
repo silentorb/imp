@@ -15,12 +15,12 @@ namespace imp_test.tests
         [Test]
         public void test_simple()
         {
-            var target = new Cpp();
-            var overlord = Imp_Fixture.create_overlord(target, "imp.pizza.imp");
+            var overlord = Imp_Fixture.create_overlord("cpp", "imp.pizza.imp");
+            var target = (Cpp)overlord.target;
             var dungeon = (Dungeon)overlord.root.children["test"].get_dungeon("Pizza");
             var output_h = target.create_header_file(dungeon);
             var output_cpp = target.create_class_file(dungeon);
-            var goal_h = Utility.load_resource("cpp.pizza.h"); 
+            var goal_h = Utility.load_resource("cpp.pizza.h");
             var goal_cpp = Utility.load_resource("cpp.pizza.cpp");
             Utility.diff(goal_h, output_h);
             Utility.diff(goal_cpp, output_cpp);

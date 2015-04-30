@@ -256,8 +256,12 @@ namespace imperative.render
         virtual protected string get_default_value(Portal portal)
         {
             if (portal.is_list)
-                return render_new_list(portal.profession, null);
+            {
+                if (portal.profession.is_array(overlord))
+                    return render_null();
 
+                return render_new_list(portal.profession, null);
+            }
             return render_literal(portal.get_default_value(), portal.get_target_profession());
         }
 
@@ -600,11 +604,11 @@ namespace imperative.render
                 : types[signature.type.ToString().ToLower()];
 
             return signature.is_list
-                ? listify(name, signature.is_const)
+                ? listify(name, signature)
                 : name;
         }
 
-        virtual protected string listify(string type, bool is_const)
+        virtual protected string listify(string type, Profession signature)
         {
             return type + "[]";
         }

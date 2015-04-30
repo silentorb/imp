@@ -129,11 +129,11 @@ namespace imperative.render.targets
             }
         }
 
-        protected override string listify(string type, bool is_const)
+        protected override string listify(string type, Profession signature)
         {
-            return is_const
-            ? type + "[]"
-            : "List<" + type + ">";
+            return signature.is_array(overlord)
+                ? render_profession(signature.children[0]) + "[]"
+                : "List<" + type + ">";
         }
 
         protected override string render_new_list(Profession profession, List<Expression> args)

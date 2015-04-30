@@ -16,8 +16,8 @@ namespace imp_test.tests
         [Test]
         public void pizza_test()
         {
-            var target = new Csharp();
-            var overlord = Imp_Fixture.create_overlord(target, "imp.pizza.imp");
+            var overlord = Imp_Fixture.create_overlord("cs", "imp.pizza.imp");
+            var target = (Csharp) overlord.target;
             var dungeon = (Dungeon)overlord.root.get_dungeon_from_path("test.Pizza");
             {
                 var output = target.generate_dungeon_file_contents(dungeon);
@@ -36,8 +36,8 @@ namespace imp_test.tests
         [Test]
         public void namespace_test()
         {
-            var target = new Csharp();
-            var overlord = Imp_Fixture.create_overlord(target, new[] { "imp.namespaces1.imp", "imp.namespaces2.imp" });
+            var overlord = Imp_Fixture.create_overlord("cs", new[] { "imp.namespaces1.imp", "imp.namespaces2.imp" });
+            var target = (Csharp)overlord.target;
             var dungeon = (Dungeon)overlord.root.get_dungeon_from_path("light.citadel.Courier");
             {
                 var output = target.generate_dungeon_file_contents(dungeon);
@@ -49,8 +49,8 @@ namespace imp_test.tests
         [Test]
         public void generic_test()
         {
-            var target = new Csharp();
-            var overlord = Imp_Fixture.create_overlord(target, "imp.generic.imp");
+            var overlord = Imp_Fixture.create_overlord("cs", "imp.generic.imp");
+            var target = (Csharp)overlord.target;
             var dungeon = (Dungeon)overlord.root.get_dungeon_from_path("magic.lore.Mage");
             {
                 var output = target.generate_dungeon_file_contents(dungeon);

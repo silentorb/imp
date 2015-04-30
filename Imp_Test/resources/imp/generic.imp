@@ -4,6 +4,6 @@ namespace magic.lore
 {
 	class Mage
 	{
-		spells:Fixed_Array<string>
+		spells:Array<string>
 	}
 }

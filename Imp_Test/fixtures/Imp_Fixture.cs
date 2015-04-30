@@ -13,14 +13,14 @@ namespace imp_test.fixtures
 {
     public static class Imp_Fixture
     {
-        public static Overlord create_overlord(Target target, string script_name)
+        public static Overlord create_overlord(string target, string script_name)
         {
             return create_overlord(target, new[] { script_name });
         }
 
-        public static Overlord create_overlord(Target target, string[] script_names)
+        public static Overlord create_overlord(string target_name, string[] script_names)
         {
-            var overlord = new Overlord(target);
+            var overlord = new Overlord(target_name);
 
             foreach (var script_name in script_names)
             {

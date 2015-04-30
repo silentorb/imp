@@ -135,6 +135,10 @@
       <Project>{777BFC47-2DF6-4E8E-8545-A2DE56A8620D}</Project>
       <Name>Kind</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Library\Library.csproj">
+      <Project>{C92D913D-6BDD-48B0-AA4D-17B93510414D}</Project>
+      <Name>Library</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

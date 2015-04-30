@@ -18,6 +18,7 @@ namespace imperative.schema
         public string class_export = "";
         public Realm parent;
         public Dictionary<string, Realm> children = new Dictionary<string, Realm>();
+        public bool is_virtual = false;
 
         public Realm(string name, Overlord overlord)
         {
@@ -100,23 +101,22 @@ namespace imperative.schema
 
         public Realm get_child_realm(string token)
         {
-             if (!children.ContainsKey(token))
+            if (!children.ContainsKey(token))
+            {
+                if (name == "")
                 {
-                    if (name == "")
-                    {
-                        if (token == "metahub")
-                        {
-                            
-                        }
-                        throw new Exception("Invalid namespace: " + token + ".");
-                    }
-                    else
-                    {
-                        throw new Exception("Namespace " + realm.name + " does not have a child named " + token + ".");
-                    }
+                    if (token == "metahub")
+                        return overlord.load_standard_library();
+                        
+                    throw new Exception("Invalid namespace: " + token + ".");
                 }
+                else
+                {
+                    throw new Exception("Namespace " + name + " does not have a child named " + token + ".");
+                }
+            }
 
-                return children[token];
+            return children[token];
         }
 
         public Realm get_or_create_realm(IEnumerable<string> original_path)

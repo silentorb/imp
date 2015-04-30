@@ -138,7 +138,7 @@ namespace imperative.schema
             if (!dependencies.ContainsKey(dungeon.name))
                 dependencies[dungeon.name] = new Dependency(dungeon);
 
-            if (dungeon.realm != realm && !needed_realms.Contains(dungeon.realm))
+            if (dungeon.realm != realm && !dungeon.realm.is_virtual && !needed_realms.Contains(dungeon.realm))
                 needed_realms.Add(dungeon.realm);
 
             return dependencies[dungeon.name];

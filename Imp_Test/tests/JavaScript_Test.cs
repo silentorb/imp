@@ -14,8 +14,8 @@ namespace imp_test.tests
         [Test]
         public void pizza_test()
         {
-            var target = new JavaScript();
-            Imp_Fixture.create_overlord(target, "imp.pizza.imp");
+            var overlord = Imp_Fixture.create_overlord("js", "imp.pizza.imp");
+            var target = (JavaScript)overlord.target;
             var output = target.generate();
             var goal = Utility.load_resource("js.pizza.js");
             Utility.diff(goal, output);
@@ -24,8 +24,8 @@ namespace imp_test.tests
         [Test]
         public void anonymous_function_test()
         {
-            var target = new JavaScript();
-            Imp_Fixture.create_overlord(target, "imp.anonymous_pizza.imp");
+            var overlord = Imp_Fixture.create_overlord("js", "imp.anonymous_pizza.imp");
+            var target = (JavaScript)overlord.target;
             var output = target.generate();
             var goal = Utility.load_resource("js.anonymous_minion.js");
             Utility.diff(goal, output);

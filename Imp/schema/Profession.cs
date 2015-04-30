@@ -19,6 +19,8 @@ namespace imperative.schema
             this.type = type;
             this.dungeon = dungeon;
             is_list = type == Kind.list;
+            if (dungeon != null && dungeon == dungeon.realm.overlord.array)
+                is_list = true;
         }
 
         public Profession clone()
@@ -29,6 +31,11 @@ namespace imperative.schema
         public Profession get_reference()
         {
             return new Profession(Kind.reference, dungeon);
+        }
+
+        public bool is_array(Overlord overlord)
+        {
+            return dungeon != null && dungeon == overlord.array;
         }
     }
 }

@@ -623,10 +623,14 @@ namespace imperative.summoner
         {
             var path = source.children[1].children.Select(p => p.text).ToArray();
             var result = parse_type2(path, context, source);
-            result.is_list = source.children.Count > 3 && source.children[3] != null;
+            result.is_list = result.is_list || source.children.Count > 3 && source.children[3] != null;
             if (source.children[0] != null)
                 result.is_const = true;
 
+            if (source.children[2] != null)
+            {
+                result.children = source.children[2].children.Select(c => parse_type2(c, context)).ToList();
+            }
 
             return result;
         }

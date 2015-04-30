@@ -7,6 +7,7 @@ using imperative.schema;
 using imperative.summoner;
 using imperative.expressions;
 using imperative.render.targets;
+using library;
 using metahub.jackolantern;
 using metahub.jackolantern.expressions;
 
@@ -28,41 +29,33 @@ namespace imperative
     public class Overlord
     {
         public List<Dungeon> dungeons = new List<Dungeon>();
-//        public Dictionary<string, Realm> realms = new Dictionary<string, Realm>();
         public Realm root;
         public Target target;
+        public Dungeon array;
 
-        public Overlord(Target target = null)
-        {
-            initialize(target);
-        }
-
-        public Overlord(string target)
-        {
-            initialize(create_target(target));
-        }
-
-        private void initialize(Target target)
+        public Overlord()
         {
             if (Platform_Function_Info.functions == null)
                 Platform_Function_Info.initialize();
 
-            this.target = target;
-            if (target != null)
-                target.overlord = this;
-
             root = new Realm("", this);
         }
 
-        public static Target create_target(string name)
+        public Overlord(string target_name)
+            : this()
+        {
+            target = create_target(target_name);
+        }
+
+        public Target create_target(string name)
         {
             switch (name)
             {
                 case "js":
-                    return new JavaScript();
+                    return new JavaScript(this);
 
                 case "cs":
-                    return new Csharp();
+                    return new Csharp(this);
             }
 
             throw new Exception("Invalid imp target: " + name + ".");
@@ -78,7 +71,7 @@ namespace imperative
 
         public void flatten()
         {
-            var temp = dungeons.Where(d => !d.is_external).Select(d=>d.name);
+            var temp = dungeons.Where(d => !d.is_external).Select(d => d.name);
 
             foreach (var dungeon in dungeons.Where(d => !d.is_external))
             {
@@ -143,7 +136,7 @@ namespace imperative
             //    }
             //}
 
-//            var pre_summoner = pre_summon(code, Pre_Summoner.Mode.snippet);
+            //            var pre_summoner = pre_summon(code, Pre_Summoner.Mode.snippet);
             var runes = Summoner2.read_runes(code, filename);
             var legend = Summoner2.translate_runes(code, runes, "snippets");
             var summoner = new Summoner2(this);
@@ -182,6 +175,19 @@ namespace imperative
             overlord.post_analyze();
 
             overlord.target.run(config.output);
+        }
+
+        public Realm load_standard_library()
+        {
+            if (!root.children.ContainsKey("metahub"))
+            {
+                var code = Library.load_resource("metahub.collections.Array.imp");
+                summon2(code, "Standard Library");
+                root.children["metahub"].children["collections"].is_virtual = true;
+                array = root.children["metahub"].children["collections"].dungeons["Array"];
+            }
+
+            return root.children["metahub"];
         }
     }
 }
