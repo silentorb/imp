@@ -179,15 +179,15 @@ namespace imperative
 
         public Realm load_standard_library()
         {
-            if (!root.children.ContainsKey("metahub"))
+            if (!root.children.ContainsKey("imp"))
             {
-                var code = Library.load_resource("metahub.collections.Array.imp");
+                var code = Library.load_resource("imp.collections.Array.imp");
                 summon2(code, "Standard Library");
-                root.children["metahub"].children["collections"].is_virtual = true;
-                array = root.children["metahub"].children["collections"].dungeons["Array"];
+                root.children["imp"].children["collections"].is_virtual = true;
+                array = root.children["imp"].children["collections"].dungeons["Array"];
             }
 
-            return root.children["metahub"];
+            return root.children["imp"];
         }
     }
 }

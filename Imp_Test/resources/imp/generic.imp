@@ -1,9 +1,13 @@
-﻿import metahub.collections
+﻿import imp.collections
 
 namespace magic.lore
 {
 	class Mage
 	{
 		spells:Array<string>
+
+		initialize() {
+			spells = new Array<string>(3)
+		}
 	}
 }

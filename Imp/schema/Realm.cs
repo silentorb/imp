@@ -105,7 +105,7 @@ namespace imperative.schema
             {
                 if (name == "")
                 {
-                    if (token == "metahub")
+                    if (token == "imp")
                         return overlord.load_standard_library();
                         
                     throw new Exception("Invalid namespace: " + token + ".");

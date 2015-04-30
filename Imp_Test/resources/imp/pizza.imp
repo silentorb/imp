@@ -30,7 +30,7 @@ namespace test {
 			crust = Crust.burnt
 		}
 
-		get_eaten():const string[] {
+		get_eaten():string[] {
 			return toppings
 		}
 	}

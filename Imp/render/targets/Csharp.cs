@@ -142,9 +142,13 @@ namespace imperative.render.targets
                 ? args.Select(a => render_expression(a)).join(", ")
                 : "";
 
-            return profession.is_const
-                ? "new " + render_profession(profession) + "[" + arg_string + "]"
-                : "new " + render_profession(profession) + "(" + arg_string + ")";
+            if (profession.is_array(overlord))
+            {
+                var text = render_profession(profession);
+                return "new " + text.Substring(0, text.Length - 2) + "[" + arg_string + "]";
+            }
+
+            return "new " + render_profession(profession) + "(" + arg_string + ")";
         }
     }
 }

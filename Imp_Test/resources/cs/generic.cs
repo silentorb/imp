@@ -9,5 +9,9 @@ namespace magic.lore
     {
         public string[] spells = null;
 
+        public void initialize()
+        {
+            spells = new string[3];
+        }
     }
 }

@@ -23,7 +23,7 @@ namespace test
             crust = Crust.burnt;
         }
 
-        public string[] get_eaten()
+        public List<string> get_eaten()
         {
             return toppings;
         } 

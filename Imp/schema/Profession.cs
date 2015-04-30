@@ -25,7 +25,7 @@ namespace imperative.schema
 
         public Profession clone()
         {
-            return new Profession(type, dungeon) { is_list = is_list };
+            return new Profession(type, dungeon) { is_list = is_list, children = children };
         }
 
         public Profession get_reference()

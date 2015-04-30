@@ -631,6 +631,8 @@ namespace imperative.summoner
             {
                 result.children = source.children[2].children.Select(c => parse_type2(c, context)).ToList();
             }
+            if (result.is_array(overlord) && result.children.Count == 0)
+                throw new Parser_Exception("Missing generic parameters.", source.position);
 
             return result;
         }
@@ -676,7 +678,7 @@ namespace imperative.summoner
             if (reference != null && reference.type == Expression_Type.operation)
                 throw new Exception("Cannot call function on operation.");
 
-            if (last.type == Expression_Type.portal && op != "@=")
+            if (last.type == Expression_Type.portal && op != "@=" && (!reference.get_profession().is_list || op != "="))
             {
                 var portal_expression = (Portal_Expression)last;
                 var portal = portal_expression.portal;
@@ -745,7 +747,7 @@ namespace imperative.summoner
         {
             var type = parse_type2(parts[0], context);
             var args = parts[1].children.Select(p => process_expression(p, context));
-            return new Instantiate((Dungeon)type.dungeon, args);
+            return new Instantiate(type, args);
         }
 
         private Expression summon_enum(List<Legend> parts, Summoner_Context context)

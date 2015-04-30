@@ -1,5 +1,5 @@
 ﻿
-namespace metahub.collections
+namespace imp.collections
 {
     external class Array
     {
