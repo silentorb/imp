@@ -1,20 +1,22 @@
 ﻿spaces(ignore) = /[ \t]+/
 newlines(optional) = /(\s*\n)+\s*/
 comma = ","
-path_separator = "."
 comma_or_newline = newlines | comma
 semicolon_or_newline = newlines | ";"
 line_comment(ignore) = "//[^\r\n]*"
 string_value = /"[^"]*"|'[^']*'/
 bool_value = "true" | "false"
+float_value = /-?(?:[0-9]*\.)?[0-9]+/
 int_value = /-?[0-9]+/
-float_value = /-?([0-9]*\.)?[0-9]+f?/
+path_separator = "."
 arrow = "=>"
 insert = /\$\w+/
 complex_set_operator = '+=' | '-=' | '*=' | '/=' | '@='
 operator_token = '+' | '-' | '/' | '*' | '<=' | '>=' | '<' | '>' | '==' | '!=' | '&&' | '||'
 set_operator = equals | complex_set_operator
 equals = "="
+
+meta_list_start = "@["
 
 block_start = "{"
 block_end = "}"
@@ -30,8 +32,7 @@ colon = ":"
 id_token = /[a-zA-Z0-9_]+/
 
 keyword(id_token>) =
-	  "abstract"
-	| "break"
+	"break"
 	| "catch"
 	| "class"
 	| "const"
@@ -41,7 +42,6 @@ keyword(id_token>) =
 	| "else"
 	| "enum"
 	| "export"
-	| "external"
 	| "if"
 	| "import"
 	| "in"
@@ -53,7 +53,6 @@ keyword(id_token>) =
 	| "private"
 	| "public"
 	| "return"
-	| "static"
 	| "throw"
 	| "while"
 	| "var"

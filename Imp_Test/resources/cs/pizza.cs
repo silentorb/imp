@@ -10,6 +10,7 @@ namespace test
         public List<string> toppings = new List<string>();
         public Crust crust = Crust.crispy;
         public bool variation = false;
+        public static string taste = "";
 
         public void add(string topping)
         {
@@ -17,7 +18,7 @@ namespace test
             if (topping == null)
                 return;
             else
-                x = 1;
+                x = 1.5f;
 
             toppings.Add(topping);
             crust = Crust.burnt;

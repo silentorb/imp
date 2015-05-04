@@ -32,8 +32,19 @@ namespace imperative.schema
         public Accordian accordian;
         public Minion parent;
         public List<Minion> children = new List<Minion>();
-        public bool is_abstract = false;
-        public bool is_static = false;
+//        public bool is_abstract = false;
+//        public bool is_static = false;
+        public List<Enchantment> enchantments = new List<Enchantment>();
+
+        public bool is_abstract
+        {
+            get { return has_enchantment("abstract"); }
+        }
+
+        public bool is_static
+        {
+            get { return has_enchantment("static"); }
+        }
 
 #if DEBUG
         public string stack_trace;
@@ -141,6 +152,16 @@ namespace imperative.schema
             accordian.add(division, expression);
 //            if (on_add_expression != null)
 //                on_add_expression(this, expression);
+        }
+
+        public bool has_enchantment(string name)
+        {
+            return enchantments.Any(e => e.name == name);
+        }
+
+        public void add_enchantment(Enchantment enchantment)
+        {
+            enchantments.Add(enchantment);
         }
     }
 }

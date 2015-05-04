@@ -223,7 +223,11 @@ namespace imperative.render
 
             current_dungeon = dungeon;
 
-            var intro = "public class " + render_dungeon_path(dungeon);
+            var abstract_keyword = dungeon.minions.Any(m => m.Value.is_abstract)
+                ? "abstract "
+                : "";
+
+            var intro = "public " + abstract_keyword + "class " + render_dungeon_path(dungeon);
             var result = add(intro) + render_scope(() =>
                 render_properties(dungeon) + newline()
                 + render_statements(statements, newline())
@@ -247,10 +251,17 @@ namespace imperative.render
             else if (config.type_mode == Type_Mode.optional_suffix)
                 main += ":" + render_profession(portal.profession);
 
+            if (portal.has_enchantment("static"))
+                main = "static " + main;
+
             if (config.explicit_public_members)
                 main = "public " + main;
 
-            return line(main + " = " + get_default_value(portal) + terminate_statement());
+            var assignment = portal.is_value && portal.other_dungeon != null
+                ? " = " + get_default_value(portal)
+                : "";
+
+            return line(main + assignment + terminate_statement());
         }
 
         virtual protected string get_default_value(Portal portal)
@@ -297,7 +308,10 @@ namespace imperative.render
                     return value.ToString();
 
                 case Kind.Float:
-                    return value.ToString();
+                    var result = value.ToString();
+                    return config.float_suffix && result.Contains('.')
+                        ? result + "f"
+                        : result;
 
                 case Kind.Int:
                     return value.ToString();
@@ -372,14 +386,17 @@ namespace imperative.render
         virtual protected string render_iterator_block(Iterator statement)
         {
             var parameter = statement.parameter;
-            var it = parameter.scope.create_symbol("it", parameter.profession);
-            var expression = render_iterator(it, statement.expression);
+//            var it = parameter.scope.create_symbol(parameter.name, parameter.profession);
+            var expression = render_iterator(parameter, statement.expression);
 
-            var result = add("for (" + expression + ")") + render_scope(new List<Expression> { 
-                    new Declare_Variable(parameter, new Insert("*" + it.name))
-                }.Concat(statement.body).ToList()
-            );
+            var result = add("foreach (" + expression + ")") + render_scope(statement.body);
             return result;
+        }
+
+        virtual protected string render_iterator(Symbol parameter, Expression expression)
+        {
+            var path_string = render_expression(expression);
+            return "var " + parameter.name + " in " + path_string;
         }
 
         virtual protected string render_operation(Operation operation)
@@ -389,15 +406,6 @@ namespace imperative.render
                 ? "(" + render_expression(c) + ")"
                 : render_expression(c)
             ).join(" " + operation.op + " ");
-        }
-
-        virtual protected string render_iterator(Symbol parameter, Expression expression)
-        {
-            var path_string = render_expression(expression);
-            return
-                "::const_iterator " + parameter.name + " = "
-                + path_string + ".begin(); " + parameter.name + " != "
-                + path_string + ".end(); " + parameter.name + "++";
         }
 
 
@@ -511,16 +519,16 @@ namespace imperative.render
         virtual protected string render_realm(Realm realm, String_Delegate action)
         {
             current_realm = realm;
-            var result = add(config.namespace_keyword + " " + render_realm_path(realm) + render_scope(action));
+            var result = add(config.namespace_keyword + " " + render_realm_path(realm, config.namespace_separator) + render_scope(action));
 
             current_realm = null;
             return result;
         }
 
-        protected string render_realm_path(Realm realm)
+        protected string render_realm_path(Realm realm, string separator)
         {
             return realm.parent != null && realm.parent.name != ""
-                ? render_realm_path(realm.parent) + config.namespace_separator + realm.name
+                ? render_realm_path(realm.parent, separator) + separator + realm.name
                 : realm.name;
         }
 
@@ -615,13 +623,18 @@ namespace imperative.render
 
         virtual protected string render_function_definition(Function_Definition definition)
         {
-            if (definition.is_abstract)
+            if (definition.is_abstract && !config.supports_abstract)
                 return "";
 
             var intro = (config.explicit_public_members ? "public " : "")
+                + (definition.minion.is_abstract ? "abstract " : "")
+                + (definition.minion.is_static ? "static " : "")
                 + (definition.return_type != null ? render_profession(definition.return_type) + " " : "")
                 + definition.name
                 + "(" + definition.parameters.Select(render_definition_parameter).join(", ") + ")";
+
+            if (definition.is_abstract)
+                return line(intro + terminate_statement());
 
             return add(intro) + render_scope(() =>
             {

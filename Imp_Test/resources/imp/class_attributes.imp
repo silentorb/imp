@@ -1,0 +1,7 @@
+﻿namespace magic.lore
+{
+	@[external, value] class Vector3
+	{
+		
+	}
+}

@@ -38,6 +38,7 @@ namespace imperative.schema
         public List<Dungeon> interfaces = new List<Dungeon>();
         public string class_export = "";
         public event Dungeon_Minion_Event on_add_minion;
+        private bool initial_generation_is_done = false;
 
         public object default_value { get; set; }
 
@@ -45,6 +46,7 @@ namespace imperative.schema
         public bool is_value
         {
             get { return _is_value; }
+            set { _is_value = value; }
         }
 
 #if DEBUG
@@ -146,6 +148,10 @@ namespace imperative.schema
 
         public void generate_code()
         {
+            if (initial_generation_is_done)
+                return;
+
+            initial_generation_is_done = true;
             var root_scope = new Scope();
             code = new List<Expression>();
             var root = create_block("root", root_scope, code);
@@ -227,18 +233,8 @@ namespace imperative.schema
 
         public void analyze()
         {
-            //if (rail != null)
-            //{
-            //    if (rail.parent != null && !rail.parent.trellis.is_abstract)
-            //    {
-            //        add_dependency(overlord.get_dungeon(rail.parent)).allow_partial = false;
-            //    }
-            //}
-            //else
-            //{
             if (parent != null && !parent.is_abstract)
                 add_dependency(parent).allow_partial = false;
-            //}
 
             foreach (var @interface in interfaces)
             {
@@ -392,24 +388,19 @@ namespace imperative.schema
 
                 case Expression_Type.declare_variable:
                     var declare_variable = (Declare_Variable)expression;
-                    add_dependency(declare_variable.symbol.profession.dungeon);
+                    analyze_profession(declare_variable.symbol.profession);
                     analyze_expression(declare_variable.expression);
                     break;
 
-                //case Expression_Type.property:
-                //    var property_expression = (Tie_Expression)expression;
-                //    add_dependency(property_expression.tie.other_rail);
-                //    break;
-
                 case Expression_Type.portal:
                     var portal_expression = (Portal_Expression)expression;
-                    add_dependency(portal_expression.portal.other_dungeon);
+                    analyze_profession(portal_expression.get_profession());
                     break;
 
                 case Expression_Type.variable:
                     var variable_expression = (Variable)expression;
                     if (variable_expression.symbol.profession.type == Kind.reference)
-                        add_dependency(variable_expression.symbol.profession.dungeon);
+                        analyze_profession(variable_expression.symbol.profession);
 
                     break;
 
@@ -418,10 +409,27 @@ namespace imperative.schema
                     analyze_expression(iterator.expression);
                     analyze_expressions(iterator.body);
                     break;
+                    
+                case Expression_Type.instantiate:
+                    var instantiation = (Instantiate) expression;
+                    analyze_profession(instantiation.profession);
+                    analyze_expressions(instantiation.args);
+                    break;
             }
 
             if (expression.next != null)
                 analyze_expression(expression.next);
+        }
+
+        void analyze_profession(Profession profession)
+        {
+            if (profession.dungeon != null)
+                add_dependency(profession.dungeon);
+
+            foreach (var child in profession.children)
+            {
+                analyze_profession(child);
+            }
         }
 
         void analyze_expressions(IEnumerable<Expression> expressions)

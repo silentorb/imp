@@ -122,21 +122,6 @@ namespace imperative
         public Dictionary<string, Snippet> summon_snippets(string code, string filename)
         {
             var templates = new Dictionary<string, Snippet>();
-            //var match = Regex.Matches(code,
-            //    @"@@@[ \t]*(\w+)[ \t]*\([ \t]*(.*?)[ \t]*\)[ \t]*\r\n(.*?)(?=@@@|\z)", RegexOptions.Singleline);
-            //foreach (Match item in match)
-            //{
-            //    foreach (Match capture in item.Captures)
-            //    {
-            //        var name = capture.Groups[1].Value;
-            //        var parameters = Regex.Split(capture.Groups[2].Value, @"\s*,\s*");
-            //        var block = capture.Groups[3].Value;
-            //        var pre_summoner = pre_summon(block, Pre_Summoner.Mode.snippet);
-            //        templates[name] = new Template(name, parameters, pre_summoner.output.patterns[1]);
-            //    }
-            //}
-
-            //            var pre_summoner = pre_summon(code, Pre_Summoner.Mode.snippet);
             var runes = Summoner2.read_runes(code, filename);
             var legend = Summoner2.translate_runes(code, runes, "snippets");
             var summoner = new Summoner2(this);
@@ -150,6 +135,23 @@ namespace imperative
             return templates;
         }
 
+        public static void run(Overlord_Configuration config)
+        {
+            var overlord = new Overlord(config.target);
+            var files = aggregate_files(config.input);
+            overlord.summon_many(files.Where(f => Path.GetExtension(f) == ".imp"));
+            overlord.generate(config);
+        }
+
+        public void generate(Overlord_Configuration config)
+        {
+            flatten();
+            post_analyze();
+
+            Generator.clear_folder(config.output);
+            target.run(config.output);
+        }
+
         public static List<string> aggregate_files(string path)
         {
             var result = new List<string>();
@@ -160,21 +162,6 @@ namespace imperative
             }
 
             return result;
-        }
-
-        public static void run(Overlord_Configuration config)
-        {
-            var overlord = new Overlord(config.target);
-            var files = Directory.Exists(config.input)
-                ? Overlord.aggregate_files(config.input)
-                : new List<string> { config.input };
-
-            overlord.summon_many(files);
-
-            overlord.flatten();
-            overlord.post_analyze();
-
-            overlord.target.run(config.output);
         }
 
         public Realm load_standard_library()

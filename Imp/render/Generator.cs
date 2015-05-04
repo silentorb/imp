@@ -66,6 +66,12 @@ namespace metahub.render
             {
                 File.Delete(file);
             }
+
+            var folders = Directory.GetDirectories(path);
+            foreach (var folder in folders)
+            {
+                Directory.Delete(folder, true);
+            }
         }
     }
 }

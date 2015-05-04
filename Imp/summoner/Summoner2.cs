@@ -96,6 +96,7 @@ namespace imperative.summoner
 
         public Dungeon process_dungeon1(Legend source, Summoner_Context context)
         {
+            var parts = source.children;
             var name = source.children[1].text;
             var replacement_name = context.get_string_pattern(name);
             if (replacement_name != null)
@@ -104,11 +105,12 @@ namespace imperative.summoner
             if (!context.realm.dungeons.ContainsKey(name))
             {
                 var dungeon = context.realm.create_dungeon(name);
-                if (source.children[0].children.Count > 0)
+                if (parts[0] != null)
                 {
-                    var attributes = source.children[0].children;
+                    var attributes = parts[0].children;
                     dungeon.is_external = attributes.Any(p => p.text == "external");
                     dungeon.is_abstract = attributes.Any(p => p.text == "abstract");
+                    dungeon.is_value = attributes.Any(p => p.text == "value");
                 }
 
                 var parent_dungeons = source.children[2].children;
@@ -210,20 +212,6 @@ namespace imperative.summoner
             }
         }
 
-        //        private void process_abstract_function(Legend source, Context context)
-        //        {
-        //            var minion = context.dungeon.spawn_minion(
-        //                source.children[0].text,
-        //                source.children[3].children.Select(p => process_parameter(p, context)).ToList()
-        //                );
-        //
-        //            minion.is_abstract = true;
-        //
-        //            var return_type = source.children[6];
-        //            if (return_type.children.Length > 0)
-        //                minion.return_type = parse_type(return_type.children[0], context);
-        //        }
-
         private void process_function_definition(Legend source, Summoner_Context context, bool as_stub = false)
         {
             var parts = source.children;
@@ -237,6 +225,14 @@ namespace imperative.summoner
 
             var new_context = new Summoner_Context(context) { scope = minion.scope };
 
+            if (parts[0] != null)
+            {
+                foreach (var enchantment in parts[0].children)
+                {
+                    minion.add_enchantment(new Enchantment(enchantment.text));
+                }
+            }
+
             if (as_stub)
             {
                 var return_type = parts[3];
@@ -245,8 +241,10 @@ namespace imperative.summoner
             }
             else
             {
-                if (parts[4].children.Count == 0)
-                    minion.is_abstract = true;
+                if (parts[4] == null)
+                {
+                    minion.add_enchantment(new Enchantment("abstract"));
+                }
                 else
                     minion.add_to_block(process_block(parts[4], new_context));
             }
@@ -257,10 +255,23 @@ namespace imperative.summoner
             if (!as_stub)
                 return;
 
-            var type_info = parse_type2(source.children[1], context);
-            var portal_name = source.children[0].text;
+            var parts = source.children;
+
+            var portal_name = parts[1].text;
             if (!context.dungeon.has_portal(portal_name))
-                context.dungeon.add_portal(new Portal(portal_name, type_info));
+            {
+                var type_info = parse_type2(parts[2], context);
+                var portal = new Portal(portal_name, type_info);
+                if (parts[0] != null)
+                {
+                    foreach (var enchantment in parts[0].children)
+                    {
+                        portal.enchant(new Enchantment(enchantment.text));
+                    }
+                }
+
+                context.dungeon.add_portal(portal);
+            }
         }
 
         private List<Expression> process_block(Legend source, Summoner_Context context)
@@ -374,7 +385,7 @@ namespace imperative.summoner
 
             if (children.Count == 2)
             {
-                var op = group.dividers[0].text;
+                var op = context.get_string_pattern(group.dividers[0].text) ?? group.dividers[0].text;
                 return new Operation(op, children.Select(p => process_expression_part(p, context)));
             }
 
@@ -504,7 +515,7 @@ namespace imperative.summoner
         {
             Portal portal = null;
             Expression array_access = pattern.children[1] != null
-                     ? process_expression(pattern.children[1].children[0], context)
+                     ? process_expression(pattern.children[1], context)
                      : null;
 
             var insert = context.get_expression_pattern(token);
@@ -565,26 +576,28 @@ namespace imperative.summoner
                 return func;
             }
 
-            if (context.realm.dungeons.ContainsKey(token))
+            var dungeon = context.get_dungeon(new[] { token });
+            if (dungeon != null)
             {
-                var dungeon = context.realm.dungeons[token];
                 path_context.dungeon = dungeon;
+                if (dungeon.GetType() == typeof(Treasury))
+                {
+                    if (path_context.index >= patterns.Count - 1)
+                        throw new Exception("Enum " + token + " is missing a member value.");
+
+                    var treasury = (Treasury)dungeon;
+                    var jewel_name = patterns.Last().children[0].text;
+                    if (!treasury.jewels.Contains(jewel_name))
+                        throw new Exception("Enum " + treasury.name + " does not contain member: " + jewel_name + ".");
+
+                    path_context.is_finished = true;
+                    return new Jewel(treasury, treasury.jewels.IndexOf(jewel_name));
+                }
+
                 return new Profession_Expression(new Profession(Kind.reference, dungeon));
             }
 
-            if (context.realm.treasuries.ContainsKey(token))
-            {
-                if (path_context.index >= patterns.Count - 1)
-                    throw new Exception("Enum " + token + " is missing a member value.");
 
-                var treasury = context.realm.treasuries[token];
-                var jewel_name = patterns.Last().children[0].text;
-                if (!treasury.jewels.Contains(jewel_name))
-                    throw new Exception("Enum " + treasury.name + " does not contain member: " + jewel_name + ".");
-
-                path_context.is_finished = true;
-                return new Jewel(treasury, treasury.jewels.IndexOf(jewel_name));
-            }
             throw new Exception("Unknown symbol: " + token);
         }
 

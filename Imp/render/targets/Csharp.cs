@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using imperative.expressions;
@@ -15,6 +16,7 @@ namespace imperative.render.targets
         {
             config = new Target_Configuration()
                 {
+                    float_suffix = true,
                     statement_terminator = ";",
                     dependency_keyword = "using",
                     space_tabs = true,
@@ -29,11 +31,16 @@ namespace imperative.render.targets
         {
             foreach (var dungeon in overlord.dungeons)
             {
-                if (dungeon.is_external || (dungeon.is_abstract && dungeon.is_external))
+                if (dungeon.is_external || dungeon.realm.is_external 
+                    || (dungeon.is_abstract && dungeon.is_external))
                     continue;
 
                 var contents = generate_dungeon_file_contents(dungeon);
-                Generator.create_file(output_folder + "/" + dungeon.name + ".cs", contents);
+                var path = output_folder + "/" + render_realm_path(dungeon.realm, "/");
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+
+                Generator.create_file(path + "/" + dungeon.name + ".cs", contents);
             }
         }
 
@@ -62,7 +69,7 @@ namespace imperative.render.targets
                 line(config.dependency_keyword + " " + d + terminate_statement())
             ).join("")
             + dungeon.needed_realms.Select(d =>
-                line(config.dependency_keyword + " " + render_realm_path(d) + terminate_statement())
+                line(config.dependency_keyword + " " + render_realm_path(d, config.namespace_separator) + terminate_statement())
             ).join("");
         }
 
@@ -122,7 +129,7 @@ namespace imperative.render.targets
                 case "rand":
                     float min = ((Literal)expression.args[0]).get_float();
                     float max = ((Literal)expression.args[1]).get_float();
-                    return "rand() % " + (max - min) + (min < 0 ? " - " + -min : " + " + min);
+                    return "new Random().Next(" + min + ", " + max + ")";
 
                 default:
                     throw new Exception("Unsupported platform-specific function: " + expression.name + ".");

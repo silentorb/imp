@@ -19,10 +19,12 @@ namespace imperative.render
         public string dependency_keyword = "";          // Sometimes "include", "import", "require", "using".  Not sure what Imp will use.
         public bool explicit_public_members = false;    // Whether members require a "public" prefix to be public.
         public bool implicit_this = true;               // Whether "this" is required to reference local members.
+        public bool float_suffix = false;               // Whether literal floats should be suffixed with 'f'.
         public int indent = 2;                          // Default indentation.
         public string namespace_keyword = "namespace";  // Usually either namespace or module.
         public string namespace_separator = ".";        // Some languages use ::
         public string path_separator = ".";             // Some languages use ->
+        public bool supports_abstract = true;           // Whether the language supports abstract methods.
         public bool supports_enums = true;              // Whether to resolve enums to integers or leave them as object members.
         public bool supports_namespaces = true;         // True for most of Imp's targets.
         public bool space_tabs = false;                 // Use spaces instead of tabs.

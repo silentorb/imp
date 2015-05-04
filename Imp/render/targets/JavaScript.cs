@@ -20,6 +20,7 @@ namespace metahub.render.targets
             config = new Target_Configuration
                 {
                     implicit_this = false,
+                    supports_abstract = false,
                     supports_enums = false,
                     supports_namespaces = false
                 };

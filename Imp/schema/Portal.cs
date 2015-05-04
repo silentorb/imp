@@ -19,7 +19,8 @@ namespace imperative.schema
         private int id; 
         private static int next_id = 1;
         public object default_value;
-        public List<Portal_Expression> expressions = new List<Portal_Expression>(); 
+        public List<Portal_Expression> expressions = new List<Portal_Expression>();
+        public List<Enchantment> enchantments = new List<Enchantment>(); 
 
         public Kind type
         {
@@ -114,6 +115,16 @@ namespace imperative.schema
                 default:
                     return null;
             }
+        }
+
+        public bool has_enchantment(string name)
+        {
+            return enchantments.Any(e => e.name == name);
+        }
+
+        public void enchant(Enchantment enchantment)
+        {
+            enchantments.Add(enchantment);
         }
     }
 }

@@ -17,13 +17,14 @@ namespace test {
 		toppings:string[]
 		crust:Crust
 		variation:bool
+		@[static] taste:string
 
 		add(topping:string) {
 			var x = 0
 			if (topping == null)
 				return
 			else
-				x = 1
+				x = 1.5
 				
 
 			toppings.add(topping)

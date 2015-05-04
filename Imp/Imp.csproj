@@ -73,11 +73,13 @@
     <Compile Include="render\targets\PHP.cs" />
     <Compile Include="render\Target_Configuration.cs" />
     <Compile Include="render\Transmuter.cs" />
+    <Compile Include="Daemon.cs" />
     <Compile Include="schema\Accordian.cs" />
     <Compile Include="schema\Configuration.cs" />
     <Compile Include="schema\Dependency.cs" />
     <Compile Include="schema\Division.cs" />
     <Compile Include="schema\Dungeon.cs" />
+    <Compile Include="schema\Enchantment.cs" />
     <Compile Include="schema\Ethereal_Minion.cs" />
     <Compile Include="schema\IDungeon.cs" />
     <Compile Include="schema\Minion.cs" />
