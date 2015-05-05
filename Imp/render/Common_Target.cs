@@ -17,7 +17,8 @@ namespace imperative.render
                 {"int", "int"},
                 {"bool", "bool"},
                 {"float", "float"},
-                {"none", "void"}
+                {"none", "void"},
+                {"reference", "void"}
             };
 
         protected Common_Target(Overlord overlord)

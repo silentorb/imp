@@ -711,6 +711,7 @@ namespace imperative.summoner
                     //if (last.parent.type == Expression_Type.operation || last.type== Expression_Type.operation)
                     //    throw new Exception();
                     //last.parent.child = null;
+                    last.parent.next = null;
                     last.parent = null;
                 }
 

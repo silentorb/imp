@@ -25,6 +25,8 @@ namespace imperative.render.targets
                     explicit_public_members = true,
                     type_mode = Type_Mode.required_prefix
                 };
+
+            types["reference"] = types["none"] = "object";
         }
 
         override public void run(string output_folder)
@@ -86,7 +88,7 @@ namespace imperative.render.targets
             switch (expression.name)
             {
                 case "count":
-                    return ref_full + "size()";
+                    return ref_full + "Count";
 
                 case "add":
                     {
