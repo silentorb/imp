@@ -7,7 +7,7 @@ namespace metahub.schema
         Int,
         String,
         reference,
-        list,
+//        list,
         Float,
         Bool,
         unknown,

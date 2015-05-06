@@ -18,7 +18,7 @@ namespace imperative.schema
         {
             this.type = type;
             this.dungeon = dungeon;
-            is_list = type == Kind.list;
+//            is_list = type == Kind.list;
             if (dungeon != null && dungeon == dungeon.realm.overlord.array)
                 is_list = true;
         }

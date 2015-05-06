@@ -695,7 +695,7 @@ namespace imperative.summoner
             {
                 var portal_expression = (Portal_Expression)last;
                 var portal = portal_expression.portal;
-                if (portal.type != Kind.list && op != "=")
+                if (portal.is_list && op != "=")
                 {
                     expression = Minion.operation(op[0].ToString(), reference.clone(), expression);
                 }
