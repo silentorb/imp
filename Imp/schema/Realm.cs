@@ -73,8 +73,11 @@ namespace imperative.schema
             var tokens = path.Take(path.Length - 1).ToArray();
             foreach (var token in tokens)
             {
-                realm = realm.get_child_realm(token);
+                realm = realm.get_child_realm(token, throw_error);
             }
+
+            if (realm == null && !throw_error)
+                return null;
 
             return realm.get_dungeon(path.Last());
         }
@@ -99,7 +102,7 @@ namespace imperative.schema
             }
         }
 
-        public Realm get_child_realm(string token)
+        public Realm get_child_realm(string token, bool throw_error = true)
         {
             if (!children.ContainsKey(token))
             {
@@ -107,11 +110,17 @@ namespace imperative.schema
                 {
                     if (token == "imp")
                         return overlord.load_standard_library();
-                        
+
+                    if (!throw_error)
+                        return null;
+
                     throw new Exception("Invalid namespace: " + token + ".");
                 }
                 else
                 {
+                    if (!throw_error)
+                        return null;
+
                     throw new Exception("Namespace " + name + " does not have a child named " + token + ".");
                 }
             }

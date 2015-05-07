@@ -492,6 +492,9 @@ namespace imperative.summoner
                 var token = pattern.children[0].text;
 
                 var next = process_token(token, pattern, patterns, args, path_context, context);
+                if (next.type == Expression_Type.empty)
+                    continue;
+
                 if (path_context.is_finished)
                     return next;
 
@@ -596,7 +599,6 @@ namespace imperative.summoner
 
                 return new Profession_Expression(new Profession(Kind.reference, dungeon));
             }
-
 
             throw new Exception("Unknown symbol: " + token);
         }

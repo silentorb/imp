@@ -12,7 +12,6 @@ namespace imperative.schema
         public Dungeon dungeon;
         public string name;
         public bool is_value = false;
-        public Portal other_portal;
         public Portal parent;
         public Profession profession;
         public Minion setter;
@@ -20,7 +19,26 @@ namespace imperative.schema
         private static int next_id = 1;
         public object default_value;
         public List<Portal_Expression> expressions = new List<Portal_Expression>();
-        public List<Enchantment> enchantments = new List<Enchantment>(); 
+        public List<Enchantment> enchantments = new List<Enchantment>();
+
+        private Portal _other_portal;
+
+        public Portal other_portal
+        {
+            get
+            {
+                if (_other_portal != null)
+                    return _other_portal;
+
+                if (other_dungeon == null || other_dungeon.is_value)
+                    return null;
+
+                _other_portal = ((Dungeon) other_dungeon).all_portals.Values.FirstOrDefault(p => p.other_dungeon == dungeon);
+                return _other_portal;
+            }
+
+            set { _other_portal = value; }
+        }
 
         public Kind type
         {
@@ -87,7 +105,14 @@ namespace imperative.schema
             if (profession.dungeon == null)
                 return profession;
 
+//            if (other_portal != null)
+//                return other_portal.profession;
+
             return new Profession(Kind.reference, other_dungeon);
+//            var result = profession.clone();
+//            result.is_list = false;
+//            return result;
+//            return other_portal.profession;
         }
 
         public object get_default_value()

@@ -6,6 +6,7 @@ using System.Text;
 using imperative.expressions;
 using imperative.schema;
 using metahub.render;
+using metahub.schema;
 
 namespace imperative.render.targets
 {
@@ -26,7 +27,7 @@ namespace imperative.render.targets
                     type_mode = Type_Mode.required_prefix
                 };
 
-            types["reference"] = types["none"] = "object";
+            types["reference"] = "object";
         }
 
         override public void run(string output_folder)
@@ -100,8 +101,7 @@ namespace imperative.render.targets
                 case "contains":
                     {
                         var first = render_expression(expression.args[0]);
-                        return "std::find(" + ref_full + "begin(), "
-                               + ref_full + "end(), " + first + ") != " + ref_full + "end()";
+                        return ref_full + "Contains(" + first + ")";
                     }
 
                 case "distance":
@@ -124,14 +124,13 @@ namespace imperative.render.targets
                 case "remove":
                     {
                         var first = render_expression(expression.args[0]);
-                        return ref_full + "erase(std::remove(" + ref_full + "begin(), "
-                               + ref_full + "end(), " + first + "), " + ref_full + "end())";
+                        return ref_full + "Remove(" + first + ")";
                     }
 
                 case "rand":
                     float min = ((Literal)expression.args[0]).get_float();
                     float max = ((Literal)expression.args[1]).get_float();
-                    return "new Random().Next(" + min + ", " + max + ")";
+                    return "(float)metahub.Hub.random.NextDouble() * " + (max - min) + (min < 0 ? " - " + -min : " + " + min);
 
                 default:
                     throw new Exception("Unsupported platform-specific function: " + expression.name + ".");

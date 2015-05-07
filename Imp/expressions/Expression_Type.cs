@@ -38,6 +38,7 @@ namespace imperative.expressions
 
         // Summoner
         statements,
-        snippet
+        snippet,
+        empty
     }
 }

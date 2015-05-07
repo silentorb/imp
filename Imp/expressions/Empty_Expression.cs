@@ -2,16 +2,16 @@ using System.Collections.Generic;
 
 namespace imperative.expressions
 {
-    public class Null_Value : Expression
+    public class Empty_Expression : Expression
     {
-        public Null_Value()
-            : base(Expression_Type.null_value)
+        public Empty_Expression()
+            : base(Expression_Type.empty)
         {
         }
 
         public override Expression clone()
         {
-            return new Null_Value();
+            return new Empty_Expression();
         }
 
         public override IEnumerable<Expression> children

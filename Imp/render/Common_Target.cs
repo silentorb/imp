@@ -258,7 +258,7 @@ namespace imperative.render
             if (config.explicit_public_members)
                 main = "public " + main;
 
-            var assignment = portal.is_value && portal.other_dungeon != null
+            var assignment = portal.other_dungeon == null || !portal.other_dungeon.is_value
                 ? " = " + get_default_value(portal)
                 : "";
 

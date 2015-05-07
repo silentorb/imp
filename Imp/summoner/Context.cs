@@ -114,13 +114,13 @@ namespace imperative.summoner
 
         public IDungeon get_dungeon(string[] path)
         {
-            var result = realm.get_dungeon(path);
+            var result = realm.get_dungeon(path, false);
             if (result != null)
                 return result;
 
             foreach (var imported_realm in imported_realms)
             {
-                result = imported_realm.get_dungeon(path);
+                result = imported_realm.get_dungeon(path, false);
                 if (result != null)
                     return result;
             }
