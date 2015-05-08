@@ -42,9 +42,9 @@ statement =
 	| while_statement
 	| return_statement
 	| for_statement
+	| preprocessor
 	| assignment
 	| expression
-
 
 expression_part =
 	  instantiate
@@ -118,3 +118,7 @@ enum_definition = enum id block_start @(enum_entry, comma_or_newline, 1, 0) bloc
 enum_entry = id @(optional_enum_assignment, 0, 1)
 
 optional_enum_assignment = equals int_value
+
+optional_group = group_start expression group_end
+
+preprocessor = preprocessor_start @(optional_group, 0, 1) block 

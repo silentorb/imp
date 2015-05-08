@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using imperative.wizard;
 using imperative.Properties;
 using imperative.schema;
 using imperative.expressions;
@@ -288,6 +289,9 @@ namespace imperative.summoner
             foreach (var pattern in legends)
             {
                 var expression = summon_statement(pattern, context);
+                if (expression == null)
+                    continue;
+
                 if (expression.type == Expression_Type.statements)
                 {
                     var statements = (Block)expression;
@@ -370,6 +374,9 @@ namespace imperative.summoner
 
                 case "enum_definition":
                     return summon_enum(parts, context);
+
+                case "preprocessor":
+                    return process_preprocessor(parts, context);
             }
 
             throw new Exception("Unsupported statement type: " + source.type + ".");
@@ -800,7 +807,16 @@ namespace imperative.summoner
 
             return new Anonymous_Function(minion);
         }
+              
+        private Expression process_preprocessor(List<Legend> parts, Summoner_Context context)
+        {
+            var condition = process_expression(parts[1], context);
+            if (!(bool)Wizard.resolve_expression(condition, context))
+                return null;
 
+            return new Block(process_block(parts[2], context));
+        }
+        
         public static List<Rune> read_runes(string input, string filename)
         {
             if (lexer == null)

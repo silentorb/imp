@@ -29,6 +29,8 @@ array_end = "]"
 
 colon = ":"
 
+preprocessor_start = /#[a-zA-Z0-9_]+/
+
 id_token = /[a-zA-Z0-9_]+/
 
 keyword(id_token>) =
