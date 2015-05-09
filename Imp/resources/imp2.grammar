@@ -1,12 +1,14 @@
 ﻿start = @(namespace_class, newlines, 1, 0)
 
-namespace_class = namespace_statement | class_definition | enum_definition | import_statement
+namespace_class = namespace_statement | class_definition | enum_definition | import_statement | external_var
 
 snippets = @(snippet_function, semicolon_or_newline, 1, 0)
 
 id = id_token | insert
 
 meta_list = meta_list_start @(id, comma_or_newline, 1, 0) array_end
+
+external_var = external var id @(type_info, 0, 1)
 
 operator = operator_token | insert
 
@@ -36,6 +38,8 @@ generic_info = < @(signature, comma, 1, 0) >
 
 empty_array = array_start array_end
 
+instantiate_array = array_start @(expression, comma_or_newline, 0, 0) array_end
+
 statement =
 	declare_variable
 	| if_chain
@@ -53,7 +57,7 @@ expression_part =
 	| reference	
 	| closed_expression
 	| null
-	| empty_array
+	| instantiate_array
 
 closed_expression = group_start expression group_end
 
@@ -79,7 +83,7 @@ class_statements = function_definition | property_declaration
 
 class_or_struct = class | struct
 
-property_declaration = @(member_attribute, 0, 0) id type_info
+property_declaration = @(member_attribute, 0, 0) id type_info @(optional_assignment, 0, 1)
 
 optional_parent_classes = colon @(id, comma_or_newline, 1, 0)
 

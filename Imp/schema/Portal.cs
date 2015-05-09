@@ -17,7 +17,7 @@ namespace imperative.schema
         public Minion setter;
         private int id; 
         private static int next_id = 1;
-        public object default_value;
+        public Expression default_expression;
         public List<Portal_Expression> expressions = new List<Portal_Expression>();
         public List<Enchantment> enchantments = new List<Enchantment>();
 
@@ -119,10 +119,7 @@ namespace imperative.schema
         {
             if (other_dungeon != null && other_dungeon.default_value != null)
                 return other_dungeon.default_value;
-            
-            if (default_value != null)
-                return default_value;
-
+   
             switch (type)
             {
                 case Kind.Int:

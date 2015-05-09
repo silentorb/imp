@@ -1,0 +1,28 @@
+﻿namespace browser {
+	external class Window {
+		$q:string
+	}
+	
+	external class Injector {
+		get(name:string)
+	}
+
+	external class Angular {
+		injector(name:string):Injector
+	}
+}
+
+external var window:browser.Window
+external var angular:browser.Angular
+
+namespace bloom {
+
+  class Garden {
+    static vineyard_url:string = 'http://localhost:3000/'
+
+    static start() {
+      var $injector = angular.injector(['ng'])
+      window.$q = $injector.get('$q')
+    }
+  }
+}

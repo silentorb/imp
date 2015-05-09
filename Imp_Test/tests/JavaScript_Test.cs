@@ -30,5 +30,15 @@ namespace imp_test.tests
             var goal = Utility.load_resource("js.anonymous_minion.js");
             Utility.diff(goal, output);
         }
+
+        [Test]
+        public void complex_test()
+        {
+            var overlord = Imp_Fixture.create_overlord("js", "imp.browser.imp");
+            var target = (JavaScript)overlord.target;
+            var output = target.generate();
+            var goal = Utility.load_resource("js.browser.js");
+            Utility.diff(goal, output);
+        }
     }
 }

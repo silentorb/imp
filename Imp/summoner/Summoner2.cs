@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using imperative.wizard;
 using imperative.Properties;
@@ -12,6 +12,7 @@ using metahub.jackolantern.expressions;
 using metahub.schema;
 using runic.lexer;
 using runic.parser;
+using Expression = imperative.expressions.Expression;
 using Parser = runic.parser.Parser;
 
 namespace imperative.summoner
@@ -68,6 +69,7 @@ namespace imperative.summoner
         {
             foreach (var pattern in source.children)
             {
+                var parts = pattern.children;
                 switch (pattern.type)
                 {
                     case "import_statement":
@@ -87,6 +89,18 @@ namespace imperative.summoner
 
                     case "class_definition":
                         second(pattern, context);
+                        break;
+
+                    case "external_var":
+                        if (step == 1)
+                        {
+                            var profession = parts[1] != null
+                                ? parse_type2(parts[1], context)
+                                : new Profession(Kind.reference);
+
+                            var symbol = new Symbol(parts[0].text, profession, null);
+                            overlord.global_variables[symbol.name] = symbol;
+                        }
                         break;
 
                     default:
@@ -114,7 +128,7 @@ namespace imperative.summoner
                     var attributes = parts[0].children;
                     dungeon.is_external = attributes.Any(p => p.text == "external");
                     dungeon.is_abstract = attributes.Any(p => p.text == "abstract");
-//                    dungeon.is_value = attributes.Any(p => p.text == "value");
+                    //                    dungeon.is_value = attributes.Any(p => p.text == "value");
                 }
 
                 var parent_dungeons = source.children[3].children;
@@ -273,6 +287,9 @@ namespace imperative.summoner
                         portal.enchant(new Enchantment(enchantment.text));
                     }
                 }
+
+                if (parts[3] != null)
+                    portal.default_expression = process_expression(parts[3], context);
 
                 context.dungeon.add_portal(portal);
             }
@@ -460,6 +477,9 @@ namespace imperative.summoner
 
                 case "lambda":
                     return process_lambda(parts, context);
+
+                case "instantiate_array":
+                    return instantiate_array(parts, context);
             }
 
             throw new Exception("Unsupported statement type: " + source.type + ".");
@@ -468,6 +488,7 @@ namespace imperative.summoner
         class Path_Context
         {
             public IDungeon dungeon;
+            public Realm realm;
             public int index = -1;
             public Expression result = null;
             public Expression last = null;
@@ -479,7 +500,8 @@ namespace imperative.summoner
 
             var path_context = new Path_Context()
             {
-                dungeon = (IDungeon)context.dungeon
+                dungeon = (IDungeon)context.dungeon,
+                realm = context.realm
             };
             var patterns = source.children[0].children;
             if (patterns.Count == 1)
@@ -526,7 +548,6 @@ namespace imperative.summoner
         Expression process_token(string token, Legend pattern, List<Legend> patterns, List<Expression> args,
             Path_Context path_context, Summoner_Context context)
         {
-            Portal portal = null;
             Expression array_access = pattern.children[1] != null
                      ? process_expression(pattern.children[1], context)
                      : null;
@@ -559,7 +580,7 @@ namespace imperative.summoner
             {
                 if (path_context.dungeon.GetType() == typeof(Dungeon))
                 {
-                    portal = ((Dungeon)path_context.dungeon).get_portal_or_null(token);
+                    var portal = ((Dungeon)path_context.dungeon).get_portal_or_null(token);
                     if (portal != null)
                     {
                         path_context.dungeon = portal.other_dungeon;
@@ -589,7 +610,7 @@ namespace imperative.summoner
                 return func;
             }
 
-            var dungeon = context.get_dungeon(new[] { token });
+            var dungeon = path_context.realm.get_dungeon(new[] { token });
             if (dungeon != null)
             {
                 path_context.dungeon = dungeon;
@@ -608,6 +629,20 @@ namespace imperative.summoner
                 }
 
                 return new Profession_Expression(new Profession(Kind.reference, dungeon));
+            }
+
+            var realm = path_context.realm.overlord.root.get_child_realm(token, false);
+            if (realm != null)
+            {
+                path_context.realm = realm;
+                return new Empty_Expression();
+            }
+
+            if (overlord.global_variables.ContainsKey(token))
+            {
+                symbol = overlord.global_variables[token];
+                path_context.dungeon = symbol.profession.dungeon;
+                return new Variable(symbol);
             }
 
             throw new Exception("Unknown symbol: " + token);
@@ -810,7 +845,7 @@ namespace imperative.summoner
 
             return new Anonymous_Function(minion);
         }
-              
+
         private Expression process_preprocessor(List<Legend> parts, Summoner_Context context)
         {
             var condition = process_expression(parts[1], context);
@@ -819,7 +854,12 @@ namespace imperative.summoner
 
             return new Block(process_block(parts[2], context));
         }
-        
+
+        private Expression instantiate_array(List<Legend> parts, Summoner_Context context)
+        {
+            return new Create_Array(parts[0].children.Select(p => process_expression(p, context)));
+        }
+
         public static List<Rune> read_runes(string input, string filename)
         {
             if (lexer == null)

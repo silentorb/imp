@@ -16,6 +16,17 @@ namespace imperative
     {
         static Mutex mutex = new Mutex(true, "{EFFA67AE-0917-49C8-BCE7-87BB876CC741}");
 
+        private static string[] success_messages =
+        {
+            "Imp sucessfully stormed the Keep.",
+            "Your code has been mutated.",
+            "Good news!  You're still alive and you're code compiled.",
+            "Sooner or later you're build will die horribly, but this wasn't that time.",
+            "Fresh code has been spawned.",
+            "Imp laughs at your code, but compiled it anyway.",
+            "The prophets were wrong—you're code sucessfully compiled."
+        };
+
         private const string pipe_name = "Imp-CLI";
         public event Daemon_Action on_run;
         
@@ -76,7 +87,7 @@ namespace imperative
                 if (on_run != null)
                     on_run(config);
 
-                Console.WriteLine("Imp sucessfully stormed the Keep.");
+                Console.WriteLine(get_random_success_message());
             }
 
             catch (Parser_Exception ex)
@@ -91,6 +102,13 @@ namespace imperative
                 Console.WriteLine(ex.StackTrace);
             }
 
+        }
+
+        string get_random_success_message()
+        {
+            var random = new Random();
+            var index = random.Next(0, success_messages.Length - 1);
+            return success_messages[index];
         }
 
         void resolve_paths(string[] args)

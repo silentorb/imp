@@ -32,6 +32,7 @@ namespace imperative
         public Realm root;
         public Target target;
         public Dungeon array;
+        public Dictionary<string, Symbol> global_variables = new Dictionary<string, Symbol>();
 
         public Overlord()
         {

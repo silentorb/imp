@@ -69,6 +69,7 @@
     <EmbeddedResource Include="resources\imp\namespaces1.imp" />
     <EmbeddedResource Include="resources\imp\generic.imp" />
     <EmbeddedResource Include="resources\imp\class_attributes.imp" />
+    <EmbeddedResource Include="resources\imp\browser.imp" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="resources\js\pizza.js" />
@@ -89,6 +90,9 @@
       <Project>{72BB0D03-764D-4799-9380-BBA1A8BE7243}</Project>
       <Name>Imp</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="resources\js\browser.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
