@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using imperative;
@@ -26,10 +27,14 @@ namespace metahub.render.targets
                 };
         }
 
-        override public void run(string output_folder)
+        override public void run(Overlord_Configuration settings)
         {
             var output = generate();
-            Generator.create_file(output_folder + "/" + "lib.js", output);
+            var output_path = File.Exists(settings.input)
+                ? settings.output + Path.GetFileNameWithoutExtension(settings.input) + ".js"
+                : settings.output + "/" + "lib.js";
+
+            Generator.create_file(output_path, output);
         }
 
         public string generate()
@@ -75,7 +80,7 @@ namespace metahub.render.targets
             var result = line(render_dungeon_path(dungeon) + " = function() {}");
             var intro = render_dungeon_path(dungeon) + ".prototype =";
             result += add(intro) + render_scope(() =>
-                dungeon.core_portals.Values.Select(portal => 
+                dungeon.core_portals.Values.Select(portal =>
                     render_line(add(portal.name + ": " + get_default_value(portal))))
                 .join("")
                 +

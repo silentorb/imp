@@ -30,7 +30,7 @@ namespace metahub.render
 
         }
 
-        public virtual void run(string output_folder)
+        public virtual void run(Overlord_Configuration config1)
         {
 
         }

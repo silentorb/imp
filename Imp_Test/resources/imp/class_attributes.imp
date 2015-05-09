@@ -1,6 +1,6 @@
 ﻿namespace magic.lore
 {
-	@[external, value] class Vector3
+	external struct Vector3
 	{
 		
 	}

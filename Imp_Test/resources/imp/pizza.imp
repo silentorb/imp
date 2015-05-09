@@ -17,7 +17,7 @@ namespace test {
 		toppings:string[]
 		crust:Crust
 		variation:bool
-		@[static] taste:string
+		static taste:string
 
 		add(topping:string) {
 			var x = 0

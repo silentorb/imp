@@ -17,7 +17,7 @@ namespace imp
         static void Main(string[] args)
         {
             var daemon = new Daemon();
-            daemon.on_run += config => Overlord.run(config);
+            daemon.on_run += Overlord.run;
             daemon.start(args);
         }
 

@@ -138,8 +138,16 @@ namespace imperative
         public static void run(Overlord_Configuration config)
         {
             var overlord = new Overlord(config.target);
-            var files = aggregate_files(config.input);
-            overlord.summon_many(files.Where(f => Path.GetExtension(f) == ".imp"));
+            if (File.Exists(config.input))
+            {
+                overlord.summon(File.ReadAllText(config.input), config.input);
+            }
+            else
+            {
+                var files = aggregate_files(config.input);
+                overlord.summon_many(files.Where(f => Path.GetExtension(f) == ".imp"));
+            }
+
             overlord.generate(config);
         }
 
@@ -148,8 +156,16 @@ namespace imperative
             flatten();
             post_analyze();
 
-            Generator.clear_folder(config.output);
-            target.run(config.output);
+            if (config.output == "")
+            {
+                config.output = Path.GetDirectoryName(config.input);
+            }
+            else
+            {
+                if (Directory.Exists(config.output))
+                    Generator.clear_folder(config.output);
+            }
+            target.run(config);
         }
 
         public static List<string> aggregate_files(string path)

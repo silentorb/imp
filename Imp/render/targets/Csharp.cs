@@ -30,7 +30,7 @@ namespace imperative.render.targets
             types["reference"] = "object";
         }
 
-        override public void run(string output_folder)
+        override public void run(Overlord_Configuration config1)
         {
             foreach (var dungeon in overlord.dungeons)
             {
@@ -39,7 +39,7 @@ namespace imperative.render.targets
                     continue;
 
                 var contents = generate_dungeon_file_contents(dungeon);
-                var path = output_folder + "/" + render_realm_path(dungeon.realm, "/");
+                var path = config1 + "/" + render_realm_path(dungeon.realm, "/");
                 if (!Directory.Exists(path))
                     Directory.CreateDirectory(path);
 

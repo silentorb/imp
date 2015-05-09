@@ -34,7 +34,7 @@ namespace metahub.render.targets
             types["string"] = "std::string";
         }
 
-        override public void run(string output_folder)
+        override public void run(Overlord_Configuration config1)
         {
             foreach (var dungeon in overlord.dungeons)
             {
@@ -44,7 +44,7 @@ namespace metahub.render.targets
                 //Console.WriteLine(dungeon.realm.name + "." + dungeon.name);
 
                 var space = Generator.get_namespace_path(dungeon.realm);
-                var dir = output_folder + "/" + space.join("/");
+                var dir = config1 + "/" + space.join("/");
                 Generator.create_folder(dir);
 
                 line_count = 0;
@@ -53,7 +53,7 @@ namespace metahub.render.targets
             }
 
             {
-                var dir = output_folder + "/metahub";
+                var dir = config1 + "/metahub";
                 Generator.create_folder(dir);
                 //Generator.create_file(dir + "/" + "list.h", Resources.list_h);
             }

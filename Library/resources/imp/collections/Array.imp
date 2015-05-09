@@ -1,7 +1,7 @@
 ﻿
 namespace imp.collections
 {
-    @[external] class Array
+    external class Array
     {
 
     }

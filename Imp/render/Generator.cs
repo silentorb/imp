@@ -29,11 +29,11 @@ namespace metahub.render
             }
         }
 
-        public static void run(Target target, string output_folder)
+        public static void run(Target target, Overlord_Configuration config)
         {
-            create_folder(output_folder);
+            create_folder(config.output);
             //Utility.clear_folder(output_folder);
-            target.run(output_folder);
+            target.run(config);
         }
 
         public static List<string> get_namespace_path(Realm region)

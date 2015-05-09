@@ -98,7 +98,7 @@ namespace imperative.summoner
         public Dungeon process_dungeon1(Legend source, Summoner_Context context)
         {
             var parts = source.children;
-            var name = source.children[1].text;
+            var name = source.children[2].text;
             var replacement_name = context.get_string_pattern(name);
             if (replacement_name != null)
                 name = replacement_name;
@@ -106,15 +106,18 @@ namespace imperative.summoner
             if (!context.realm.dungeons.ContainsKey(name))
             {
                 var dungeon = context.realm.create_dungeon(name);
+                if (parts[1].text == "struct")
+                    dungeon.is_value = true;
+
                 if (parts[0] != null)
                 {
                     var attributes = parts[0].children;
                     dungeon.is_external = attributes.Any(p => p.text == "external");
                     dungeon.is_abstract = attributes.Any(p => p.text == "abstract");
-                    dungeon.is_value = attributes.Any(p => p.text == "value");
+//                    dungeon.is_value = attributes.Any(p => p.text == "value");
                 }
 
-                var parent_dungeons = source.children[2].children;
+                var parent_dungeons = source.children[3].children;
                 if (parent_dungeons.Count > 0)
                     dungeon.parent = (Dungeon)get_dungeon(parent_dungeons[0].children);
 
@@ -127,13 +130,13 @@ namespace imperative.summoner
 
         public Dungeon process_dungeon2(Legend source, Summoner_Context context)
         {
-            var name = source.children[1].text;
+            var name = source.children[2].text;
 
             var replacement_name = context.get_string_pattern(name);
             if (replacement_name != null)
                 name = replacement_name;
 
-            var statements = source.children[3].children;
+            var statements = source.children[4].children;
             var dungeon = context.realm.dungeons[name];
             var dungeon_context = new Summoner_Context(context) { dungeon = dungeon };
             foreach (var statement in statements)
@@ -146,13 +149,13 @@ namespace imperative.summoner
 
         public Dungeon process_dungeon3(Legend source, Summoner_Context context)
         {
-            var name = source.children[1].text;
+            var name = source.children[2].text;
 
             var replacement_name = context.get_string_pattern(name);
             if (replacement_name != null)
                 name = replacement_name;
 
-            var statements = source.children[3].children;
+            var statements = source.children[4].children;
             var dungeon = context.realm.dungeons[name];
             var dungeon_context = new Summoner_Context(context) { dungeon = dungeon };
             foreach (var statement in statements)
