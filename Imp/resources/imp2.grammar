@@ -125,4 +125,10 @@ optional_enum_assignment = equals int_value
 
 optional_group = group_start expression group_end
 
-preprocessor = preprocessor_start @(optional_group, 0, 1) block 
+preprocessor = preprocessor_start @(optional_group, 0, 1) block
+
+dictionary = block_start @(key_value, comma_or_newline, 0, 0) block_end
+
+key_value = string_or_id colon
+
+string_or_id = string_value | id
