@@ -23,6 +23,52 @@ namespace bloom {
     static start() {
       var $injector = angular.injector(['ng'])
       window.$q = $injector.get('$q')
+
+	  this.query({
+		  "trellis": "user",
+		  "filters": [
+			{
+			  "path": "id",
+			  "value": "user",
+			  "type": "parameter"
+			}
+		  ],
+		  "version": "1.0.0.browser"
+		})
     }
+
+	
+	  static query(data) {
+		return Garden.post('vineyard/query', data)
+	  }
+	  
+  static post(path, data) {
+    return Garden.http('POST', path, data)
+  }
+
+  static get(path) {
+    return Garden.http('GET', path)
+  }
+
+  static http(method, path, data = null) {
+    var def = $q.defer()
+    var options = {
+      method: method,
+      contentType: 'application/json',
+      crossDomain: true,
+      xhrFields: {
+        withCredentials: true
+      },
+      data: JSON.stringify(data),
+      dataType: 'json',
+      success: (response)=> {
+        def.resolve(response)
+      }
+    }
+
+    jQuery.ajax(this.vineyard_url + path, options)
+
+    return def.promise
+  }
   }
 }

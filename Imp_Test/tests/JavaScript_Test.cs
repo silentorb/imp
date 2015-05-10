@@ -32,7 +32,7 @@ namespace imp_test.tests
         }
 
         [Test]
-        public void complex_test()
+        public void browser_test()
         {
             var overlord = Imp_Fixture.create_overlord("js", "imp.browser.imp");
             var target = (JavaScript)overlord.target;

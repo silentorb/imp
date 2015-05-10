@@ -19,7 +19,7 @@ namespace imperative.summoner
 {
     public class Summoner2
     {
-        private Overlord overlord;
+        public Overlord overlord;
         private static Lexer lexer;
         private static Parser parser;
 
@@ -402,7 +402,7 @@ namespace imperative.summoner
             throw new Exception("Unsupported statement type: " + source.type + ".");
         }
 
-        private Expression process_expression(Legend legend, Summoner_Context context)
+        public Expression process_expression(Legend legend, Summoner_Context context)
         {
             var group = (Group_Legend)legend;
             var children = group.children;
@@ -480,6 +480,9 @@ namespace imperative.summoner
 
                 case "instantiate_array":
                     return instantiate_array(parts, context);
+
+                case "dictionary":
+                    return summon_dictionary(parts, context);
             }
 
             throw new Exception("Unsupported statement type: " + source.type + ".");
@@ -497,6 +500,7 @@ namespace imperative.summoner
 
         private Expression process_reference(Legend source, Summoner_Context context)
         {
+            return Pathfinder.process_anything(this, source.children[0].children, context);
 
             var path_context = new Path_Context()
             {
@@ -645,7 +649,7 @@ namespace imperative.summoner
                 return new Variable(symbol);
             }
 
-            throw new Exception("Unknown symbol: " + token);
+            throw new Parser_Exception("Unknown symbol: " + token, pattern.position);
         }
 
         private Expression process_function_call(string token, Path_Context path_context, List<Expression> args)
@@ -858,6 +862,17 @@ namespace imperative.summoner
         private Expression instantiate_array(List<Legend> parts, Summoner_Context context)
         {
             return new Create_Array(parts[0].children.Select(p => process_expression(p, context)));
+        }
+
+        private Expression summon_dictionary(List<Legend> parts, Summoner_Context context)
+        {
+            var dictionary = new Dictionary<string, Expression>();
+            foreach (var child in parts[0].children)
+            {
+                dictionary[child.children[0].text] = process_expression(child.children[1], context);
+            }
+
+            return new Create_Dictionary(dictionary);
         }
 
         public static List<Rune> read_runes(string input, string filename)

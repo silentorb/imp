@@ -13,6 +13,7 @@ namespace imperative.expressions
         parent_class,
         operation,
         create_array,
+        create_dictionary,
         null_value,
         self,
         path,

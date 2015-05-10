@@ -28,7 +28,7 @@ id_with_optional_index = id @(index, 0, 1)
 
 reference = @(id_with_optional_index, path_separator, 1, 0) @(arguments, 0, 1)
 
-declare_symbol = id @(type_info, 0, 1)
+declare_symbol = id @(type_info, 0, 1) @(optional_assignment, 0, 1)
 
 type_info = colon signature
 
@@ -58,6 +58,7 @@ expression_part =
 	| closed_expression
 	| null
 	| instantiate_array
+	| dictionary
 
 closed_expression = group_start expression group_end
 
@@ -133,6 +134,6 @@ preprocessor = preprocessor_start @(optional_group, 0, 1) block
 
 dictionary = block_start @(key_value, comma_or_newline, 0, 0) block_end
 
-key_value = string_or_id colon
+key_value = string_or_id colon expression
 
 string_or_id = string_value | id
