@@ -19,7 +19,7 @@ namespace imperative.schema
         public Realm parent;
         public Dictionary<string, Realm> children = new Dictionary<string, Realm>();
         public bool is_virtual = false;
-
+        
         public Realm(string name, Overlord overlord)
         {
             this.name = name;

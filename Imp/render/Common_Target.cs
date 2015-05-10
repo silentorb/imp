@@ -90,7 +90,7 @@ namespace imperative.render
                     break;
 
                 case Expression_Type.create_array:
-                    result = "FOOO";
+                    result = "[" + render_arguments(((Create_Array)expression).items) + "]";
                     break;
 
                 case Expression_Type.anonymous_function:
@@ -274,6 +274,10 @@ namespace imperative.render
 
                 return render_new_list(portal.profession, null);
             }
+            if (portal.default_expression != null)
+            {
+                return render_expression(portal.default_expression);
+            }
             return render_literal(portal.get_default_value(), portal.get_target_profession());
         }
 
@@ -318,7 +322,7 @@ namespace imperative.render
                     return value.ToString();
 
                 case Kind.String:
-                    return "\"" + value + "\"";
+                    return config.primary_quote + value + config.primary_quote;
 
                 case Kind.Bool:
                     return (bool)value ? "true" : "false";
@@ -416,7 +420,7 @@ namespace imperative.render
                 ? render_expression(expression.reference) + "."
                 : "";
 
-            if (!config.implicit_this)
+            if (!config.implicit_this && expression.reference != null && expression.reference.type == Expression_Type.portal)
                 ref_full = render_this() + "." + ref_full;
 
             var args = expression.args.Select(e => render_expression(e)).join(", ");
@@ -458,9 +462,13 @@ namespace imperative.render
                 ? ref_string + "."
                 : "";
 
-            return ref_full + expression.get_name() + "(" +
-                expression.args.Select(a => render_expression(a))
-                .join(", ") + ")";
+            return ref_full + expression.get_name() + "(" + render_arguments(expression.args)
+                 + ")";
+        }
+
+        private string render_arguments(List<Expression> args)
+        {
+            return args.Select(a => render_expression(a)).join(", ");
         }
 
         virtual protected string render_assignment(Assignment statement)

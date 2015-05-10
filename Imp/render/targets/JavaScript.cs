@@ -21,6 +21,7 @@ namespace metahub.render.targets
             config = new Target_Configuration
                 {
                     implicit_this = false,
+                    primary_quote = "'",
                     supports_abstract = false,
                     supports_enums = false,
                     supports_namespaces = false
@@ -72,15 +73,19 @@ namespace metahub.render.targets
             current_dungeon = dungeon;
 
             var i = 0;
-            var total = dungeon.core_portals.Count + statements.Count();
+            var portals = dungeon.core_portals.Values.Where(p => !p.has_enchantment("static")).ToArray();
+            var static_portals = dungeon.core_portals.Values.Except(portals);
+
+            var total = portals.Length + statements.Count();
             String_Delegate2 render_line = text => ++i < total
                     ? text + "," + newline()
                     : text;
 
-            var result = line(render_dungeon_path(dungeon) + " = function() {}");
-            var intro = render_dungeon_path(dungeon) + ".prototype =";
-            result += add(intro) + render_scope(() =>
-                dungeon.core_portals.Values.Select(portal =>
+            var dungeon_prefix = render_dungeon_path(dungeon);
+            var result = line(render_dungeon_path(dungeon) + " = function() {}")
+                + render_static_properties(dungeon_prefix, static_portals)
+                + add(dungeon_prefix + ".prototype =") + render_scope(() =>
+                portals.Select(portal =>
                     render_line(add(portal.name + ": " + get_default_value(portal))))
                 .join("")
                 +
@@ -92,6 +97,11 @@ namespace metahub.render.targets
             current_dungeon = null;
 
             return result;
+        }
+
+        string render_static_properties(string dungeon_prefix, IEnumerable<Portal> portals)
+        {
+            return portals.Select(p => line(dungeon_prefix + "." + p.name + " = " + get_default_value(p))).join("");
         }
 
         override protected string render_properties(Dungeon dungeon)
