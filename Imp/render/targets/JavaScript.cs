@@ -76,7 +76,10 @@ namespace metahub.render.targets
             var portals = dungeon.core_portals.Values.Where(p => !p.has_enchantment("static")).ToArray();
             var static_portals = dungeon.core_portals.Values.Except(portals);
 
-            var total = portals.Length + statements.Count();
+            var minions = dungeon.minions.Values.Where(p => !p.has_enchantment("static")).ToArray();
+            var static_minions = dungeon.minions.Values.Except(minions);
+
+            var total = portals.Length + minions.Length;
             String_Delegate2 render_line = text => ++i < total
                     ? text + "," + newline()
                     : text;
@@ -84,14 +87,16 @@ namespace metahub.render.targets
             var dungeon_prefix = render_dungeon_path(dungeon);
             var result = line(render_dungeon_path(dungeon) + " = function() {}")
                 + render_static_properties(dungeon_prefix, static_portals)
-                + add(dungeon_prefix + ".prototype =") + render_scope(() =>
+                + render_static_minions(dungeon_prefix, static_minions)
+                + (total == 0 ? "" :
+                add(dungeon_prefix + ".prototype =") + render_scope(() =>
                 portals.Select(portal =>
                     render_line(add(portal.name + ": " + get_default_value(portal))))
                 .join("")
-                +
-                statements.Select(s => render_line(render_statement(s)))
+                + minions.Select(minion =>
+                    render_line(add(minion.name + ": " + render_function_definition(minion))))
                 .join("")
-                + newline()
+                + newline())
             );
 
             current_dungeon = null;
@@ -102,6 +107,11 @@ namespace metahub.render.targets
         string render_static_properties(string dungeon_prefix, IEnumerable<Portal> portals)
         {
             return portals.Select(p => line(dungeon_prefix + "." + p.name + " = " + get_default_value(p))).join("");
+        }
+
+        string render_static_minions(string dungeon_prefix, IEnumerable<Minion> minions)
+        {
+            return minions.Select(p => line(dungeon_prefix + "." + p.name + " = " + render_function_definition(p))).join("");
         }
 
         override protected string render_properties(Dungeon dungeon)
@@ -141,10 +151,27 @@ namespace metahub.render.targets
                 minion.expressions.Insert(0, new Declare_Variable(self, new Self(minion.dungeon)));
             }
 
-            return render.get_indentation() + definition.name + ": function(" + definition.parameters.Select(p => p.symbol.name).join(", ") + ")"
+            return "function(" + definition.parameters.Select(p => p.symbol.name).join(", ") + ")"
                 + render_minion_scope(minion);
         }
 
+        protected string render_function_definition(Minion minion)
+        {
+            if (minion.is_abstract)
+                return "";
+
+
+            // Search for any case of "this" inside an anonymous function.
+            var minions = minion.expression.find(Expression_Type.anonymous_function);
+            if (minions.Any(m => m.find(e => e.type == Expression_Type.self || e.type == Expression_Type.property_function_call).Any()))
+            {
+                var self = minion.scope.create_symbol("self", new Profession(Kind.reference, current_dungeon));
+                minion.expressions.Insert(0, new Declare_Variable(self, new Self(minion.dungeon)));
+            }
+
+            return "function(" + minion.parameters.Select(p => p.symbol.name).join(", ") + ")"
+                + render_minion_scope(minion);
+        }
         protected override string render_this()
         {
             return current_minion.GetType() == typeof(Ethereal_Minion)

@@ -500,7 +500,7 @@ namespace imperative.summoner
 
         private Expression process_reference(Legend source, Summoner_Context context)
         {
-            return Pathfinder.process_anything(this, source.children[0].children, context);
+            return Tunneler.process_anything(this, source.children, context);
 
             var path_context = new Path_Context()
             {

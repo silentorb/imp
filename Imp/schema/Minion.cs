@@ -35,6 +35,7 @@ namespace imperative.schema
 //        public bool is_abstract = false;
 //        public bool is_static = false;
         public List<Enchantment> enchantments = new List<Enchantment>();
+        public Function_Definition expression;
 
         public bool is_abstract
         {

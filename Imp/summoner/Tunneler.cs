@@ -9,7 +9,7 @@ using runic.parser;
 
 namespace imperative.summoner
 {
-    static class Pathfinder
+    static class Tunneler
     {
         public static Expression process_anything(Summoner2 summoner, List<Legend> patterns,
             Summoner_Context context, int step = 0)
@@ -22,9 +22,9 @@ namespace imperative.summoner
             if (patterns.Count == 1 && pattern.text == "null")
                 return new Null_Value();
 
-            Expression array_access = pattern.children[1] != null
-                     ? summoner.process_expression(pattern.children[1], context)
-                     : null;
+//            Expression array_access = pattern.children[1] != null
+//                     ? summoner.process_expression(pattern.children[1], context)
+//                     : null;
 
             var token = pattern.children[0].text;
 
@@ -47,7 +47,7 @@ namespace imperative.summoner
                 //                if (path_context.index == patterns.Count - 1 && symbol.profession.type == Kind.function)
                 //                    return new Dynamic_Function_Call(symbol.name, null, args);
 
-                var next = new Variable(symbol) { index = array_access };
+                var next = new Variable(symbol);
                 var profession = next.get_profession();
                 var dungeon = profession != null
                               ? profession.dungeon
@@ -149,7 +149,7 @@ namespace imperative.summoner
                             .ToList();
 
                     var minion = dungeon.minions[token];
-                    return append(new Method_Call(minion), process_dungeon(minion.return_type.dungeon,
+                    return append(new Method_Call(minion, null, args), process_dungeon(minion.return_type.dungeon,
                         summoner, patterns, context, step + 1));
                 }
 

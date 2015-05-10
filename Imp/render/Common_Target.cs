@@ -122,6 +122,9 @@ namespace imperative.render
                     var jewel = (Jewel)expression;
                     return render_enum_value(jewel.treasury, jewel.value);
 
+                case Expression_Type.create_dictionary:
+                    return render_dictionary((Create_Dictionary)expression);
+
                 default:
                     throw new Exception("Unsupported Expression type: " + expression.type + ".");
             }
@@ -391,7 +394,7 @@ namespace imperative.render
         virtual protected string render_iterator_block(Iterator statement)
         {
             var parameter = statement.parameter;
-//            var it = parameter.scope.create_symbol(parameter.name, parameter.profession);
+            //            var it = parameter.scope.create_symbol(parameter.name, parameter.profession);
             var expression = render_iterator(parameter, statement.expression);
 
             var result = add("foreach (" + expression + ")") + render_scope(statement.body);
@@ -672,6 +675,25 @@ namespace imperative.render
         virtual protected string get_connector(Profession profession)
         {
             return config.path_separator;
+        }
+
+        private string render_dictionary(Create_Dictionary dictionary)
+        {
+            if (dictionary.items.Count == 0)
+                return "{}";
+
+            var items = dictionary.items;
+            var most = items.Take(items.Count - 1);
+            var last = items.Last();
+
+            indent();
+            var result = "{" + newline()
+                + most.Select(pair => line(pair.Key + ": " + render_expression(pair.Value) + ",")).@join("")
+                + line(last.Key + ": " + render_expression(last.Value))
+                + add("}");
+
+            unindent();
+            return result;
         }
     }
 }

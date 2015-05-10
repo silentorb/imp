@@ -24,9 +24,9 @@ reference_token = id @(arguments, 0, 1)
 
 index = array_start expression array_end
 
-id_with_optional_index = id @(index, 0, 1)
+id_with_optional_index = id @(arguments, 0, 1)
 
-reference = @(id_with_optional_index, path_separator, 1, 0) @(arguments, 0, 1)
+reference = @(id_with_optional_index, path_separator, 1, 0) 
 
 declare_symbol = id @(type_info, 0, 1) @(optional_assignment, 0, 1)
 

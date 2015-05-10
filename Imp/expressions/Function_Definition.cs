@@ -22,6 +22,7 @@ namespace imperative.expressions
             this.minion = minion;
             name = minion.name;
             dungeon = minion.dungeon;
+            minion.expression = this;
         }
 
         public override IEnumerable<Expression> children

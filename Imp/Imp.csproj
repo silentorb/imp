@@ -51,7 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="expressions\Create_Dictionary.cs" />
-    <Compile Include="summoner\Pathfinder.cs" />
+    <Compile Include="summoner\Tunneler.cs" />
     <Compile Include="wizard\Wizard.cs" />
     <Compile Include="expressions\Empty_Expression.cs" />
     <Compile Include="expressions\Jewel.cs" />
