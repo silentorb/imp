@@ -9,8 +9,7 @@ namespace imperative.summoner
 {
     public class Summoner_Context
     {
-        public List<Realm> imported_realms = new List<Realm>(); 
-        public Realm realm;
+        public List<Dungeon> imported_realms = new List<Dungeon>();
         public Dungeon dungeon;
         public Scope scope;
         public Summoner_Context parent;
@@ -23,21 +22,14 @@ namespace imperative.summoner
         {
         }
 
-        public Summoner_Context(Realm realm, Dungeon dungeon = null)
+        public Summoner_Context(Dungeon dungeon = null)
         {
-            this.realm = realm;
             this.dungeon = dungeon;
         }
 
-        public Summoner_Context(Dungeon dungeon)
-        {
-            realm = dungeon.realm;
-            this.dungeon = dungeon;
-        }
 
         public Summoner_Context(Minion minion)
         {
-            realm = minion.dungeon.realm;
             dungeon = minion.dungeon;
             scope = new Scope(minion.scope);
         }
@@ -45,7 +37,6 @@ namespace imperative.summoner
         public Summoner_Context(Summoner_Context parent)
         {
             this.parent = parent;
-            realm = parent.realm;
             dungeon = parent.dungeon;
             scope = parent.scope;
             this.imported_realms = parent.imported_realms;
@@ -114,9 +105,16 @@ namespace imperative.summoner
 
         public IDungeon get_dungeon(string[] path)
         {
-            var result = realm.get_dungeon(path, false);
+            var result = dungeon.get_dungeon(path, false);
             if (result != null)
                 return result;
+
+            if (dungeon.realm != null)
+            {
+                result = dungeon.realm.get_dungeon(path, false);
+                if (result != null)
+                    return result;      
+            }
 
             foreach (var imported_realm in imported_realms)
             {
@@ -125,7 +123,7 @@ namespace imperative.summoner
                     return result;
             }
 
-            return realm.overlord.root.get_dungeon(path);
+            return dungeon.overlord.root.get_dungeon(path);
         }
     }
 }

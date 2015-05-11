@@ -17,7 +17,7 @@ namespace imp_test.tests
         {
             var overlord = Imp_Fixture.create_overlord("cpp", "imp.pizza.imp");
             var target = (Cpp)overlord.target;
-            var dungeon = (Dungeon)overlord.root.children["test"].get_dungeon("Pizza");
+            var dungeon = (Dungeon)overlord.root.dungeons["test"].get_dungeon("Pizza");
             var output_h = target.create_header_file(dungeon);
             var output_cpp = target.create_class_file(dungeon);
             var goal_h = Utility.load_resource("cpp.pizza.h");

@@ -1,6 +1,6 @@
 ﻿namespace browser {
 	external class Window {
-		$q:string
+		$q:Q
 	}
 	
 	external class Injector {
@@ -10,10 +10,29 @@
 	external class Angular {
 		injector(name:string):Injector
 	}
+
+	external class Q {
+		defer()
+		promise
+		resolve()
+	}
+
+	external class Json {
+		stringify(input)
+		parse(input:string)
+	}
+
+	external class jQuery_Class {
+		ajax()
+	}
 }
 
 external var window:browser.Window
 external var angular:browser.Angular
+external var $q:browser.Q
+external var JSON:browser.Json
+external var jQuery:browser.jQuery_Class
+
 
 namespace bloom {
 
@@ -65,7 +84,7 @@ namespace bloom {
       }
     }
 
-    jQuery.ajax(this.vineyard_url + path, options)
+    jQuery.ajax	(this.vineyard_url + path, options)
 
     return def.promise
   }

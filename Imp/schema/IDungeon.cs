@@ -9,7 +9,7 @@ namespace imperative.schema
     {
         string name { get; set; }
         string source_file { get; set; }
-        Realm realm { get; set; }
+        Dungeon realm { get; set; }
         bool is_value { get; }
         object default_value { get; set; }
     }

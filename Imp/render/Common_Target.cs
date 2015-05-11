@@ -27,11 +27,22 @@ namespace imperative.render
 
         }
 
-        protected Realm current_realm;
+        protected Dungeon current_realm;
         protected Dungeon current_dungeon;
-        protected Minion_Base current_minion;
+
         protected List<Dictionary<string, Profession>> scopes = new List<Dictionary<string, Profession>>();
         protected Dictionary<string, Profession> current_scope;
+        protected Stack<Minion_Base> minion_stack = new Stack<Minion_Base>();
+        protected Minion_Base current_minion
+        {
+            get
+            {
+                if (minion_stack.Count == 0)
+                    return null;
+
+                return minion_stack.Peek();
+            }
+        }
 
         virtual protected void push_scope()
         {
@@ -365,7 +376,7 @@ namespace imperative.render
             return dungeon.name;
         }
 
-        virtual protected string render_realm_name(Realm realm)
+        virtual protected string render_realm_name(Dungeon realm)
         {
             var path = Generator.get_namespace_path(realm);
             return path.join(".");
@@ -513,7 +524,8 @@ namespace imperative.render
 
         virtual protected string render_minion_scope(Minion_Base minion)
         {
-            current_minion = minion;
+            minion_stack.Push(minion);
+
             var result = render_scope(() =>
                {
                    foreach (var parameter in minion.parameters)
@@ -524,11 +536,11 @@ namespace imperative.render
                    return render_statements(minion.expressions);
                });
 
-            current_minion = null;
+            minion_stack.Pop();
             return result;
         }
 
-        virtual protected string render_realm(Realm realm, String_Delegate action)
+        virtual protected string render_realm(Dungeon realm, String_Delegate action)
         {
             current_realm = realm;
             var result = add(config.namespace_keyword + " " + render_realm_path(realm, config.namespace_separator) + render_scope(action));
@@ -537,7 +549,7 @@ namespace imperative.render
             return result;
         }
 
-        protected string render_realm_path(Realm realm, string separator)
+        protected string render_realm_path(Dungeon realm, string separator)
         {
             return realm.parent != null && realm.parent.name != ""
                 ? render_realm_path(realm.parent, separator) + separator + realm.name

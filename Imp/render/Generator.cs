@@ -36,7 +36,7 @@ namespace metahub.render
             target.run(config);
         }
 
-        public static List<string> get_namespace_path(Realm region)
+        public static List<string> get_namespace_path(Dungeon region)
         {
             var tokens = new List<string>();
             while (region != null && region.name != "root")

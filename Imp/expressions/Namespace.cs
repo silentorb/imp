@@ -5,9 +5,9 @@ namespace imperative.expressions
 {
     public class Namespace : Block
     {
-        public Realm realm;
+        public Dungeon realm;
 
-        public Namespace(Realm realm, List<Expression> block)
+        public Namespace(Dungeon realm, List<Expression> block)
             : base(Expression_Type.space)
         {
             this.realm = realm;

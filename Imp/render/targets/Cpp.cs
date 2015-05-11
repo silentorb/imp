@@ -206,7 +206,7 @@ namespace metahub.render.targets
 
         private class Temp
         {
-            public Realm realm;
+            public Dungeon realm;
             public List<IDungeon> dependencies;
         }
 
@@ -324,7 +324,7 @@ namespace metahub.render.targets
             return result;
         }
 
-        override protected string render_realm(Realm realm, String_Delegate action)
+        override protected string render_realm(Dungeon realm, String_Delegate action)
         {
             var space = Generator.get_namespace_path(realm);
             var result = line("namespace " + space.join("::") + " {");

@@ -98,8 +98,9 @@ namespace imperative.summoner
                                 ? parse_type2(parts[1], context)
                                 : new Profession(Kind.reference);
 
-                            var symbol = new Symbol(parts[0].text, profession, null);
-                            overlord.global_variables[symbol.name] = symbol;
+                            var portal = new Portal(parts[0].text, profession, overlord.root);
+                            portal.enchantments.Add(new Enchantment("static"));
+                            overlord.root.add_portal(portal);
                         }
                         break;
 
@@ -117,9 +118,9 @@ namespace imperative.summoner
             if (replacement_name != null)
                 name = replacement_name;
 
-            if (!context.realm.dungeons.ContainsKey(name))
+            if (!context.dungeon.dungeons.ContainsKey(name))
             {
-                var dungeon = context.realm.create_dungeon(name);
+                var dungeon = context.dungeon.create_dungeon(name);
                 if (parts[1].text == "struct")
                     dungeon.is_value = true;
 
@@ -151,7 +152,7 @@ namespace imperative.summoner
                 name = replacement_name;
 
             var statements = source.children[4].children;
-            var dungeon = context.realm.dungeons[name];
+            var dungeon = context.dungeon.dungeons[name];
             var dungeon_context = new Summoner_Context(context) { dungeon = dungeon };
             foreach (var statement in statements)
             {
@@ -170,7 +171,7 @@ namespace imperative.summoner
                 name = replacement_name;
 
             var statements = source.children[4].children;
-            var dungeon = context.realm.dungeons[name];
+            var dungeon = context.dungeon.dungeons[name];
             var dungeon_context = new Summoner_Context(context) { dungeon = dungeon };
             foreach (var statement in statements)
             {
@@ -187,7 +188,7 @@ namespace imperative.summoner
             {
                 if (statement.type == "class_definition")
                     dungeon_step(statement, context);
-                else if (!context.realm.treasuries.ContainsKey(statement.children[0].text))
+                else if (!context.dungeon.treasuries.ContainsKey(statement.children[0].text))
                     summon_enum(statement.children, context);
             }
         }
@@ -206,7 +207,7 @@ namespace imperative.summoner
             //            }
             //            var realm = overlord.root.children[name];
             var context = new Summoner_Context(parent_context);
-            context.realm = overlord.root.get_or_create_realm(source.children[0].children.Select(p => p.text));
+            context.dungeon = overlord.root.get_or_create_realm(source.children[0].children.Select(p => p.text));
 
             return context;
         }
@@ -278,7 +279,10 @@ namespace imperative.summoner
             var portal_name = parts[1].text;
             if (!context.dungeon.has_portal(portal_name))
             {
-                var type_info = parse_type2(parts[2], context);
+                var type_info = parts[2] != null
+                    ? parse_type2(parts[2], context)
+                    : new Profession(Kind.reference);
+
                 var portal = new Portal(portal_name, type_info);
                 if (parts[0] != null)
                 {
@@ -491,7 +495,7 @@ namespace imperative.summoner
         class Path_Context
         {
             public IDungeon dungeon;
-            public Realm realm;
+            public Dungeon realm;
             public int index = -1;
             public Expression result = null;
             public Expression last = null;
@@ -505,7 +509,7 @@ namespace imperative.summoner
             var path_context = new Path_Context()
             {
                 dungeon = (IDungeon)context.dungeon,
-                realm = context.realm
+                realm = context.dungeon
             };
             var patterns = source.children[0].children;
             if (patterns.Count == 1)
@@ -635,19 +639,19 @@ namespace imperative.summoner
                 return new Profession_Expression(new Profession(Kind.reference, dungeon));
             }
 
-            var realm = path_context.realm.overlord.root.get_child_realm(token, false);
-            if (realm != null)
-            {
-                path_context.realm = realm;
-                return new Empty_Expression();
-            }
+//            var realm = path_context.realm.overlord.root.get_child_realm(token, false);
+//            if (realm != null)
+//            {
+//                path_context.realm = realm;
+//                return new Empty_Expression();
+//            }
 
-            if (overlord.global_variables.ContainsKey(token))
-            {
-                symbol = overlord.global_variables[token];
-                path_context.dungeon = symbol.profession.dungeon;
-                return new Variable(symbol);
-            }
+//            if (overlord.global_variables.ContainsKey(token))
+//            {
+//                symbol = overlord.global_variables[token];
+//                path_context.dungeon = symbol.profession.dungeon;
+//                return new Variable(symbol);
+//            }
 
             throw new Parser_Exception("Unknown symbol: " + token, pattern.position);
         }
@@ -826,7 +830,7 @@ namespace imperative.summoner
 
                 items.Add(item.children[0].text);
             }
-            var treasury = context.realm.create_treasury(parts[0].text, items);
+            var treasury = context.dungeon.create_treasury(parts[0].text, items);
             return new Treasury_Definition(treasury);
         }
 

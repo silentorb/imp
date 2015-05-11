@@ -29,17 +29,17 @@ namespace imperative
     public class Overlord
     {
         public List<Dungeon> dungeons = new List<Dungeon>();
-        public Realm root;
+        public Dungeon root;
         public Target target;
         public Dungeon array;
-        public Dictionary<string, Symbol> global_variables = new Dictionary<string, Symbol>();
+//        public Dictionary<string, Symbol> global_variables = new Dictionary<string, Symbol>();
 
         public Overlord()
         {
             if (Platform_Function_Info.functions == null)
                 Platform_Function_Info.initialize();
 
-            root = new Realm("", this);
+            root = new Dungeon("", this, null);
         }
 
         public Overlord(string target_name)
@@ -181,17 +181,17 @@ namespace imperative
             return result;
         }
 
-        public Realm load_standard_library()
+        public Dungeon load_standard_library()
         {
-            if (!root.children.ContainsKey("imp"))
+            if (!root.dungeons.ContainsKey("imp"))
             {
                 var code = Library.load_resource("imp.collections.Array.imp");
                 summon2(code, "Standard Library");
-                root.children["imp"].children["collections"].is_virtual = true;
-                array = root.children["imp"].children["collections"].dungeons["Array"];
+                root.dungeons["imp"].dungeons["collections"].is_virtual = true;
+                array = root.dungeons["imp"].dungeons["collections"].dungeons["Array"];
             }
 
-            return root.children["imp"];
+            return root.dungeons["imp"];
         }
     }
 }

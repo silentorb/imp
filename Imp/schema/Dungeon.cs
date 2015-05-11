@@ -18,7 +18,9 @@ namespace imperative.schema
     public class Dungeon : IDungeon
     {
         public string name { get; set; }
-        public Realm realm { get; set; }
+        public Dungeon realm { get; set; }
+        public Dictionary<string, Dungeon> dungeons = new Dictionary<string, Dungeon>();
+        public Dictionary<string, Treasury> treasuries = new Dictionary<string, Treasury>();
         public Dungeon parent;
         public List<Expression> code;
         public Dictionary<string, string[]> inserts;
@@ -29,9 +31,10 @@ namespace imperative.schema
         public Dictionary<string, Portal> core_portals = new Dictionary<string, Portal>();
         public Dictionary<string, Used_Function> used_functions = new Dictionary<string, Used_Function>();
         public Dictionary<string, Dependency> dependencies = new Dictionary<string, Dependency>();
-        public List<Realm> needed_realms = new List<Realm>();
+        public List<Dungeon> needed_realms = new List<Dungeon>();
         public bool is_external = false;
         public bool is_abstract = false;
+        public bool is_virtual = false;
         public string source_file { get; set; }
         public List<string> stubs = new List<string>();
         public Dictionary<string, object> hooks = new Dictionary<string, object>();
@@ -39,6 +42,8 @@ namespace imperative.schema
         public string class_export = "";
         public event Dungeon_Minion_Event on_add_minion;
         private bool initial_generation_is_done = false;
+        public string external_name;
+        public Dictionary<string, Dungeon_Additional> trellis_additional = new Dictionary<string, Dungeon_Additional>();
 
         public object default_value { get; set; }
 
@@ -54,7 +59,7 @@ namespace imperative.schema
         private static int next_id = 1;
 #endif
 
-        public Dungeon(string name, Overlord overlord, Realm realm, Dungeon parent = null, bool is_value = false)
+        public Dungeon(string name, Overlord overlord, Dungeon realm, Dungeon parent = null, bool is_value = false)
         {
 #if DEBUG
             id = next_id++;
@@ -62,27 +67,31 @@ namespace imperative.schema
 
             this.name = name;
             this.overlord = overlord;
-            this.realm = realm;
-            this.parent = parent;
             _is_value = is_value;
-            realm.dungeons[name] = this;
             overlord.dungeons.Add(this);
             code = new List<Expression>();
-            if (!is_external && source_file == null)
-                source_file = realm.name + "/" + name;
-
+          
             if (parent != null)
             {
+                this.parent = parent;
                 foreach (var portal in parent.all_portals.Values)
                 {
                     all_portals[portal.name] = new Portal(portal, this);
                 }
             }
 
-            is_external = realm.is_external;
-            class_export = realm.class_export;
-            if (!is_external && source_file == null)
-                source_file = realm.name + "/" + name;
+            if (realm != null)
+            {
+                this.realm = realm;
+                realm.dungeons[name] = this;
+                if (!is_external && source_file == null)
+                    source_file = realm.name + "/" + name;
+
+                is_external = realm.is_external;
+                class_export = realm.class_export;
+                if (!is_external && source_file == null)
+                    source_file = realm.name + "/" + name;
+            }
         }
 
         private void load_additional()
@@ -509,5 +518,111 @@ namespace imperative.schema
 
             return result;
         }
+
+        public IDungeon get_dungeon_from_path(string path)
+        {
+            return get_dungeon(path.Split('.'));
+        }
+
+        public IDungeon get_dungeon(string child_name)
+        {
+            if (dungeons.ContainsKey(child_name))
+                return dungeons[child_name];
+
+            if (treasuries.ContainsKey(child_name))
+                return treasuries[child_name];
+
+            return null;
+        }
+
+        public IDungeon get_dungeon(IEnumerable<string> original_path, bool throw_error = true)
+        {
+            var realm = this;
+            var path = original_path.ToArray();
+            var tokens = path.Take(path.Length - 1).ToArray();
+            foreach (var token in tokens)
+            {
+                realm = realm.get_child_realm(token, throw_error);
+            }
+
+            if (realm == null && !throw_error)
+                return null;
+
+            return realm.get_dungeon(path.Last());
+        }
+
+        public Dungeon get_child_realm(string token, bool throw_error = true)
+        {
+            if (!dungeons.ContainsKey(token))
+            {
+                if (name == "")
+                {
+                    if (token == "imp")
+                        return overlord.load_standard_library();
+
+                    if (!throw_error)
+                        return null;
+
+                    throw new Exception("Invalid namespace: " + token + ".");
+                }
+                else
+                {
+                    if (!throw_error)
+                        return null;
+
+                    throw new Exception("Namespace " + name + " does not have a child named " + token + ".");
+                }
+            }
+
+            return dungeons[token];
+        }
+
+        public Dungeon create_dungeon(string dungeon_name)
+        {
+            var dungeon = new Dungeon(dungeon_name, overlord, this);
+            dungeons[dungeon_name] = dungeon;
+            return dungeon;
+        }
+
+        public Dungeon get_or_create_realm(IEnumerable<string> original_path)
+        {
+            var realm = this;
+            var path = original_path.ToArray();
+            foreach (var token in path)
+            {
+                if (!realm.dungeons.ContainsKey(token))
+                {
+                    create_dungeon(token);
+                }
+
+                realm = realm.dungeons[token];
+            }
+
+            return realm;
+        }
+
+        public Dungeon get_realm(IEnumerable<string> original_path)
+        {
+            var realm = this;
+            var path = original_path.ToArray();
+            foreach (var token in path)
+            {
+                realm = realm.get_child_realm(token);
+            }
+
+            return realm;
+        }
+
+        public Treasury create_treasury(string treasury_name, List<string> jewels)
+        {
+            if (get_dungeon(treasury_name) != null)
+                throw new Exception("Realm " + name + " already contains a type named " + treasury_name + ".");
+
+            var treasury = new Treasury(treasury_name, jewels, this);
+            treasuries[treasury_name] = treasury;
+
+            return treasury;
+        }
+
     }
 }

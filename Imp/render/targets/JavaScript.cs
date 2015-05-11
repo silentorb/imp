@@ -322,7 +322,7 @@ namespace metahub.render.targets
         //            return "new " + full_dungeon_name(expression.dungeon) + "(" + args + ")";
         //        }
 
-        override protected string render_realm(Realm realm, String_Delegate action)
+        override protected string render_realm(Dungeon realm, String_Delegate action)
         {
             if (realm.name == "")
                 return action();

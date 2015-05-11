@@ -5,7 +5,7 @@ using System.Text;
 
 
 namespace imperative.schema
-{
+{/*
     public class Realm
     {
         public string name;
@@ -156,5 +156,5 @@ namespace imperative.schema
 
             return realm;
         }
-    }
+    }*/
 }

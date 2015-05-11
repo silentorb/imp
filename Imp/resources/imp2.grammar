@@ -84,7 +84,7 @@ class_statements = function_definition | property_declaration
 
 class_or_struct = class | struct
 
-property_declaration = @(member_attribute, 0, 0) id type_info @(optional_assignment, 0, 1)
+property_declaration = @(member_attribute, 0, 0) id @(type_info, 0, 1) @(optional_assignment, 0, 1)
 
 optional_parent_classes = colon @(id, comma_or_newline, 1, 0)
 
