@@ -161,7 +161,8 @@ namespace imperative.render
         virtual protected string render_portal(Portal_Expression portal_expression)
         {
             var result = portal_expression.portal.name;
-            if (!config.implicit_this && (portal_expression.parent == null
+            if (!config.implicit_this && portal_expression.portal.dungeon.realm != null
+                && (portal_expression.parent == null
                 || portal_expression.parent.type == Expression_Type.statement
                 || portal_expression.parent.next == null))
                 result = render_this() + "." + result;
@@ -434,7 +435,9 @@ namespace imperative.render
                 ? render_expression(expression.reference) + "."
                 : "";
 
-            if (!config.implicit_this && expression.reference != null && expression.reference.type == Expression_Type.portal)
+            if (!config.implicit_this && expression.reference != null 
+                && expression.reference.type == Expression_Type.portal
+                 && ((Portal_Expression)expression.reference).portal.dungeon.realm != null)
                 ref_full = render_this() + "." + ref_full;
 
             var args = expression.args.Select(e => render_expression(e)).join(", ");

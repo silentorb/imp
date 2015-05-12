@@ -51,6 +51,11 @@ namespace imperative.schema
             return symbol;
         }
 
+        public void add_symbol(Symbol symbol)
+        {
+            symbols[symbol.name] = symbol;
+        }
+
         public void add_map(string name, Expression_Generator generator)
         {
             map[name] = generator;

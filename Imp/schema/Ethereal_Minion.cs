@@ -12,6 +12,10 @@ namespace imperative.schema
         {
             this.parameters = parameters.ToList();
             scope = new Scope(parent_scope);
+            foreach (var parameter in this.parameters)
+            {
+                scope.add_symbol(parameter.symbol);
+            }
         }
     }
 }

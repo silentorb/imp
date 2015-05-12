@@ -76,7 +76,11 @@ namespace imperative.summoner
                 summoner, patterns, context, 0);
 
             if (result != null)
+            {
+//                var profession = new Profession(Kind.reference,
+//                    context.dungeon.overlord.root.dungeons[token]);
                 return result;
+            }
 
 //            var func = context.dungeon == null || context.dungeon.GetType() == typeof(Dungeon)
 //                ? process_function_call(token, path_context, args)
@@ -185,7 +189,7 @@ namespace imperative.summoner
                 return first;
 
             first.next = second;
-            return second;
+            return first;
         }
 
         private static Expression process_treasury(Treasury treasury, Summoner2 summoner,

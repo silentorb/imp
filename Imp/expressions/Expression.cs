@@ -41,6 +41,13 @@ namespace imperative.expressions
 
         public Expression parent;
 
+        public Expression get_root()
+        {
+            return parent != null
+                ? parent.get_root()
+                : this;
+        }
+
         //private Expression _parent = null;
         //public Expression parent
         //{
@@ -89,7 +96,10 @@ namespace imperative.expressions
         public Expression get_end()
         {
             var result = this;
-            while (result.next != null && (result.next.type == Expression_Type.property || result.next.type == Expression_Type.portal))
+            while (result.next != null && (
+                result.next.type == Expression_Type.property 
+                || result.next.type == Expression_Type.portal
+                || result.next.type == Expression_Type.function_call))
             {
                 result = result.next;
             }

@@ -439,7 +439,7 @@ namespace imperative.summoner
                 if (expression_pattern == null)
                     throw new Exception("Cannot discern variable type.");
 
-                profession = expression_pattern.get_profession();
+                profession = expression_pattern.get_end().get_profession();
             }
 
             var symbol = context.scope.create_symbol(parts[0].text, profession);
