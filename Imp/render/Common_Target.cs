@@ -27,6 +27,14 @@ namespace imperative.render
 
         }
 
+        protected static Expression_Type[] token_types =
+        {
+            Expression_Type.portal, 
+            Expression_Type.function_call,
+            Expression_Type.property_function_call,
+            Expression_Type.variable
+        };
+
         protected Dungeon current_realm;
         protected Dungeon current_dungeon;
 
@@ -428,14 +436,13 @@ namespace imperative.render
             ).join(" " + operation.op + " ");
         }
 
-
         virtual protected string render_property_function_call(Property_Function_Call expression, Expression parent)
         {
             var ref_full = expression.reference != null
                 ? render_expression(expression.reference) + "."
                 : "";
 
-            if (!config.implicit_this && expression.reference != null 
+            if (!config.implicit_this && expression.reference != null
                 && expression.reference.type == Expression_Type.portal
                  && ((Portal_Expression)expression.reference).portal.dungeon.realm != null)
                 ref_full = render_this() + "." + ref_full;
@@ -471,9 +478,18 @@ namespace imperative.render
 
         virtual protected string render_function_call(Abstract_Function_Call expression, Expression parent)
         {
+            var method_call = expression as Method_Call;
+            var this_string = method_call != null
+                && !config.implicit_this
+                && !Common_Target.token_types.Contains(method_call.parent.type)
+                && method_call.minion != null
+                && method_call.minion.dungeon.realm != null
+                ? render_this()
+                : "";
+
             var ref_string = expression.reference != null
-               ? render_expression(expression.reference)
-               : "";
+               ? this_string + render_expression(expression.reference)
+               : this_string;
 
             var ref_full = ref_string.Length > 0
                 ? ref_string + "."

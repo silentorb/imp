@@ -97,7 +97,7 @@ namespace imperative.expressions
         {
             var result = this;
             while (result.next != null && (
-                result.next.type == Expression_Type.property 
+                result.next.type == Expression_Type.property
                 || result.next.type == Expression_Type.portal
                 || result.next.type == Expression_Type.function_call))
             {
@@ -150,7 +150,7 @@ namespace imperative.expressions
 
             foreach (var expression in children)
             {
-                if (expression.type== expression_type)
+                if (expression.type == expression_type)
                     result.Add(expression);
 
                 result.AddRange(expression.find(expression_type));
