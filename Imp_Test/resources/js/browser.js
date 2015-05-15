@@ -6,15 +6,15 @@ bloom.Garden.start = function() {
 	var $injector = angular.injector(['ng'])
 	window.$q = $injector.get('$q')
 	this.query({
-		'trellis': 'user',
-		'filters': [
+		trellis: 'user',
+		filters: [
                 {
-                	'path': 'id',
-                	'value': 'user',
-                	'type': 'parameter'
+                	path: 'id',
+                	value: 'user',
+                	type: 'parameter'
                 }
             ],
-		'version': '1.0.0.browser'
+		version: '1.0.0.browser'
 	}).then(function(response) {
 		var user = response.objects[0]
 		if (user.username == 'anonymous') {

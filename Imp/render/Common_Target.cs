@@ -226,7 +226,7 @@ namespace imperative.render
                     return line(((Insert)statement).code);
 
                 default:
-                    return line(render_expression(statement) + terminate_statement());
+                    return add("") + render_expression(statement) + terminate_statement() + newline();
             }
         }
 
