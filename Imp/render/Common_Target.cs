@@ -108,9 +108,9 @@ namespace imperative.render
                     result = expression.get_profession().dungeon.name;
                     break;
 
-                case Expression_Type.create_array:
-                    result = "[" + render_arguments(((Create_Array)expression).items) + "]";
-                    break;
+                //                case Expression_Type.create_array:
+                //                    result = "[" + render_arguments(((Create_Array)expression).items) + "]";
+                //                    break;
 
                 case Expression_Type.anonymous_function:
                     return render_anonymous_function((Anonymous_Function)expression);
@@ -295,7 +295,7 @@ namespace imperative.render
                 if (portal.profession.is_array(overlord))
                     return render_null();
 
-                return render_new_list(portal.profession, null);
+                return render_list(portal.profession, null);
             }
             if (portal.default_expression != null)
             {
@@ -304,12 +304,21 @@ namespace imperative.render
             return render_literal(portal.get_default_value(), portal.get_target_profession());
         }
 
-        protected virtual string render_new_list(Profession profession, List<Expression> args)
+        protected virtual string render_list(Profession profession, List<Expression> args)
         {
             if (args == null)
                 return "[]";
 
+            indent();
             var arg_string = args.Select(a => render_expression(a)).join(", ");
+            if (arg_string.Contains("\n"))
+            {
+                arg_string = newline() + add() + arg_string + newline() + unindent() + add();
+            }
+            else
+            {
+                unindent();
+            }
             return "[" + arg_string + "]";
         }
 
@@ -520,7 +529,7 @@ namespace imperative.render
         private string render_instantiation(Instantiate expression)
         {
             if (expression.profession.is_list)
-                return render_new_list(expression.profession, expression.args);
+                return render_list(expression.profession, expression.args);
 
             var args = expression.args.Select(a => render_expression(a)).join(", ");
             return "new " + render_profession(expression.profession) + "(" + args + ")";
@@ -717,14 +726,17 @@ namespace imperative.render
             var most = items.Take(items.Count - 1);
             var last = items.Last();
 
+            var first = add("{") + newline();
+
             indent();
-            var result = "{" + newline()
-                + most.Select(pair => line(pair.Key + ": " + render_expression(pair.Value) + ",")).@join("")
-                + line(last.Key + ": " + render_expression(last.Value))
-                + add("}");
+
+            var second = most.Select(pair => add("") + pair.Key + ": " + render_expression(pair.Value) + "," + newline())
+                .@join("")
+                         + add("") + last.Key + ": " + render_expression(last.Value) + newline();
 
             unindent();
-            return result;
+
+            return first + second + add("}");
         }
     }
 }

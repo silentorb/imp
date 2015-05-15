@@ -76,66 +76,10 @@ namespace imperative.summoner
                 summoner, patterns, context, 0);
 
             if (result != null)
-            {
-//                var profession = new Profession(Kind.reference,
-//                    context.dungeon.overlord.root.dungeons[token]);
                 return result;
-            }
-
-//            var func = context.dungeon == null || context.dungeon.GetType() == typeof(Dungeon)
-//                ? process_function_call(token, path_context, args)
-//                : null;
-//
-//            if (func != null)
-//            {
-//                if (func.type == Expression_Type.property_function_call && path_context.last.parent != null)
-//                {
-//                    //last.parent.child = null;
-//                    var last2 = path_context.last.parent;
-//                    path_context.last = path_context.last.parent;
-//                    last2.next = null;
-//                }
-//                else
-//                {
-//                    path_context.is_finished = true;
-//                }
-//
-//                return func;
-//            }
-
-//            if (summoner.overlord.global_variables.ContainsKey(token))
-//            {
-//                symbol = summoner.overlord.global_variables[token];
-//                return append(new Variable(symbol), process_dungeon(symbol.profession.dungeon,
-//                summoner, patterns, context, step + 1));
-//            }
 
             throw new Parser_Exception("Unknown symbol: " + token, pattern.position);
         }
-
-//        static Expression process_realm(Dungeon realm, Summoner2 summoner, List<Legend> patterns,
-//            Summoner_Context context, int step)
-//        {
-//            if (step >= patterns.Count)
-//                return null;
-//
-//            var pattern = patterns[step];
-//            var token = pattern.children[0].text;
-//            var dungeon = realm.get_dungeon(token);
-//
-//            if (dungeon != null)
-//            {
-//                return process_dungeon(dungeon, summoner, patterns, context, step + 1);
-//            }
-//
-//            var child_realm = realm.get_child_realm(token, false);
-//            if (child_realm != null)
-//            {
-//                return process_realm(child_realm, summoner, patterns, context, step + 1);
-//            }
-//
-//            return null;
-//        }
 
         static Expression process_idungeon(IDungeon idungeon, Summoner2 summoner, List<Legend> patterns,
             Summoner_Context context, int step)
@@ -155,29 +99,73 @@ namespace imperative.summoner
             var pattern = patterns[step];
             var token = pattern.children[0].text;
             if (dungeon.has_minion(token))
-            {
-                List<Expression> args = pattern.children[1] == null
-                    ? null
-                    : pattern.children[1].children
-                        .Select(p => summoner.process_expression(p, context))
-                        .ToList();
-
-                var minion = dungeon.minions[token];
-                return append(new Method_Call(minion, null, args), process_idungeon(minion.return_type.dungeon,
-                    summoner, patterns, context, step + 1));
-            }
+                return process_minion(dungeon.minions[token], summoner, patterns, context, step);
 
             if (dungeon.has_portal(token))
-            {
-                var portal = dungeon.all_portals[token];
-                return append(new Portal_Expression(portal), process_idungeon(portal.other_dungeon,
-                    summoner, patterns, context, step + 1));
-            }
+                return process_portal(dungeon.all_portals[token], summoner, patterns, context, step);
 
             if (dungeon.dungeons.ContainsKey(token))
                 return new Profession_Expression(new Profession(Kind.reference, dungeon));
 
             return null;
+        }
+
+        static Expression process_minion(Minion minion, Summoner2 summoner,
+            List<Legend> patterns, Summoner_Context context, int step)
+        {
+            var pattern = patterns[step];
+            List<Expression> args = pattern.children[1] == null
+                ? null
+                : pattern.children[1].children
+                    .Select(p => summoner.process_expression(p, context))
+                    .ToList();
+
+            var result = new Method_Call(minion, null, args);
+            if (step == patterns.Count - 1)
+                return result;
+
+            if (minion.return_type.dungeon == null)
+            {
+                if (minion.return_type.type == Kind.none)
+                    throw new Exception("Spell " + minion.name 
+                        + " does not return anything.");
+
+                throw new Exception(minion.return_type.type
+                    + " does not have a member named " + patterns[step + 1] + ".");
+            }
+
+            var child = process_idungeon(minion.return_type.dungeon,
+                summoner, patterns, context, step + 1);
+
+            if (child == null)
+                throw new Exception("Dungeon " + minion.return_type.dungeon.name
+                    + " does not have a member named " + patterns[step + 1].children[0].text + ".");
+
+            return append(result, child);  
+        }
+
+        static Expression process_portal(Portal portal, Summoner2 summoner,
+            List<Legend> patterns, Summoner_Context context, int step)
+        {
+            var pattern = patterns[step];
+            List<Expression> args = pattern.children[1] == null
+                ? null
+                : pattern.children[1].children
+                    .Select(p => summoner.process_expression(p, context))
+                    .ToList();
+
+            var result = new Portal_Expression(portal);
+            if (step == patterns.Count - 1)
+                return result;
+
+            var child = process_idungeon(portal.other_dungeon,
+                summoner, patterns, context, step + 1);
+
+            if (child == null)
+                throw new Exception("Dungeon " + portal.other_dungeon
+                    + " does not have a member named " + patterns[step + 1].children[0].text + ".");
+
+            return append(result, child);
         }
 
         static Expression append(Expression first, Expression second)

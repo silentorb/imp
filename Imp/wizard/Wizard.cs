@@ -63,10 +63,10 @@ namespace imperative.wizard
 //                    result = expression.get_profession().dungeon.name;
 //                    break;
 
-                case Expression_Type.create_array:
-                    throw new Exception("Not implemented.");
-//                    result = "FOOO";
-//                    break;
+//                case Expression_Type.create_array:
+//                    throw new Exception("Not implemented.");
+////                    result = "FOOO";
+////                    break;
 
                 case Expression_Type.anonymous_function:
                     throw new Exception("Not implemented.");

@@ -56,13 +56,14 @@ namespace metahub.render
             return render.indent(tab);
         }
 
-        public Renderer unindent()
+        public string unindent()
         {
             var offset = config.space_tabs
                 ? config.indent
                 : 1;
 
-            return render.unindent(offset);
+            render.unindent(offset);
+            return "";
         }
 
         public string newline(int amount = 1)
@@ -79,7 +80,7 @@ namespace metahub.render
             : newline() + content;
         }
 
-        public string add(string text)
+        public string add(string text = "")
         {
             if (needs_indent)
             {

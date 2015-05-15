@@ -504,7 +504,7 @@ namespace imperative.summoner
 
         private Expression process_reference(Legend source, Summoner_Context context)
         {
-            return Summoning.Tunnel.process_anything(this, source.children, context, 0);
+            //            return Summoning.Tunnel.process_anything(this, source.children, context, 0);
             return Tunneler.process_anything(this, source.children, context);
 
         }
@@ -696,7 +696,8 @@ namespace imperative.summoner
 
         private Expression instantiate_array(List<Legend> parts, Summoner_Context context)
         {
-            return new Create_Array(parts[0].children.Select(p => process_expression(p, context)));
+            return new Instantiate(new Profession(Kind.unknown) { is_list = true },
+                parts[0].children.Select(p => process_expression(p, context)));
         }
 
         private Expression summon_dictionary(List<Legend> parts, Summoner_Context context)

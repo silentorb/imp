@@ -8,12 +8,12 @@ bloom.Garden.start = function() {
 	this.query({
 		trellis: 'user',
 		filters: [
-                {
-                	path: 'id',
-                	value: 'user',
-                	type: 'parameter'
-                }
-            ],
+            {
+                path: 'id',
+                value: 'user',
+                type: 'parameter'
+            }
+        ],
 		version: '1.0.0.browser'
 	}).then(function(response) {
 		var user = response.objects[0]

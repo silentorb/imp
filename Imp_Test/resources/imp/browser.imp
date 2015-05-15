@@ -11,9 +11,13 @@
 		injector(name:string):Injector
 	}
 
+	external class Promise {
+		then(a):Promise
+	}
+
 	external class Q {
 		defer()
-		promise
+		promise:Promise
 		resolve()
 	}
 
@@ -54,9 +58,18 @@ namespace bloom {
 		  ],
 		  "version": "1.0.0.browser"
 		})
+		.then((response)=> {
+			var user = response.objects.get(0)
+			if (user.username == 'anonymous') {
+				Garden.goto('garden-login')
+			}
+			else {
+				Garden.goto('garden-hub')
+			}
+		})
     }
 	
-	  static query(data) {
+	  static query(data):browser.Promise {
 		return Garden.post('vineyard/query', data)
 	  }
 	  

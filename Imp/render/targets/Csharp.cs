@@ -144,7 +144,7 @@ namespace imperative.render.targets
                 : "List<" + type + ">";
         }
 
-        protected override string render_new_list(Profession profession, List<Expression> args)
+        protected override string render_list(Profession profession, List<Expression> args)
         {
             var arg_string = args != null
                 ? args.Select(a => render_expression(a)).join(", ")

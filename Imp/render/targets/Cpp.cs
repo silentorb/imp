@@ -308,7 +308,7 @@ namespace metahub.render.targets
             }
 
             result += pad(render_function_declarations(dungeon))
-                      + unindent().line("};");
+                      + unindent() + line("};");
 
             return result;
         }
@@ -330,7 +330,7 @@ namespace metahub.render.targets
             var result = line("namespace " + space.join("::") + " {");
             current_realm = realm;
             indent();
-            result += action() + unindent().line("}");
+            result += action() + unindent() + line("}");
 
             current_realm = null;
             return result;
@@ -621,10 +621,6 @@ namespace metahub.render.targets
 
                 case Expression_Type.null_value:
                     return "NULL";
-
-                case Expression_Type.create_array:
-                    result = "FOOO";
-                    break;
 
                 case Expression_Type.comment:
                     return render_comment((Comment)expression);
