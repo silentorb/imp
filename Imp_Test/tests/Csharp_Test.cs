@@ -26,10 +26,11 @@ namespace imp_test.tests
             }
 
             {
-                var treasury = overlord.root.dungeons["test"].treasuries["Crust"];
-                var output = target.generate_enum_file_contents(treasury);
-                var goal = Utility.load_resource("cs.crust.cs");
-                Utility.diff(goal, output);
+                throw new Exception("Not implemented.");
+//                var treasury = overlord.root.dungeons["test"].treasuries["Crust"];
+//                var output = target.generate_enum_file_contents(treasury);
+//                var goal = Utility.load_resource("cs.crust.cs");
+//                Utility.diff(goal, output);
             }
         }
 

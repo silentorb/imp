@@ -18,14 +18,14 @@ namespace imperative.expressions
         {
             this.name = name;
             info = Platform_Function_Info.functions[name];
-            profession = info.return_type.clone();
-            if (profession.type == Kind.reference)
-            {
-                if (reference == null)
-                    throw new Exception("A platform function that returns a reference must have a calling reference.");
-
-                profession.dungeon = reference.get_profession().dungeon;
-            }
+            profession = info.return_type;
+//            if (profession == Kind.reference)
+//            {
+//                if (reference == null)
+//                    throw new Exception("A platform function that returns a reference must have a calling reference.");
+//
+//                profession.dungeon = reference.get_profession().dungeon;
+//            }
         }
 
         public override Profession get_profession()

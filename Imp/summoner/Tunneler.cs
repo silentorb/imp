@@ -87,10 +87,10 @@ namespace imperative.summoner
             if (idungeon == null || step >= patterns.Count)
                 return null;
 
-            if (idungeon.GetType() == typeof (Dungeon))
+//            if (idungeon.GetType() == typeof (Dungeon))
                 return process_dungeon((Dungeon)idungeon, summoner, patterns, context, step);
-            else
-                return process_treasury((Treasury)idungeon, summoner, patterns, context, step);
+//            else
+//                return process_treasury((Treasury)idungeon, summoner, patterns, context, step);
         }
 
         private static Expression process_dungeon(Dungeon dungeon, Summoner2 summoner,
@@ -105,7 +105,7 @@ namespace imperative.summoner
                 return process_portal(dungeon.all_portals[token], summoner, patterns, context, step);
 
             if (dungeon.dungeons.ContainsKey(token))
-                return new Profession_Expression(new Profession(Kind.reference, dungeon));
+                return new Profession_Expression(Profession.get(summoner.overlord.library, dungeon));
 
             return null;
         }
@@ -126,11 +126,11 @@ namespace imperative.summoner
 
             if (minion.return_type.dungeon == null)
             {
-                if (minion.return_type.type == Kind.none)
+                if (minion.return_type == Professions.none)
                     throw new Exception("Spell " + minion.name 
                         + " does not return anything.");
 
-                throw new Exception(minion.return_type.type
+                throw new Exception(minion.return_type
                     + " does not have a member named " + patterns[step + 1] + ".");
             }
 
@@ -180,21 +180,21 @@ namespace imperative.summoner
             return first;
         }
 
-        private static Expression process_treasury(Treasury treasury, Summoner2 summoner,
-            List<Legend> patterns, Summoner_Context context, int step)
-        {
-            var pattern = patterns[step];
-            var token = pattern.children[0].text;
-            if (step >= patterns.Count - 1)
-                throw new Exception("Enum " + token + " is missing a member value.");
-
-            var jewel_name = patterns.Last().children[0].text;
-            if (!treasury.jewels.Contains(jewel_name))
-                throw new Exception("Enum " + treasury.name
-                    + " does not contain member: " + jewel_name + ".");
-
-            return new Jewel(treasury, treasury.jewels.IndexOf(jewel_name));
-        }
+//        private static Expression process_treasury(Treasury treasury, Summoner2 summoner,
+//            List<Legend> patterns, Summoner_Context context, int step)
+//        {
+//            var pattern = patterns[step];
+//            var token = pattern.children[0].text;
+//            if (step >= patterns.Count - 1)
+//                throw new Exception("Enum " + token + " is missing a member value.");
+//
+//            var jewel_name = patterns.Last().children[0].text;
+//            if (!treasury.jewels.Contains(jewel_name))
+//                throw new Exception("Enum " + treasury.name
+//                    + " does not contain member: " + jewel_name + ".");
+//
+//            return new Jewel(treasury, treasury.jewels.IndexOf(jewel_name));
+//        }
 
         private static Expression process_function_call(Expression expression, Expression previous,
             string token, Dungeon dungeon, List<Expression> args)

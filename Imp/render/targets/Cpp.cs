@@ -73,7 +73,7 @@ namespace metahub.render.targets
             List<Portal> scalars = new List<Portal>();
             foreach (var portal in dungeon.core_portals.Values)
             {
-                if (portal.type == Kind.reference && !portal.is_list && !portal.is_value)
+                if (!Professions.is_scalar(portal.profession) && !portal.is_list && !portal.is_value)
                     references.Add(portal);
                 else if (!portal.is_list)
                     scalars.Add(portal);
@@ -423,11 +423,13 @@ namespace metahub.render.targets
 
        override protected string render_profession(Profession signature, bool is_parameter = false)
         {
+           throw new Exception("Not implemented");
+
             if (signature.dungeon == null)
             {
-                var name = signature.type == Kind.reference
-                               ? "void*"
-                               : types[signature.type.ToString().ToLower()];
+                var name = !Professions.is_scalar(signature)
+                    ? "void*"
+                    : types[signature.dungeon.name.ToString().ToLower()];
                 
                 return signature.is_list
                     ? "std::vector<" + name + ">"
@@ -662,44 +664,46 @@ namespace metahub.render.targets
             if (signature == null)
                 return expression.value.ToString();
 
-            switch (signature.type)
-            {
-                case Kind.unknown:
-                    return expression.value.ToString(); ;
-
-                case Kind.Float:
-                    var result = expression.value.ToString();
-                    return result.Contains(".")
-                               ? result + "f"
-                               : result;
-
-                case Kind.Int:
-                    return expression.value.ToString();
-
-                case Kind.String:
-                    return "\"" + expression.value + "\"";
-
-                case Kind.Bool:
-                    return (bool)expression.value ? "true" : "false";
-
-                case Kind.reference:
-//                    if (!signature.dungeon.is_value)
-//                        throw new Exception("Literal expressions must be scalar values.");
-
-                    if (expression.value != null)
-                        return expression.value.ToString();
-
-                    return render_trellis_name(signature.dungeon) + "()";
-
-                default:
-                    throw new Exception("Invalid literal " + expression.value + " type " + expression.profession.type + ".");
-            }
+            throw new Exception("Not implemented.");
+//            switch (signature.type)
+//            {
+//                case Kind.unknown:
+//                    return expression.value.ToString(); ;
+//
+//                case Kind.Float:
+//                    var result = expression.value.ToString();
+//                    return result.Contains(".")
+//                               ? result + "f"
+//                               : result;
+//
+//                case Kind.Int:
+//                    return expression.value.ToString();
+//
+//                case Kind.String:
+//                    return "\"" + expression.value + "\"";
+//
+//                case Kind.Bool:
+//                    return (bool)expression.value ? "true" : "false";
+//
+//                case Kind.reference:
+////                    if (!signature.dungeon.is_value)
+////                        throw new Exception("Literal expressions must be scalar values.");
+//
+//                    if (expression.value != null)
+//                        return expression.value.ToString();
+//
+//                    return render_trellis_name(signature.dungeon) + "()";
+//
+//                default:
+//                    throw new Exception("Invalid literal " + expression.value + " type " + expression.profession.type + ".");
+//            }
         }
 
         bool is_pointer(Profession signature)
         {
-            if (signature.type == null)
-                throw new Exception();
+            throw new Exception("Not implemented.");
+//            if (signature.type == null)
+//                throw new Exception();
 
             if (signature.dungeon == null)
                 return false;

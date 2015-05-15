@@ -12,5 +12,6 @@ namespace imperative.schema
         Dungeon realm { get; set; }
         bool is_value { get; }
         object default_value { get; set; }
+        string fullname { get; }
     }
 }

@@ -30,7 +30,7 @@ public class Literal : Expression {
         : base(Expression_Type.literal)
     {
         this.value = value;
-        profession = new Profession(Kind.Int);
+        profession = Professions.Int;
     }
 
     public Literal(string value)
@@ -38,7 +38,7 @@ public class Literal : Expression {
         : base(Expression_Type.literal)
     {
         this.value = value;
-        profession = new Profession(Kind.String);
+        profession = Professions.String;
     }
 
     public Literal(float value)
@@ -46,7 +46,7 @@ public class Literal : Expression {
         : base(Expression_Type.literal)
     {
         this.value = value;
-        profession = new Profession(Kind.Float);
+        profession = Professions.Float;
     }
 
     public Literal(bool value)
@@ -54,7 +54,7 @@ public class Literal : Expression {
         : base(Expression_Type.literal)
     {
         this.value = value;
-        profession = new Profession(Kind.Bool);
+        profession = Professions.Bool;
     }
 
     public override Expression clone()
@@ -64,7 +64,7 @@ public class Literal : Expression {
 
     public float get_float()
     {
-        return profession.type == Kind.Int 
+        return profession == Professions.Float
             ? (int) value 
             : (float) value;
     }

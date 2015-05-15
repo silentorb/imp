@@ -32,12 +32,14 @@ namespace imperative
         public Dungeon root;
         public Target target;
         public Dungeon array;
-//        public Dictionary<string, Symbol> global_variables = new Dictionary<string, Symbol>();
+        public Professions library;
 
         public Overlord()
         {
             if (Platform_Function_Info.functions == null)
                 Platform_Function_Info.initialize();
+
+            library = new Professions();
 
             root = new Dungeon("", this, null);
         }

@@ -137,9 +137,9 @@ namespace imperative.render
                     result = ((Insert)expression).code;
                     break;
 
-                case Expression_Type.jewel:
-                    var jewel = (Jewel)expression;
-                    return render_enum_value(jewel.treasury, jewel.value);
+                //                case Expression_Type.jewel:
+                //                    var jewel = (Jewel)expression;
+                //                    return render_enum_value(jewel.treasury, jewel.value);
 
                 case Expression_Type.create_dictionary:
                     return render_dictionary((Create_Dictionary)expression);
@@ -339,52 +339,52 @@ namespace imperative.render
             if (profession == null)
                 return value.ToString();
 
-            switch (profession.type)
+            if (profession == Professions.unknown)
+                return value.ToString();
+
+            if (profession == Professions.Float)
             {
-                case Kind.unknown:
-                    return value.ToString();
-
-                case Kind.Float:
-                    var result = value.ToString();
-                    return config.float_suffix && result.Contains('.')
-                        ? result + "f"
-                        : result;
-
-                case Kind.Int:
-                    return value.ToString();
-
-                case Kind.String:
-                    return config.primary_quote + value + config.primary_quote;
-
-                case Kind.Bool:
-                    return (bool)value ? "true" : "false";
-
-                case Kind.reference:
-                    if (value == null)
-                        return render_null();
-
-                    if (!profession.dungeon.is_value)
-                        throw new Exception("Literal expressions must be scalar values.");
-
-                    if (profession.dungeon.GetType() == typeof(Treasury))
-                        return render_enum_value((Treasury)profession.dungeon, (int)value);
-
-                    if (value != null)
-                        return value.ToString();
-
-                    return render_dungeon_name(profession.dungeon) + "()";
-
-                default:
-                    throw new Exception("Invalid literal " + value + " type " + profession.type + ".");
+                var result = value.ToString();
+                return config.float_suffix && result.Contains('.')
+                    ? result + "f"
+                    : result;
             }
+
+            if (profession == Professions.Int)
+                return value.ToString();
+
+            if (profession == Professions.String)
+                return config.primary_quote + value + config.primary_quote;
+
+            if (profession == Professions.Bool)
+                return (bool)value ? "true" : "false";
+
+            if (profession == Professions.any)
+            {
+                if (value == null)
+                    return render_null();
+
+                if (!profession.dungeon.is_value)
+                    throw new Exception("Literal expressions must be scalar values.");
+
+                //                    if (profession.dungeon.GetType() == typeof(Treasury))
+                //                        return render_enum_value((Treasury)profession.dungeon, (int)value);
+
+                if (value != null)
+                    return value.ToString();
+
+                return render_dungeon_name(profession.dungeon) + "()";
+            }
+
+            throw new Exception("Invalid literal " + value + " type " + profession + ".");
         }
 
-        virtual protected string render_enum_value(Treasury treasury, int value)
-        {
-            return config.supports_enums
-                ? treasury.name + get_connector(new Profession(Kind.reference, treasury)) + treasury.jewels[value]
-                : value.ToString();
-        }
+        //        virtual protected string render_enum_value(Treasury treasury, int value)
+        //        {
+        //            return config.supports_enums
+        //                ? treasury.name + get_connector(new Profession(Kind.reference, treasury)) + treasury.jewels[value]
+        //                : value.ToString();
+        //        }
 
         virtual protected string render_dungeon_name(IDungeon dungeon)
         {
@@ -599,14 +599,14 @@ namespace imperative.render
             return result;
         }
 
-        virtual protected string render_treasury(Treasury treasury)
-        {
-            var i = treasury.jewels.Count;
-            return add("enum " + treasury.name) + render_scope(() =>
-                treasury.jewels.Select(j =>
-                    add(j + (--i > 0 ? "," : "")) + newline()).join("")
-                );
-        }
+        //        virtual protected string render_treasury(Treasury treasury)
+        //        {
+        //            var i = treasury.jewels.Count;
+        //            return add("enum " + treasury.name) + render_scope(() =>
+        //                treasury.jewels.Select(j =>
+        //                    add(j + (--i > 0 ? "," : "")) + newline()).join("")
+        //                );
+        //        }
 
         virtual protected string render_flow_control(Flow_Control statement, bool minimal, bool is_succeeded = false)
         {
@@ -659,9 +659,10 @@ namespace imperative.render
 
         virtual protected string render_profession(Profession signature, bool is_parameter = false)
         {
+            throw new Exception("Not implemented.");
             var name = signature.dungeon != null
                 ? signature.dungeon.name
-                : types[signature.type.ToString().ToLower()];
+                : types[signature.dungeon.name.ToString().ToLower()];
 
             return signature.is_list
                 ? listify(name, signature)

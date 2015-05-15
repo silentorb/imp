@@ -40,11 +40,11 @@ namespace imperative.schema
             set { _other_portal = value; }
         }
 
-        public Kind type
-        {
-            get { return profession.type; }
-            set { profession.type = value; }
-        }
+//        public Kind type
+//        {
+//            get { return profession.type; }
+//            set { profession.type = value; }
+//        }
 
         public IDungeon other_dungeon
         {
@@ -70,7 +70,7 @@ namespace imperative.schema
 
             this.name = name;
             this.dungeon = dungeon;
-            profession = new Profession(type, other_dungeon);
+            profession = dungeon.overlord.library.get(other_dungeon);
         }
 
         public Portal(string name, Profession profession, Dungeon dungeon = null)
@@ -83,7 +83,7 @@ namespace imperative.schema
         public Portal(Portal original, Dungeon new_dungeon)
         {
             dungeon = new_dungeon;
-            profession = new Profession(original.type, original.other_dungeon);
+            profession = original.dungeon.overlord.library.get(original.other_dungeon);
             name = original.name;
             is_value = original.is_value;
             other_portal = original.other_portal;
@@ -108,7 +108,7 @@ namespace imperative.schema
 //            if (other_portal != null)
 //                return other_portal.profession;
 
-            return new Profession(Kind.reference, other_dungeon);
+            return dungeon.overlord.library.get(other_dungeon);
 //            var result = profession.clone();
 //            result.is_list = false;
 //            return result;
@@ -119,24 +119,20 @@ namespace imperative.schema
         {
             if (other_dungeon != null && other_dungeon.default_value != null)
                 return other_dungeon.default_value;
-   
-            switch (type)
-            {
-                case Kind.Int:
-                    return 0;
 
-                case Kind.Float:
-                    return 0;
+            if (profession == Professions.Int)
+                return 0;
 
-                case Kind.String:
-                    return "";
+            if (profession == Professions.Float)
+                return 0;
 
-                case Kind.Bool:
-                    return false;
+            if (profession == Professions.String)
+                return "";
 
-                default:
-                    return null;
-            }
+            if (profession == Professions.Bool)
+                return false;
+
+            return null;
         }
 
         public bool has_enchantment(string name)

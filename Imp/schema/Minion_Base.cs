@@ -14,8 +14,6 @@ namespace imperative.schema
         public List<Parameter> parameters;
         public List<Expression> expressions = new List<Expression>();
         public Scope scope;
-//        public event Minion_Expression_Event on_add_expression;
-        public Profession return_type = new Profession(Kind.none);
-
+        public Profession return_type;
     }
 }

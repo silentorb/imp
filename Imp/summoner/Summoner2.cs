@@ -96,7 +96,7 @@ namespace imperative.summoner
                         {
                             var profession = parts[1] != null
                                 ? parse_type2(parts[1], context)
-                                : new Profession(Kind.reference);
+                                : Professions.any;
 
                             var portal = new Portal(parts[0].text, profession, overlord.root);
                             portal.enchantments.Add(new Enchantment("static"));
@@ -188,8 +188,8 @@ namespace imperative.summoner
             {
                 if (statement.type == "class_definition")
                     dungeon_step(statement, context);
-                else if (!context.dungeon.treasuries.ContainsKey(statement.children[0].text))
-                    summon_enum(statement.children, context);
+//                else if (!context.dungeon.treasuries.ContainsKey(statement.children[0].text))
+//                    summon_enum(statement.children, context);
             }
         }
 
@@ -281,7 +281,7 @@ namespace imperative.summoner
             {
                 var type_info = parts[2] != null
                     ? parse_type2(parts[2], context)
-                    : new Profession(Kind.reference);
+                    : Professions.unknown;
 
                 var portal = new Portal(portal_name, type_info);
                 if (parts[0] != null)
@@ -396,8 +396,8 @@ namespace imperative.summoner
                                    : new Block(expressions);
                     }
 
-                case "enum_definition":
-                    return summon_enum(parts, context);
+//                case "enum_definition":
+//                    return summon_enum(parts, context);
 
                 case "preprocessor":
                     return process_preprocessor(parts, context);
@@ -468,7 +468,7 @@ namespace imperative.summoner
                     return new Null_Value();
 
                 case "empty_array":
-                    return new Instantiate(new Profession(Kind.reference, null));
+                    return new Instantiate(overlord.library.get(Professions.unknown.dungeon, true));
 
                 case "reference":
                     return process_reference(source, context);
@@ -513,7 +513,7 @@ namespace imperative.summoner
         {
             var type = source.children[1] != null
                            ? parse_type2(source.children[1], context)
-                           : new Profession(Kind.unknown);
+                           : Professions.unknown;
 
             return new Parameter(new Symbol(source.children[0].text, type, null));
         }
@@ -523,8 +523,8 @@ namespace imperative.summoner
             var path = source.children[1].children.Select(p => p.text).ToArray();
             var result = parse_type2(path, context, source);
             result.is_list = result.is_list || source.children.Count > 3 && source.children[3] != null;
-            if (source.children[0] != null)
-                result.is_const = true;
+//            if (source.children[0] != null)
+//                result.is_const = true;
 
             if (source.children[2] != null)
             {
@@ -544,26 +544,23 @@ namespace imperative.summoner
                 switch (text)
                 {
                     case "bool":
-                        return new Profession(Kind.Bool);
+                        return Professions.Bool;
                     case "string":
-                        return new Profession(Kind.String);
+                        return Professions.String;
                     case "float":
-                        return new Profession(Kind.Float);
+                        return Professions.Float;
                     case "int":
-                        return new Profession(Kind.Int);
+                        return Professions.Int;
                 }
 
                 var profession = context.get_profession_pattern(text);
                 if (profession != null)
-                {
-                    var result = profession.clone();
-                    return result;
-                }
+                    return profession;
             }
 
             var dungeon = context.get_dungeon(path);
             if (dungeon != null)
-                return new Profession(Kind.reference, dungeon);
+                return overlord.library.get(dungeon);
 
             throw new Parser_Exception("Invalid type: " + text + ".", source.position);
         }
@@ -624,12 +621,13 @@ namespace imperative.summoner
         public Expression process_iterator(List<Legend> parts, Summoner_Context context)
         {
             var reference = process_expression_part(parts[1], context);
-            var profession = reference.get_end().get_profession().get_reference();
-            var symbol = context.scope.create_symbol(parts[0].text, profession);
-            context.scope.add_map(symbol.name, c => new Variable(symbol));
-            return new Iterator(symbol,
-                                reference, process_block(parts[2], context)
-                );
+            throw new Exception("Not implemented.");
+//            var profession = reference.get_end().get_profession().get_reference();
+//            var symbol = context.scope.create_symbol(parts[0].text, profession);
+//            context.scope.add_map(symbol.name, c => new Variable(symbol));
+//            return new Iterator(symbol,
+//                                reference, process_block(parts[2], context)
+//                );
         }
 
         public Expression summon_if_chain(List<Legend> parts, Summoner_Context context)
@@ -650,20 +648,20 @@ namespace imperative.summoner
             return new Instantiate(type, args);
         }
 
-        private Expression summon_enum(List<Legend> parts, Summoner_Context context)
-        {
-            var items = new List<string>();
-            foreach (var item in parts[1].children)
-            {
-                int? value = null;
-                if (item.children[1] != null)
-                    value = int.Parse(item.children[1].text);
-
-                items.Add(item.children[0].text);
-            }
-            var treasury = context.dungeon.create_treasury(parts[0].text, items);
-            return new Treasury_Definition(treasury);
-        }
+//        private Expression summon_enum(List<Legend> parts, Summoner_Context context)
+//        {
+//            var items = new List<string>();
+//            foreach (var item in parts[1].children)
+//            {
+//                int? value = null;
+//                if (item.children[1] != null)
+//                    value = int.Parse(item.children[1].text);
+//
+//                items.Add(item.children[0].text);
+//            }
+//            var treasury = context.dungeon.create_treasury(parts[0].text, items);
+//            return new Treasury_Definition(treasury);
+//        }
 
         private Expression process_function_snippet(List<Legend> parts, Summoner_Context context)
         {
@@ -680,7 +678,7 @@ namespace imperative.summoner
             var new_context = new Summoner_Context(context) { scope = minion.scope };
             var block = process_block(parts[1], new_context);
             minion.expressions.AddRange(block);
-            minion.return_type = new Profession(Kind.none);
+            minion.return_type = Professions.none;
 
             return new Anonymous_Function(minion);
         }
@@ -696,7 +694,7 @@ namespace imperative.summoner
 
         private Expression instantiate_array(List<Legend> parts, Summoner_Context context)
         {
-            return new Instantiate(new Profession(Kind.unknown) { is_list = true },
+            return new Instantiate(overlord.library.get(Professions.unknown.dungeon, true),
                 parts[0].children.Select(p => process_expression(p, context)));
         }
 

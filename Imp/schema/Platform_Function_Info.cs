@@ -22,15 +22,15 @@ namespace imperative.schema
         {
             functions = new Dictionary<string, Platform_Function_Info>();
 
-            add(new Platform_Function_Info("count", new Profession(Kind.Int)));
-            add(new Platform_Function_Info("add", new Profession(Kind.none)));
-            add(new Platform_Function_Info("contains", new Profession(Kind.Bool)));
-            add(new Platform_Function_Info("distance", new Profession(Kind.Float)));
-            add(new Platform_Function_Info("first", new Profession(Kind.reference)));
-            add(new Platform_Function_Info("last", new Profession(Kind.reference)));
-            add(new Platform_Function_Info("pop", new Profession(Kind.reference)));
-            add(new Platform_Function_Info("remove", new Profession(Kind.none)));
-            add(new Platform_Function_Info("rand", new Profession(Kind.Float)));
+            add(new Platform_Function_Info("count", Professions.Int));
+            add(new Platform_Function_Info("add", Professions.none));
+            add(new Platform_Function_Info("contains", Professions.Bool));
+            add(new Platform_Function_Info("distance", Professions.Float));
+            add(new Platform_Function_Info("first", Professions.any));
+            add(new Platform_Function_Info("last", Professions.any));
+            add(new Platform_Function_Info("pop", Professions.any));
+            add(new Platform_Function_Info("remove", Professions.none));
+            add(new Platform_Function_Info("rand", Professions.Float));
         }
 
         static void add(Platform_Function_Info info)

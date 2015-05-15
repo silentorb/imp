@@ -147,7 +147,7 @@ namespace metahub.render.targets
             var minions = definition.find(Expression_Type.anonymous_function);
             if (minions.Any(m => m.find(e => e.type == Expression_Type.self || e.type == Expression_Type.property_function_call).Any()))
             {
-                var self = minion.scope.create_symbol("self", new Profession(Kind.reference, current_dungeon));
+                var self = minion.scope.create_symbol("self", current_dungeon.overlord.library.get(current_dungeon));
                 minion.expressions.Insert(0, new Declare_Variable(self, new Self(minion.dungeon)));
             }
 
@@ -165,7 +165,7 @@ namespace metahub.render.targets
             var minions = minion.expression.find(Expression_Type.anonymous_function);
             if (minions.Any(m => m.find(e => e.type == Expression_Type.self || e.type == Expression_Type.property_function_call).Any()))
             {
-                var self = minion.scope.create_symbol("self", new Profession(Kind.reference, current_dungeon));
+                var self = minion.scope.create_symbol("self", current_dungeon.overlord.library.get(current_dungeon));
                 minion.expressions.Insert(0, new Declare_Variable(self, new Self(minion.dungeon)));
             }
 

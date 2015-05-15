@@ -107,7 +107,7 @@ namespace imperative.schema
             if (reference.type == Expression_Type.operation)
                 throw new Exception("Cannot call function on operation.");
 
-            return portal.type == Kind.reference
+            return !Professions.is_scalar(portal.profession)
                 ? setter(portal, new Null_Value(), reference, null)
                 : new Property_Function_Call(Property_Function_Type.remove, portal, new List<Expression>
                     {

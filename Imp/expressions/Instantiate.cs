@@ -21,7 +21,7 @@ namespace imperative.expressions
         }
 
         public Instantiate(Dungeon dungeon, IEnumerable<Expression> args = null)
-            : this(new Profession(Kind.reference, dungeon), args)
+            : this(dungeon.overlord.library.get(dungeon), args)
         {
             
         }

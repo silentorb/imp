@@ -20,7 +20,7 @@ namespace imperative.schema
         public string name { get; set; }
         public Dungeon realm { get; set; }
         public Dictionary<string, Dungeon> dungeons = new Dictionary<string, Dungeon>();
-        public Dictionary<string, Treasury> treasuries = new Dictionary<string, Treasury>();
+//        public Dictionary<string, Treasury> treasuries = new Dictionary<string, Treasury>();
         public Dungeon parent;
         public List<Expression> code;
         public Dictionary<string, string[]> inserts;
@@ -52,6 +52,16 @@ namespace imperative.schema
         {
             get { return _is_value; }
             set { _is_value = value; }
+        }
+
+        public string fullname
+        {
+            get
+            {
+                return realm != null
+                    ? realm.fullname + name
+                    : name;
+            }
         }
 
 #if DEBUG
@@ -408,7 +418,7 @@ namespace imperative.schema
 
                 case Expression_Type.variable:
                     var variable_expression = (Variable)expression;
-                    if (variable_expression.symbol.profession.type == Kind.reference)
+                    if (!Professions.is_scalar(variable_expression.symbol.profession))
                         analyze_profession(variable_expression.symbol.profession);
 
                     break;
@@ -463,7 +473,7 @@ namespace imperative.schema
             var minion = new Minion(minion_name, this, portal)
                 {
                     parameters = parameters ?? new List<Parameter>(),
-                    return_type = return_type ?? new Profession(Kind.none)
+                    return_type = return_type ?? Professions.none
                 };
 
             if (expressions != null)
@@ -529,8 +539,8 @@ namespace imperative.schema
             if (dungeons.ContainsKey(child_name))
                 return dungeons[child_name];
 
-            if (treasuries.ContainsKey(child_name))
-                return treasuries[child_name];
+//            if (treasuries.ContainsKey(child_name))
+//                return treasuries[child_name];
 
             return null;
         }
@@ -613,16 +623,16 @@ namespace imperative.schema
             return realm;
         }
 
-        public Treasury create_treasury(string treasury_name, List<string> jewels)
-        {
-            if (get_dungeon(treasury_name) != null)
-                throw new Exception("Realm " + name + " already contains a type named " + treasury_name + ".");
-
-            var treasury = new Treasury(treasury_name, jewels, this);
-            treasuries[treasury_name] = treasury;
-
-            return treasury;
-        }
+//        public Treasury create_treasury(string treasury_name, List<string> jewels)
+//        {
+//            if (get_dungeon(treasury_name) != null)
+//                throw new Exception("Realm " + name + " already contains a type named " + treasury_name + ".");
+//
+//            var treasury = new Treasury(treasury_name, jewels, this);
+//            treasuries[treasury_name] = treasury;
+//
+//            return treasury;
+//        }
 
     }
 }
