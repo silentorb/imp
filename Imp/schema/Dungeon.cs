@@ -472,21 +472,28 @@ namespace imperative.schema
             return new Function_Definition(minion);
         }
 
-        public Minion spawn_minion(string minion_name, List<Parameter> parameters = null, List<Expression> expressions = null, Profession return_type = null, Portal portal = null)
+        public Minion spawn_simple_minion(string minion_name, List<Parameter> parameters = null,
+            List<Expression> expressions = null, Profession return_type = null, Portal portal = null)
         {
             if (minions.ContainsKey(minion_name))
                 throw new Exception("Dungeon " + name + " already contains an minion named " + minion_name + ".");
 
             var minion = new Minion(minion_name, this, portal)
-                {
-                    parameters = parameters ?? new List<Parameter>(),
-                    return_type = return_type ?? Professions.none
-                };
+            {
+                parameters = parameters ?? new List<Parameter>(),
+                return_type = return_type ?? Professions.none
+            };
 
             if (expressions != null)
                 minion.add_to_block(expressions);
 
             minions[minion_name] = minion;
+            return minion;
+        }
+
+        public Minion spawn_minion(string minion_name, List<Parameter> parameters = null, List<Expression> expressions = null, Profession return_type = null, Portal portal = null)
+        {
+            var minion = spawn_simple_minion(minion_name, parameters, expressions);
 
             var definition = new Function_Definition(minion);
 

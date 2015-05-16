@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using imperative.expressions;
 
 namespace imperative.schema
 {
@@ -35,7 +36,7 @@ namespace imperative.schema
             professions["function"] = new List<Profession> { Function };
         }
 
-        public void initialize()
+        public static void initialize()
         {
             if (initialized)
                 return;
@@ -49,11 +50,22 @@ namespace imperative.schema
             any = create_type("none");
             unknown = create_type("any");
             Function = create_type("function");
-            List = new Dungeon("List", null, null);
+
+            initialize_list();
+
             Dictionary = new Dungeon("Dictionary", null, null);
         }
 
-        Profession create_type(string name)
+        private static void initialize_list()
+        {
+            List = new Dungeon("List", null, null);
+            List.spawn_simple_minion("get", new List<Parameter>
+            {
+                new Parameter(new Symbol("index", Int, null))
+            });
+        }
+
+        static Profession create_type(string name)
         {
             var dungeon = new Dungeon(name, null, null);
             return Profession.create(dungeon);
