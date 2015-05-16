@@ -12,7 +12,6 @@ namespace imperative.expressions
         instantiate,
         parent_class,
         operation,
-//        create_array,
         create_dictionary,
         null_value,
         self,
@@ -22,10 +21,8 @@ namespace imperative.expressions
         profession,
         anonymous_function,
         if_statement,
-        jewel,
 
         // Statements
-        treasury_definition,
         statement,
         space,
         class_definition,

@@ -425,43 +425,43 @@ namespace metahub.render.targets
         {
            throw new Exception("Not implemented");
 
-            if (signature.dungeon == null)
-            {
-                var name = !Professions.is_scalar(signature)
-                    ? "void*"
-                    : types[signature.dungeon.name.ToString().ToLower()];
-                
-                return signature.is_list
-                    ? "std::vector<" + name + ">"
-                    : name;
-            }
-            else if (signature.dungeon.GetType() == typeof (Dungeon))
-            {
-                var dungeon = (Dungeon) signature.dungeon;
-                var name = dungeon.is_abstract
-                    ? "void"
-                    : render_dungeon_path(signature.dungeon);
-
-                if (!signature.is_list)
-                {
-                    return
-                        dungeon.is_value
-                            ? is_parameter ? name + "&" : name
-                            : name + "*";
-                }
-                else
-                {
-                    return "std::vector<" + (dungeon.is_value
-                        ? name
-                        : name + "*")
-                           + ">";
-                }
-            }
-            else
-            {
-//                var treasury = (Treasury) signature.dungeon;
-                return render_dungeon_path(signature.dungeon);
-            }
+//            if (signature.dungeon == null)
+//            {
+//                var name = !Professions.is_scalar(signature)
+//                    ? "void*"
+//                    : types[signature.dungeon.name.ToString().ToLower()];
+//                
+//                return signature.is_list
+//                    ? "std::vector<" + name + ">"
+//                    : name;
+//            }
+//            else if (signature.dungeon.GetType() == typeof (Dungeon))
+//            {
+//                var dungeon = (Dungeon) signature.dungeon;
+//                var name = dungeon.is_abstract
+//                    ? "void"
+//                    : render_dungeon_path(signature.dungeon);
+//
+//                if (!signature.is_list)
+//                {
+//                    return
+//                        dungeon.is_value
+//                            ? is_parameter ? name + "&" : name
+//                            : name + "*";
+//                }
+//                else
+//                {
+//                    return "std::vector<" + (dungeon.is_value
+//                        ? name
+//                        : name + "*")
+//                           + ">";
+//                }
+//            }
+//            else
+//            {
+////                var treasury = (Treasury) signature.dungeon;
+//                return render_dungeon_path(signature.dungeon);
+//            }
         }
 
 //        string render_symbol_signature(Symbol symbol, bool is_parameter = false)

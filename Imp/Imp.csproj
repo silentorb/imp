@@ -55,9 +55,6 @@
     <Compile Include="schema\Professions.cs" />
     <Compile Include="summoner\Tunneler.cs" />
     <Compile Include="wizard\Wizard.cs" />
-    <Compile Include="expressions\Empty_Expression.cs" />
-    <Compile Include="expressions\Jewel.cs" />
-    <Compile Include="expressions\Treasury_Definition.cs" />
     <Compile Include="expressions\If.cs" />
     <Compile Include="expressions\Dynamic_Function_Call.cs" />
     <Compile Include="expressions\Profession_Expression.cs" />
@@ -111,7 +108,6 @@
     <Compile Include="expressions\Class_Definition.cs" />
     <Compile Include="expressions\Method_Call.cs" />
     <Compile Include="expressions\Comment.cs" />
-    <Compile Include="expressions\Create_Array.cs" />
     <Compile Include="expressions\Declare_Variable.cs" />
     <Compile Include="expressions\Expression.cs" />
     <Compile Include="expressions\Expression_Type.cs" />

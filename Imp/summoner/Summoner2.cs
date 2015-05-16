@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -522,7 +523,10 @@ namespace imperative.summoner
         {
             var path = source.children[1].children.Select(p => p.text).ToArray();
             var result = parse_type2(path, context, source);
-            result.is_list = result.is_list || source.children.Count > 3 && source.children[3] != null;
+            if (source.children.Count > 3 && source.children[3] != null && result.dungeon != Professions.List.dungeon)
+            {
+                result = context.dungeon.overlord.library.get(Professions.List.dungeon, result.dungeon);
+            }
 //            if (source.children[0] != null)
 //                result.is_const = true;
 

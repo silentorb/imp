@@ -98,8 +98,8 @@ namespace imperative.wizard
 //                    result = ((Insert)expression).code;
 //                    break;
 
-                case Expression_Type.jewel:
-                    throw new Exception("Not implemented.");
+//                case Expression_Type.jewel:
+//                    throw new Exception("Not implemented.");
 //                    var jewel = (Jewel)expression;
 //                    return render_enum_value(jewel.treasury, jewel.value);
 

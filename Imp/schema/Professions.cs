@@ -16,6 +16,7 @@ namespace imperative.schema
         public static Profession any;
         public static Profession unknown;
         public static Profession Function;
+        public static Profession List;
 
         public Dictionary<string, List<Profession>> professions = new Dictionary<string, List<Profession>>();
 
@@ -31,6 +32,7 @@ namespace imperative.schema
             professions["any"] = new List<Profession> { any };
             professions["unknown"] = new List<Profession> { unknown };
             professions["function"] = new List<Profession> { Function };
+            professions["list"] = new List<Profession> { List };
         }
 
         public void initialize()
@@ -39,26 +41,78 @@ namespace imperative.schema
                 return;
 
             initialized = true;
-            Int = create_scalar_type("int");
-            Float = create_scalar_type("float");
-            String = create_scalar_type("string");
-            Bool = create_scalar_type("bool");
-            none = create_scalar_type("unknown");
-            any = create_scalar_type("none");
-            unknown = create_scalar_type("any");
-            Function = create_scalar_type("function");
+            Int = create_type("int");
+            Float = create_type("float");
+            String = create_type("string");
+            Bool = create_type("bool");
+            none = create_type("unknown");
+            any = create_type("none");
+            unknown = create_type("any");
+            Function = create_type("function");
+            List = create_type("list");
         }
 
-        Profession create_scalar_type(string name)
+        Profession create_type(string name)
         {
             var dungeon = new Dungeon(name, null, null);
             return Profession.create(dungeon);
         }
 
-        public Profession get(IDungeon dungeon, bool is_list = false,
-            List<Profession> children = null)
+//        public Profession get(IDungeon dungeon)
+//        {
+//            var fullname = dungeon.fullname;
+//            if (!professions.ContainsKey(fullname))
+//            {
+//                var result = new Profession(dungeon, children);
+//                professions[fullname] = new List<Profession> { result };
+//                return result;
+//            }
+//        }
+
+        public Profession get(IDungeon dungeon, Profession one)
         {
-            return Profession.get(this, dungeon, is_list, children);
+            return get(dungeon, new List<Profession> { one });
+        }
+
+        public Profession get(IDungeon dungeon, List<Profession> children = null)
+        {
+            var fullname = dungeon.fullname;
+            if (!professions.ContainsKey(fullname))
+            {
+                var result = new Profession(dungeon, children);
+                professions[fullname] = new List<Profession> { result };
+                return result;
+            }
+
+            var group = professions[fullname];
+            foreach (var item in group)
+            {
+                if ((item.children != null) == (children != null))
+                {
+                    if (children == null || compare_children(children, item.children))
+                        return item;
+                }
+            }
+
+            {
+                var result = new Profession(dungeon, children);
+                group.Add(result);
+                return result;
+            }
+        }
+
+        private static bool compare_children(List<Profession> a, List<Profession> b)
+        {
+            if (a.Count != b.Count)
+                return false;
+
+            for (var i = 0; i < a.Count; ++i)
+            {
+                if (a[i] != b[i])
+                    return false;
+            }
+
+            return true;
         }
 
         public static bool is_scalar(Profession profession)
