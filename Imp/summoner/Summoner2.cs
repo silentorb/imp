@@ -469,7 +469,7 @@ namespace imperative.summoner
                     return new Null_Value();
 
                 case "empty_array":
-                    return new Instantiate(overlord.library.get(Professions.unknown.dungeon, true));
+                    return new Instantiate(overlord.library.get(Professions.List, Professions.unknown));
 
                 case "reference":
                     return process_reference(source, context);
@@ -523,9 +523,9 @@ namespace imperative.summoner
         {
             var path = source.children[1].children.Select(p => p.text).ToArray();
             var result = parse_type2(path, context, source);
-            if (source.children.Count > 3 && source.children[3] != null && result.dungeon != Professions.List.dungeon)
+            if (source.children.Count > 3 && source.children[3] != null && result.dungeon != Professions.List)
             {
-                result = context.dungeon.overlord.library.get(Professions.List.dungeon, result.dungeon);
+                result = context.dungeon.overlord.library.get(Professions.List, result.dungeon);
             }
 //            if (source.children[0] != null)
 //                result.is_const = true;
@@ -578,7 +578,8 @@ namespace imperative.summoner
             if (reference != null && reference.type == Expression_Type.operation)
                 throw new Exception("Cannot call function on operation.");
 
-            if (last.type == Expression_Type.portal && op != "@=" && (!reference.get_profession().is_list || op != "="))
+            if (last.type == Expression_Type.portal && op != "@=" 
+                && (reference.get_profession().dungeon != Professions.List || op != "="))
             {
                 var portal_expression = (Portal_Expression)last;
                 var portal = portal_expression.portal;
@@ -698,7 +699,7 @@ namespace imperative.summoner
 
         private Expression instantiate_array(List<Legend> parts, Summoner_Context context)
         {
-            return new Instantiate(overlord.library.get(Professions.unknown.dungeon, true),
+            return new Instantiate(overlord.library.get(Professions.List, Professions.unknown),
                 parts[0].children.Select(p => process_expression(p, context)));
         }
 
@@ -710,7 +711,7 @@ namespace imperative.summoner
                 dictionary[child.children[0].text] = process_expression(child.children[1], context);
             }
 
-            return new Create_Dictionary(dictionary);
+            return new Create_Dictionary(overlord.library, dictionary);
         }
 
         public static List<Rune> read_runes(string input, string filename)

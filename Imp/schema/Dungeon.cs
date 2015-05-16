@@ -76,9 +76,13 @@ namespace imperative.schema
 #endif
 
             this.name = name;
-            this.overlord = overlord;
+            if (overlord != null)
+            {
+                this.overlord = overlord;
+                overlord.dungeons.Add(this);
+            }
+
             _is_value = is_value;
-            overlord.dungeons.Add(this);
             code = new List<Expression>();
           
             if (parent != null)
@@ -159,7 +163,7 @@ namespace imperative.schema
             if (!dependencies.ContainsKey(dungeon.name))
                 dependencies[dungeon.name] = new Dependency(dungeon);
 
-            if (dungeon.realm != realm && !dungeon.realm.is_virtual && !needed_realms.Contains(dungeon.realm))
+            if (dungeon.realm != null && dungeon.realm != realm && !dungeon.realm.is_virtual && !needed_realms.Contains(dungeon.realm))
                 needed_realms.Add(dungeon.realm);
 
             return dependencies[dungeon.name];
@@ -444,6 +448,9 @@ namespace imperative.schema
         {
             if (profession.dungeon != null)
                 add_dependency(profession.dungeon);
+
+            if (profession.children == null)
+                return;
 
             foreach (var child in profession.children)
             {

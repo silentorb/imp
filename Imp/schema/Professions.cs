@@ -16,7 +16,8 @@ namespace imperative.schema
         public static Profession any;
         public static Profession unknown;
         public static Profession Function;
-        public static Profession List;
+        public static Dungeon List;
+        public static Dungeon Dictionary;
 
         public Dictionary<string, List<Profession>> professions = new Dictionary<string, List<Profession>>();
 
@@ -32,7 +33,6 @@ namespace imperative.schema
             professions["any"] = new List<Profession> { any };
             professions["unknown"] = new List<Profession> { unknown };
             professions["function"] = new List<Profession> { Function };
-            professions["list"] = new List<Profession> { List };
         }
 
         public void initialize()
@@ -49,7 +49,8 @@ namespace imperative.schema
             any = create_type("none");
             unknown = create_type("any");
             Function = create_type("function");
-            List = create_type("list");
+            List = new Dungeon("List", null, null);
+            Dictionary = new Dungeon("Dictionary", null, null);
         }
 
         Profession create_type(string name)
@@ -68,6 +69,11 @@ namespace imperative.schema
 //                return result;
 //            }
 //        }
+
+        public Profession get(IDungeon dungeon, IDungeon one)
+        {
+            return get(dungeon, new List<Profession> { get(one) });
+        }
 
         public Profession get(IDungeon dungeon, Profession one)
         {

@@ -528,7 +528,7 @@ namespace imperative.render
 
         private string render_instantiation(Instantiate expression)
         {
-            if (expression.profession.is_list)
+            if (expression.profession.dungeon == Professions.List)
                 return render_list(expression.profession, expression.args);
 
             var args = expression.args.Select(a => render_expression(a)).join(", ");
@@ -664,7 +664,7 @@ namespace imperative.render
                 ? signature.dungeon.name
                 : types[signature.dungeon.name.ToString().ToLower()];
 
-            return signature.is_list
+            return signature.dungeon == Professions.List
                 ? listify(name, signature)
                 : name;
         }

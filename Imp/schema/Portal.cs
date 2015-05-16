@@ -54,7 +54,7 @@ namespace imperative.schema
 
         public bool is_list
         {
-            get { return profession.dungeon == Professions.List.dungeon; }
+            get { return profession.dungeon == Professions.List; }
         }
 
         public string fullname

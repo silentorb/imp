@@ -105,7 +105,7 @@ namespace imperative.summoner
                 return process_portal(dungeon.all_portals[token], summoner, patterns, context, step);
 
             if (dungeon.dungeons.ContainsKey(token))
-                return new Profession_Expression(Profession.get(summoner.overlord.library, dungeon));
+                return new Profession_Expression(summoner.overlord.library.get(dungeon));
 
             return null;
         }

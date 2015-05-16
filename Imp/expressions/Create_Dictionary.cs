@@ -10,16 +10,18 @@ namespace imperative.expressions
         public Dictionary<string, Expression> items;
         private Profession _profession;
 
-        public Create_Dictionary()
+        public Create_Dictionary(Professions library)
             : base(Expression_Type.create_dictionary)
         {
             items = new Dictionary<string, Expression>();
+            _profession = library.get(Professions.Dictionary, Professions.unknown);
         }
 
-        public Create_Dictionary(Dictionary<string, Expression> children)
+        public Create_Dictionary(Professions library, Dictionary<string, Expression> children)
             : base(Expression_Type.create_dictionary)
         {
             items = children;
+            _profession = library.get(Professions.Dictionary, Professions.unknown);
         }
 
         public override IEnumerable<Expression> children

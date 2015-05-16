@@ -708,7 +708,7 @@ namespace metahub.render.targets
             if (signature.dungeon == null)
                 return false;
 
-            return !signature.dungeon.is_value && !signature.is_list;
+            return !signature.dungeon.is_value && signature.dungeon != Professions.List;
         }
 
         override protected string get_connector(Expression expression)
