@@ -44,17 +44,18 @@ namespace imperative.summoner
             var symbol = context.scope.find_or_null(token);
             if (symbol != null)
             {
+                return process_symbol(symbol, summoner, patterns, context, step);
                 //                if (path_context.index == patterns.Count - 1 && symbol.profession.type == Kind.function)
                 //                    return new Dynamic_Function_Call(symbol.name, null, args);
 
-                var next = new Variable(symbol);
-                var profession = next.get_profession();
-                var dungeon = profession != null
-                              ? profession.dungeon
-                              : next.get_profession().dungeon;
-
-                return append(next, process_idungeon(dungeon, summoner, patterns,
-                        context, step + 1));
+//                var next = new Variable(symbol);
+//                var profession = next.get_profession();
+//                var dungeon = profession != null
+//                              ? profession.dungeon
+//                              : next.get_profession().dungeon;
+//
+//                return append(next, process_idungeon(dungeon, summoner, patterns,
+//                        context, step + 1));
             }
 
             Expression result;
@@ -134,7 +135,7 @@ namespace imperative.summoner
                     + " does not have a member named " + patterns[step + 1] + ".");
             }
 
-            var child = process_idungeon(minion.return_type.dungeon,
+            var child = process_dungeon((Dungeon)minion.return_type.dungeon,
                 summoner, patterns, context, step + 1);
 
             if (child == null)
@@ -158,11 +159,33 @@ namespace imperative.summoner
             if (step == patterns.Count - 1)
                 return result;
 
-            var child = process_idungeon(portal.other_dungeon,
+            var child = process_dungeon((Dungeon)portal.other_dungeon,
                 summoner, patterns, context, step + 1);
 
             if (child == null)
                 throw new Exception("Dungeon " + portal.other_dungeon
+                    + " does not have a member named " + patterns[step + 1].children[0].text + ".");
+
+            return append(result, child);
+        }
+
+        static Expression process_symbol(Symbol symbol, Summoner2 summoner,
+            List<Legend> patterns, Summoner_Context context, int step)
+        {
+            var result = new Variable(symbol);
+            var profession = result.get_profession();
+            var dungeon = profession != null
+                          ? profession.dungeon
+                          : result.get_profession().dungeon;
+
+            if (step == patterns.Count - 1)
+                return result;
+
+            var child = process_dungeon((Dungeon)dungeon, summoner, patterns,
+                    context, step + 1);
+
+            if (child == null)
+                throw new Exception("Dungeon " + symbol.profession.dungeon.name
                     + " does not have a member named " + patterns[step + 1].children[0].text + ".");
 
             return append(result, child);

@@ -555,6 +555,8 @@ namespace imperative.summoner
                         return Professions.Float;
                     case "int":
                         return Professions.Int;
+                    case "any":
+                        return Professions.any;
                 }
 
                 var profession = context.get_profession_pattern(text);

@@ -27,14 +27,6 @@ namespace imperative.render
 
         }
 
-        protected static Expression_Type[] token_types =
-        {
-            Expression_Type.portal, 
-            Expression_Type.function_call,
-            Expression_Type.property_function_call,
-            Expression_Type.variable
-        };
-
         protected Dungeon current_realm;
         protected Dungeon current_dungeon;
 
@@ -168,13 +160,20 @@ namespace imperative.render
 
         virtual protected string render_portal(Portal_Expression portal_expression)
         {
-            var result = portal_expression.portal.name;
-            if (!config.implicit_this && portal_expression.portal.dungeon.realm != null
-                && (portal_expression.parent == null
-                || portal_expression.parent.type == Expression_Type.statement
-                || portal_expression.parent.next == null))
-                result = render_this() + "." + result;
-
+            var portal = portal_expression.portal;
+            var result = portal.name;
+            if (portal_expression.parent == null || !portal_expression.parent.is_token())
+            {
+                if (portal.has_enchantment(Enchantments.Static))
+                {
+                    if (portal.dungeon.name != "")
+                        result = render_dungeon_name(portal.dungeon) + "." + result;
+                }
+                else if (!config.implicit_this && portal.dungeon.realm != null)
+                {
+                    result = render_this() + "." + result;
+                }
+            }
             if (portal_expression.index != null)
                 result += "[" + render_expression(portal_expression.index) + "]";
 
@@ -488,13 +487,21 @@ namespace imperative.render
         virtual protected string render_function_call(Abstract_Function_Call expression, Expression parent)
         {
             var method_call = expression as Method_Call;
-            var this_string = method_call != null
-                && !config.implicit_this
-                && !Common_Target.token_types.Contains(method_call.parent.type)
-                && method_call.minion != null
-                && method_call.minion.dungeon.realm != null
-                ? render_this()
-                : "";
+            string this_string = "";
+
+            if (method_call != null && (method_call.parent == null || !method_call.parent.is_token()))
+            {
+                if (method_call.minion != null && method_call.minion.has_enchantment(Enchantments.Static))
+                {
+                    this_string = render_dungeon_name(current_dungeon);
+                }
+                else if (!config.implicit_this
+                         && method_call.minion != null
+                         && method_call.minion.dungeon.realm != null)
+                {
+                    this_string = render_this();
+                }
+            }
 
             var ref_string = expression.reference != null
                ? this_string + render_expression(expression.reference)

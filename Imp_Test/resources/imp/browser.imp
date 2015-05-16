@@ -16,9 +16,13 @@
 	}
 
 	external class Q {
-		defer()
-		promise:Promise
+		defer():Deferred
+	}
+
+	external class Deferred {
 		resolve()
+		reject()
+		promise:Promise		
 	}
 
 	external class Json {
@@ -40,6 +44,14 @@ external var jQuery:browser.jQuery_Class
 
 namespace bloom {
 
+	abstract class Response {
+		objects:any[]
+	}
+
+	abstract class User {
+		username:string
+	}
+
   class Garden {
     static vineyard_url:string = 'http://localhost:3000/'
 
@@ -58,8 +70,8 @@ namespace bloom {
 		  ],
 		  "version": "1.0.0.browser"
 		})
-		.then((response)=> {
-			var user = response.objects.get(0)
+		.then((response:bloom.Response)=> {
+			var user:User = response.objects.get(0)
 			if (user.username == 'anonymous') {
 				Garden.goto('garden-login')
 			}

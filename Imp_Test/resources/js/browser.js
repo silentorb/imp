@@ -41,7 +41,9 @@ bloom.Garden.get = function(path) {
 	return Garden.http('GET', path)
 }
 bloom.Garden.http = function(method, path, data) {
-	if (data === void 0) { data = null }
+	if (data === undefined)
+		data = null
+
 	var def = $q.defer()
 	var options = {
 		method: method,
@@ -52,7 +54,7 @@ bloom.Garden.http = function(method, path, data) {
 		},
 		data: JSON.stringify(data),
 		dataType: 'json',
-		success: function (response) {
+		success: function(response) {
 			def.resolve(response)
 		}
 	}

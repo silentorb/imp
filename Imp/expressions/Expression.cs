@@ -173,5 +173,18 @@ namespace imperative.expressions
 
             return result;
         }
+
+        protected static Expression_Type[] token_types =
+        {
+            Expression_Type.portal, 
+            Expression_Type.function_call,
+            Expression_Type.property_function_call,
+            Expression_Type.variable
+        };
+
+        public bool is_token()
+        {
+            return token_types.Contains(type);
+        }
     }
 }
