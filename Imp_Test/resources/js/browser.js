@@ -5,7 +5,7 @@ bloom.Garden.vineyard_url = 'http://localhost:3000/'
 bloom.Garden.start = function() {
 	var $injector = angular.injector(['ng'])
 	window.$q = $injector.get('$q')
-	this.query({
+	bloom.Garden.query({
 		trellis: 'user',
 		filters: [
             {
