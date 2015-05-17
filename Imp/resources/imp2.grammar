@@ -1,6 +1,6 @@
 ﻿start = @(namespace_class, newlines, 1, 0)
 
-namespace_class = namespace_statement | class_definition | enum_definition | import_statement | external_var
+namespace_class = namespace_statement | class_definition | enum_definition | import_statement | external_var | function_definition
 
 snippets = @(snippet_function, semicolon_or_newline, 1, 0)
 

@@ -10,7 +10,7 @@ float_value = /-?(?:[0-9]*\.)?[0-9]+/
 int_value = /-?[0-9]+/
 path_separator = "."
 arrow = "=>"
-insert = /\$\w+/
+insert = /\$\w*/
 complex_set_operator = '+=' | '-=' | '*=' | '/=' | '@='
 operator_token = '+' | '-' | '/' | '*' | '<=' | '>=' | '<' | '>' | '==' | '!=' | '&&' | '||'
 set_operator = equals | complex_set_operator

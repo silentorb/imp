@@ -106,7 +106,7 @@ namespace imperative.summoner
                 return process_portal(dungeon.all_portals[token], summoner, patterns, context, step);
 
             if (dungeon.dungeons.ContainsKey(token))
-                return new Profession_Expression(summoner.overlord.library.get(dungeon));
+                return process_profession(dungeon.dungeons[token], summoner, patterns, context, step);
 
             return null;
         }
@@ -131,16 +131,16 @@ namespace imperative.summoner
                     throw new Exception("Spell " + minion.name 
                         + " does not return anything.");
 
-                throw new Exception(minion.return_type
-                    + " does not have a member named " + patterns[step + 1] + ".");
+                throw new Parser_Exception(minion.return_type
+                    + " does not have a member named " + patterns[step + 1] + ".", pattern.position);
             }
 
             var child = process_dungeon((Dungeon)minion.return_type.dungeon,
                 summoner, patterns, context, step + 1);
 
             if (child == null)
-                throw new Exception("Dungeon " + minion.return_type.dungeon.name
-                    + " does not have a member named " + patterns[step + 1].children[0].text + ".");
+                throw new Parser_Exception("Dungeon " + minion.return_type.dungeon.name
+                    + " does not have a member named " + patterns[step + 1].children[0].text + ".", pattern.position);
 
             return append(result, child);  
         }
@@ -163,8 +163,8 @@ namespace imperative.summoner
                 summoner, patterns, context, step + 1);
 
             if (child == null)
-                throw new Exception("Dungeon " + portal.other_dungeon
-                    + " does not have a member named " + patterns[step + 1].children[0].text + ".");
+                throw new Parser_Exception("Dungeon " + portal.other_dungeon
+                    + " does not have a member named " + patterns[step + 1].children[0].text + ".", pattern.position);
 
             return append(result, child);
         }
@@ -189,6 +189,22 @@ namespace imperative.summoner
                     + " does not have a member named " + patterns[step + 1].children[0].text + ".");
 
             return append(result, child);
+        }
+
+        static Expression process_profession(Dungeon dungeon, Summoner2 summoner,
+            List<Legend> patterns, Summoner_Context context, int step)
+        {
+            if (step == patterns.Count - 1)
+                return new Profession_Expression(summoner.overlord.library.get(dungeon));
+
+            var child = process_dungeon(dungeon, summoner, patterns,
+                    context, step + 1);
+
+            if (child == null)
+                throw new Exception("Dungeon " + dungeon.name
+                    + " does not have a member named " + patterns[step + 1].children[0].text + ".");
+
+            return child;
         }
 
         static Expression append(Expression first, Expression second)

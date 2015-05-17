@@ -17,12 +17,10 @@ bloom.Garden.start = function() {
 		version: '1.0.0.browser'
 	}).then(function(response) {
 		var user = response.objects[0]
-		if (user.username == 'anonymous') {
+		if (user.username == 'anonymous')
 			Garden.goto('garden-login')
-		}
-		else {
+		else
 			Garden.goto('garden-hub')
-		}
 	})
 }
 bloom.Garden.goto = function(name) {

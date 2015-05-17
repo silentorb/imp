@@ -15,6 +15,12 @@
 		then(a):Promise
 	}
 
+	external class Element {
+		addClass()
+		insertAfter()
+		remove()
+	}
+
 	external class Q {
 		defer():Deferred
 	}
@@ -40,6 +46,7 @@ external var angular:browser.Angular
 external var $q:browser.Q
 external var JSON:browser.Json
 external var jQuery:browser.jQuery_Class
+external $():browser.Element
 
 
 namespace bloom {
@@ -81,6 +88,13 @@ namespace bloom {
 		})
     }
 	
+	static goto(name) {
+		$('.current-page').remove()
+		var new_page = $('<' + name + '/>')
+		new_page.addClass('current-page')
+		new_page.insertAfter($('header'))
+	}
+
 	  static query(data):browser.Promise {
 		return Garden.post('vineyard/query', data)
 	  }

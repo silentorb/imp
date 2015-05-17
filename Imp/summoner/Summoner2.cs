@@ -105,6 +105,12 @@ namespace imperative.summoner
                         }
                         break;
 
+                    case "function_definition":
+                        if (step == 2)
+                            process_function_definition(pattern, context, false, true);
+
+                        break;
+
                     default:
                         throw new Exception("Not supported.");
                 }
@@ -189,8 +195,8 @@ namespace imperative.summoner
             {
                 if (statement.type == "class_definition")
                     dungeon_step(statement, context);
-//                else if (!context.dungeon.treasuries.ContainsKey(statement.children[0].text))
-//                    summon_enum(statement.children, context);
+                //                else if (!context.dungeon.treasuries.ContainsKey(statement.children[0].text))
+                //                    summon_enum(statement.children, context);
             }
         }
 
@@ -232,16 +238,17 @@ namespace imperative.summoner
             }
         }
 
-        private void process_function_definition(Legend source, Summoner_Context context, bool as_stub = false)
+        private void process_function_definition(Legend source, Summoner_Context context, bool as_stub = false, bool simple = false)
         {
             var parts = source.children;
             var name = parts[1].text;
             var minion = context.dungeon.has_minion(name)
-                             ? context.dungeon.summon_minion(name)
-                             : context.dungeon.spawn_minion(
-                                 name,
-                                 parts[2].children.Select(p => process_parameter(p, context)).ToList()
-                                   );
+                ? context.dungeon.summon_minion(name)
+                : simple
+                ? context.dungeon.spawn_simple_minion(name,
+                    parts[2].children.Select(p => process_parameter(p, context)).ToList())
+                    : context.dungeon.spawn_minion(name,
+                    parts[2].children.Select(p => process_parameter(p, context)).ToList());
 
             var new_context = new Summoner_Context(context) { scope = minion.scope };
 
@@ -253,11 +260,13 @@ namespace imperative.summoner
                 }
             }
 
+            var return_type = parts[3];
+            if (return_type != null)
+                minion.return_type = parse_type2(return_type, context);
+
             if (as_stub)
             {
-                var return_type = parts[3];
-                if (return_type != null)
-                    minion.return_type = parse_type2(return_type, context);
+
             }
             else
             {
@@ -397,8 +406,8 @@ namespace imperative.summoner
                                    : new Block(expressions);
                     }
 
-//                case "enum_definition":
-//                    return summon_enum(parts, context);
+                //                case "enum_definition":
+                //                    return summon_enum(parts, context);
 
                 case "preprocessor":
                     return process_preprocessor(parts, context);
@@ -415,7 +424,7 @@ namespace imperative.summoner
             if (children.Count == 1)
                 return process_expression_part(children[0], context);
 
-            if (children.Count == 2)
+            if (children.Count == 2 || group.dividers.Skip(1).All(d => d.text == group.dividers[0].text))
             {
                 var op = context.get_string_pattern(group.dividers[0].text) ?? group.dividers[0].text;
                 return new Operation(op, children.Select(p => process_expression_part(p, context)));
@@ -527,8 +536,8 @@ namespace imperative.summoner
             {
                 result = context.dungeon.overlord.library.get(Professions.List, result.dungeon);
             }
-//            if (source.children[0] != null)
-//                result.is_const = true;
+            //            if (source.children[0] != null)
+            //                result.is_const = true;
 
             if (source.children[2] != null)
             {
@@ -580,7 +589,7 @@ namespace imperative.summoner
             if (reference != null && reference.type == Expression_Type.operation)
                 throw new Exception("Cannot call function on operation.");
 
-            if (last.type == Expression_Type.portal && op != "@=" 
+            if (last.type == Expression_Type.portal && op != "@="
                 && (reference.get_profession().dungeon != Professions.List || op != "="))
             {
                 var portal_expression = (Portal_Expression)last;
@@ -629,12 +638,12 @@ namespace imperative.summoner
         {
             var reference = process_expression_part(parts[1], context);
             throw new Exception("Not implemented.");
-//            var profession = reference.get_end().get_profession().get_reference();
-//            var symbol = context.scope.create_symbol(parts[0].text, profession);
-//            context.scope.add_map(symbol.name, c => new Variable(symbol));
-//            return new Iterator(symbol,
-//                                reference, process_block(parts[2], context)
-//                );
+            //            var profession = reference.get_end().get_profession().get_reference();
+            //            var symbol = context.scope.create_symbol(parts[0].text, profession);
+            //            context.scope.add_map(symbol.name, c => new Variable(symbol));
+            //            return new Iterator(symbol,
+            //                                reference, process_block(parts[2], context)
+            //                );
         }
 
         public Expression summon_if_chain(List<Legend> parts, Summoner_Context context)
@@ -655,20 +664,20 @@ namespace imperative.summoner
             return new Instantiate(type, args);
         }
 
-//        private Expression summon_enum(List<Legend> parts, Summoner_Context context)
-//        {
-//            var items = new List<string>();
-//            foreach (var item in parts[1].children)
-//            {
-//                int? value = null;
-//                if (item.children[1] != null)
-//                    value = int.Parse(item.children[1].text);
-//
-//                items.Add(item.children[0].text);
-//            }
-//            var treasury = context.dungeon.create_treasury(parts[0].text, items);
-//            return new Treasury_Definition(treasury);
-//        }
+        //        private Expression summon_enum(List<Legend> parts, Summoner_Context context)
+        //        {
+        //            var items = new List<string>();
+        //            foreach (var item in parts[1].children)
+        //            {
+        //                int? value = null;
+        //                if (item.children[1] != null)
+        //                    value = int.Parse(item.children[1].text);
+        //
+        //                items.Add(item.children[0].text);
+        //            }
+        //            var treasury = context.dungeon.create_treasury(parts[0].text, items);
+        //            return new Treasury_Definition(treasury);
+        //        }
 
         private Expression process_function_snippet(List<Legend> parts, Summoner_Context context)
         {
