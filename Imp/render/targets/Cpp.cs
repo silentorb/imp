@@ -339,7 +339,7 @@ namespace metahub.render.targets
         string render_trellis_name(IDungeon dungeon)
         {
             if (dungeon.realm != current_realm)
-                return render_realm_name(dungeon.realm) + "::" + dungeon.name;
+                return render_dungeon_path(dungeon.realm) + "::" + dungeon.name;
 
             return dungeon.name;
         }

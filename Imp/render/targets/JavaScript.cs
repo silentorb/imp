@@ -160,7 +160,6 @@ namespace metahub.render.targets
             if (minion.is_abstract)
                 return "";
 
-
             // Search for any case of "this" inside an anonymous function.
             var minions = minion.expression.find(Expression_Type.anonymous_function);
             if (minions.Any(m => m.find(e => e.type == Expression_Type.self || e.type == Expression_Type.property_function_call).Any()))
@@ -169,6 +168,18 @@ namespace metahub.render.targets
                 minion.expressions.Insert(0, new Declare_Variable(self, new Self(minion.dungeon)));
             }
 
+            var parameters_with_default_values = minion.parameters.Where(p => p.default_value != null);
+            foreach (var parameter in parameters_with_default_values)
+            {
+                minion.expressions.Insert(0, new If(new List<Flow_Control>
+                {
+                    new Flow_Control(Flow_Control_Type.If, 
+                        new Operation("===", new Variable(parameter.symbol), new Insert("undefined") ), 
+                        new Expression[] {
+                        new Assignment(new Variable(parameter.symbol), "=",  parameter.default_value) 
+                        })
+                }));
+            }
             return "function(" + minion.parameters.Select(p => p.symbol.name).join(", ") + ")"
                 + render_minion_scope(minion);
         }

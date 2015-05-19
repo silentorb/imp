@@ -123,7 +123,7 @@ namespace bloom {
       }
     }
 
-    jQuery.ajax	(this.vineyard_url + path, options)
+    jQuery.ajax	(Garden.vineyard_url + path, options)
 
     return def.promise
   }

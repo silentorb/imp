@@ -524,8 +524,11 @@ namespace imperative.summoner
             var type = source.children[1] != null
                            ? parse_type2(source.children[1], context)
                            : Professions.unknown;
+            Expression default_value = null;
+            if (source.children[2] != null)
+                default_value = process_expression(source.children[2], context);
 
-            return new Parameter(new Symbol(source.children[0].text, type, null));
+            return new Parameter(new Symbol(source.children[0].text, type, null), default_value);
         }
 
         private Profession parse_type2(Legend source, Summoner_Context context)

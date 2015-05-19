@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using imperative.expressions;
@@ -142,7 +143,10 @@ namespace imperative.render
 
             if (expression.next != null)
             {
-                result += "." + render_expression(expression.next, expression);
+                var child = render_expression(expression.next, expression);
+                result += child[0] == '['
+                    ? child 
+                    : "." + child;
             }
 
             return result;
@@ -167,7 +171,7 @@ namespace imperative.render
                 if (portal.has_enchantment(Enchantments.Static))
                 {
                     if (portal.dungeon.name != "")
-                        result = render_dungeon_name(portal.dungeon) + "." + result;
+                        result = render_dungeon_path(portal.dungeon) + "." + result;
                 }
                 else if (!config.implicit_this && portal.dungeon.realm != null)
                 {
@@ -372,7 +376,7 @@ namespace imperative.render
                 if (value != null)
                     return value.ToString();
 
-                return render_dungeon_name(profession.dungeon) + "()";
+                return render_dungeon_path(profession.dungeon) + "()";
             }
 
             throw new Exception("Invalid literal " + value + " type " + profession + ".");
@@ -385,19 +389,19 @@ namespace imperative.render
         //                : value.ToString();
         //        }
 
-        virtual protected string render_dungeon_name(IDungeon dungeon)
-        {
-            if (dungeon.realm != current_realm)
-                return render_realm_name(dungeon.realm) + "." + dungeon.name;
+//        virtual protected string render_dungeon_name(IDungeon dungeon)
+//        {
+//            if (dungeon.realm != current_realm)
+//                return render_dungeon_path(dungeon.realm) + "." + dungeon.name;
+//
+//            return dungeon.name;
+//        }
 
-            return dungeon.name;
-        }
-
-        virtual protected string render_realm_name(Dungeon realm)
-        {
-            var path = Generator.get_namespace_path(realm);
-            return path.join(".");
-        }
+//        virtual protected string render_realm_name(Dungeon realm)
+//        {
+//            var path = Generator.get_namespace_path(realm);
+//            return path.join(".");
+//        }
 
         virtual protected string render_scope(List<Expression> statements, bool minimal = false, bool is_succeeded = false)
         {
@@ -489,17 +493,23 @@ namespace imperative.render
             var method_call = expression as Method_Call;
             string this_string = "";
 
-            if (method_call != null && (method_call.parent == null || !method_call.parent.is_token()))
+            if (method_call != null)
             {
-                if (method_call.minion != null && method_call.minion.has_enchantment(Enchantments.Static))
+                if (method_call.minion == Professions.List.minions["get"])
+                    return render_list(parent.get_profession(), expression.args);
+
+                if (method_call.parent == null || !method_call.parent.is_token())
                 {
-                    this_string = render_dungeon_name(current_dungeon);
-                }
-                else if (!config.implicit_this
-                         && method_call.minion != null
-                         && method_call.minion.dungeon.realm != null)
-                {
-                    this_string = render_this();
+                    if (method_call.minion != null && method_call.minion.has_enchantment(Enchantments.Static))
+                    {
+                        this_string = render_dungeon_path(current_dungeon);
+                    }
+                    else if (!config.implicit_this
+                             && method_call.minion != null
+                             && method_call.minion.dungeon.realm != null)
+                    {
+                        this_string = render_this();
+                    }
                 }
             }
 
@@ -642,18 +652,10 @@ namespace imperative.render
 
         virtual protected string render_dungeon_path(IDungeon dungeon)
         {
-            var name = dungeon.name;
-            //            if (dungeon.realm.external_name != null)
-            //            {
-            //                name = dungeon.realm.external_name + config.namespace_separator + name;
-            //            }
-            //            else 
-            if (dungeon.realm != current_realm || !config.supports_namespaces)
-            {
-                name = dungeon.realm.name + config.namespace_separator + name;
-            }
-
-            return name;
+            return dungeon.realm != null && dungeon.realm.name != ""
+                && (dungeon.realm != current_realm || !config.supports_namespaces)
+                ? render_dungeon_path(dungeon.realm) + config.namespace_separator + dungeon.name
+                : dungeon.name;
         }
 
         virtual protected string render_profession(Symbol symbol, bool is_parameter = false)
