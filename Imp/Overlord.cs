@@ -146,17 +146,25 @@ namespace imperative
         public static void run(Overlord_Configuration config)
         {
             var overlord = new Overlord(config.target);
-            if (File.Exists(config.input))
+            overlord.summon_input(config.input);
+            overlord.generate(config);
+        }
+
+        public void summon_input(string input)
+        {
+            if (File.Exists(input))
             {
-                overlord.summon_file(config.input);
+                // Very quick-and-dirty but it works for now.
+                var cwd = Directory.GetCurrentDirectory();
+                Directory.SetCurrentDirectory(Path.GetDirectoryName(input));
+                summon_file(input);
+                Directory.SetCurrentDirectory(cwd);
             }
             else
             {
-                var files = aggregate_files(config.input);
-                overlord.summon_many(files.Where(f => Path.GetExtension(f) == ".imp"));
+                var files = aggregate_files(input);
+                summon_many(files.Where(f => Path.GetExtension(f) == ".imp"));
             }
-
-            overlord.generate(config);
         }
 
         public void generate(Overlord_Configuration config)

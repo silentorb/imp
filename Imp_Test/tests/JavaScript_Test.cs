@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
@@ -44,7 +45,8 @@ namespace imp_test.tests
         [Test]
         public void multifile_test()
         {
-            var overlord = Imp_Fixture.create_overlord("js", "imp.part1.imp");
+            var input_path = Path.GetFullPath(@"..\..\resources\imp\part1.imp");
+            var overlord = Imp_Fixture.create_overlord_with_path("js", input_path);
             var target = (JavaScript)overlord.target;
             var output = target.generate();
             var goal = Utility.load_resource("js.part1-2.js");

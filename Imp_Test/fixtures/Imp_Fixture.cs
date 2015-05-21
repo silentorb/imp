@@ -33,6 +33,15 @@ namespace imp_test.fixtures
             return overlord;
         }
 
+        public static Overlord create_overlord_with_path(string target_name, string script_path)
+        {
+            var overlord = new Overlord(target_name);
+            overlord.summon_input(script_path);
+            overlord.flatten();
+            overlord.post_analyze();
+            return overlord;
+        }
+
         public static Expression summon_statement(Legend legend)
         {
             var overlord = new Overlord();
@@ -50,5 +59,6 @@ namespace imp_test.fixtures
             context.scope = new Scope();
             return summoner.summon_statements(legend, context);
         }
+
     }
 }

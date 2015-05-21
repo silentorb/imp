@@ -1,10 +1,3 @@
-﻿
-class Archer {
-
-}
-
-include "part2.imp"
-
-class Cleric {
-
-}
+﻿Archer = function() {}
+Barbarian = function() {}
+Cleric = function() {}
