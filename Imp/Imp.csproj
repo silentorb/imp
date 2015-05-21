@@ -101,7 +101,6 @@
     <Compile Include="summoner\expressions\Snippet.cs" />
     <Compile Include="expressions\Block.cs" />
     <Compile Include="summoner\Pre_Summoner.cs" />
-    <Compile Include="summoner\Summoner.cs" />
     <Compile Include="summoner\Template.cs" />
     <Compile Include="expressions\Anonymous_Function.cs" />
     <Compile Include="expressions\Assignment.cs" />
@@ -150,9 +149,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="resources\imp2.grammar" />
-    <None Include="resources\imp.lexer" />
     <None Include="resources\imp.grammar" />
+    <None Include="resources\imp.lexer" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">

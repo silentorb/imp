@@ -61,51 +61,21 @@ namespace imperative.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to start = trim @(namespace_class, newlines, 1, 0) final_trim
-        ///
-        ///namespace_class = namespace | class
-        ///snippet_entry = trim @(snippet_function, semicolon_or_newline, 1, 0) final_trim
-        ///
-        ///none = /&amp;*/
-        ///ws = /\s+/
-        ///trim = /\s*/
-        ///final_trim = /\s*$/
-        ///newlines = /(\s*\n)+\s*/
-        ///one_or_no_newline = /[ \t]*(\r\n)?[ \t]*/
-        ///comma = trim &quot;,&quot; trim
-        ///spaces = /[ \t]+/
-        ///dot = &quot;.&quot;
-        ///path_separator = &quot;.&quot;
-        ///id = /[\$a-zA-Z0-9_]+/
-        ///comma_or_newline = /\s*((\s*\n)+|,)\s*/
-        ///semicolon_or_newline = /\s*((\s*\n)+|;)\s*/
-        ///
-        ///string = (&apos;&quot;&apos;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string imp_grammar {
-            get {
-                return ResourceManager.GetString("imp_grammar", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to spaces(ignore) = /[ \t]+/
         ///newlines(optional) = /(\s*\n)+\s*/
         ///comma = &quot;,&quot;
-        ///path_separator = &quot;.&quot;
-        ///id = /[\$a-zA-Z0-9_]+/
         ///comma_or_newline = newlines | comma
         ///semicolon_or_newline = newlines | &quot;;&quot;
-        ///line_comment = &quot;//[^\r\n]*&quot;
-        ///string = /&quot;[^&quot;]*&quot;/ | /&apos;[^&apos;]*&apos;/
-        ///bool = &quot;true&quot; | &quot;false&quot;
-        ///int = /-?[0-9]+/
-        ///float = /-?([0-9]*\.)?[0-9]+f?/
-        ///operator = &apos;+&apos; | &apos;-&apos; | &apos;/&apos; | &apos;*&apos; | &apos;&lt;=&apos; | &apos;&gt;=&apos; | &apos;&lt;&apos; | &apos;&gt;&apos; | &apos;==&apos; | &apos;!=&apos; | &apos;&amp;&amp;&apos; | &apos;||&apos; | /\$\w+/
-        ///set_operator = &apos;=&apos; | &apos;+=&apos; | &apos;-=&apos; | &apos;*=&apos; | &apos;/=&apos; | &apos;@=&apos;
-        ///
-        ///block_start = &quot;{&quot;
-        ///blo [rest of string was truncated]&quot;;.
+        ///line_comment(ignore) = &quot;//[^\r\n]*&quot;
+        ///string_value = /&quot;([^&quot;]*)&quot;|\G&apos;([^&apos;]*)&apos;/
+        ///bool_value = &quot;true&quot; | &quot;false&quot;
+        ///float_value = /-?(?:[0-9]*\.)?[0-9]+/
+        ///int_value = /-?[0-9]+/
+        ///path_separator = &quot;.&quot;
+        ///arrow = &quot;=&gt;&quot;
+        ///insert = /\$\w*/
+        ///complex_set_operator = &apos;+=&apos; | &apos;-=&apos; | &apos;*=&apos; | &apos;/=&apos; | &apos;@=&apos;
+        ///operator_token = &apos;+&apos; | &apos;-&apos; | &apos;/&apos; | &apos;*&apos; | &apos;&lt;=&apos; | &apos;&gt;=&apos; | &apos;&lt;&apos; | &apos;&gt;&apos; | &apos;==&apos; | &apos;!=&apos; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string imp_lexer {
             get {
@@ -114,30 +84,27 @@ namespace imperative.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to start = trim @(namespace_class, newlines, 1, 0) final_trim
+        ///   Looks up a localized string similar to start = @(namespace_class, newlines, 1, 0)
         ///
-        ///namespace_class = namespace | class
-        ///snippet_entry = trim @(snippet_function, semicolon_or_newline, 1, 0) final_trim
+        ///namespace_class = namespace_statement | class_definition | enum_definition | import_statement | external_var | function_definition
         ///
-        ///none = /&amp;*/
-        ///ws = /\s+/
-        ///trim = /\s*/
-        ///final_trim = /\s*$/
-        ///newlines = /(\s*\n)+\s*/
-        ///one_or_no_newline = /[ \t]*(\r\n)?[ \t]*/
-        ///comma = trim &quot;,&quot; trim
-        ///spaces = /[ \t]+/
-        ///dot = &quot;.&quot;
-        ///path_separator = &quot;.&quot;
-        ///id = /[\$a-zA-Z0-9_]+/
-        ///comma_or_newline = /\s*((\s*\n)+|,)\s*/
-        ///semicolon_or_newline = /\s*((\s*\n)+|;)\s*/
+        ///snippets = @(snippet_function, semicolon_or_newline, 1, 0)
         ///
-        ///string = (&apos;&quot;&apos;  [rest of string was truncated]&quot;;.
+        ///id = id_token | insert
+        ///
+        ///meta_list = meta_list_start @(id, comma_or_newline, 1, 0) array_end
+        ///
+        ///external_var = external var id @(type_info, 0, 1)
+        ///
+        ///operator = operator_token | insert
+        ///
+        ///comma_or_newline = comma | newlines
+        ///
+        ///value_type = string | bool | int | float |  [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string imp2_grammar {
+        internal static string imp_grammar {
             get {
-                return ResourceManager.GetString("imp2_grammar", resourceCulture);
+                return ResourceManager.GetString("imp_grammar", resourceCulture);
             }
         }
     }

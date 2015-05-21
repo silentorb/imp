@@ -48,6 +48,7 @@ keyword(id_token>) =
 	| "external"
 	| "if"
 	| "import"
+	| "include"
 	| "in"
 	| "finally"
 	| "for"

@@ -1,60 +1,61 @@
-﻿start = trim @(namespace_class, newlines, 1, 0) final_trim
+﻿start = @(namespace_class, newlines, 1, 0)
 
-namespace_class = namespace | class
-snippet_entry = trim @(snippet_function, semicolon_or_newline, 1, 0) final_trim
+namespace_class = 
+	  import_statement
+	| include_statement
+	| namespace_statement	
+	| class_definition 
+	| enum_definition
+	| external_var 
+	| function_definition
 
-none = /&*/
-ws = /\s+/
-trim = /\s*/
-final_trim = /\s*$/
-newlines = /(\s*\n)+\s*/
-one_or_no_newline = /[ \t]*(\r\n)?[ \t]*/
-comma = trim "," trim
-spaces = /[ \t]+/
-dot = "."
-path_separator = "."
-id = /[\$a-zA-Z0-9_]+/
-comma_or_newline = /\s*((\s*\n)+|,)\s*/
-semicolon_or_newline = /\s*((\s*\n)+|;)\s*/
+snippets = @(snippet_function, semicolon_or_newline, 1, 0)
 
-string = ('"' /[^"]*/ '"') | ("'" /[^']*/ "'")
-bool = "true" | "false"
-int = /-?[0-9]+/
-float = /-?([0-9]*\.)?[0-9]+f?/
-operator = '+' | '-' | '/' | '*' | '<=' | '>=' | '<' | '>' | '==' | '!=' | '&&' | '||' | /\$\w+/
-set_operator = '=' | '+=' | '-=' | '*=' | '/=' | '@='
-value = string | bool | int | float
-operation_separator = trim operator trim
+id = id_token | insert
 
-arguments = "(" trim @(expression, comma_or_newline, 0, 0) trim ")"
+meta_list = meta_list_start @(id, comma_or_newline, 1, 0) array_end
 
-optional_arguments = trim arguments
+external_var = external var id @(type_info, 0, 1)
 
-reference_token = id @(arguments, none, 0, 1)
+operator = operator_token | insert
 
-optional_array = "[" trim expression trim "]"
+comma_or_newline = comma | newlines
 
-id_with_optional_array = id @(optional_array, none, 0, 1)
+value_type = string | bool | int | float | id
 
-reference = @(id_with_optional_array, path_separator, 1, 0) @(optional_arguments, none, 0, 1)
+value = string_value | bool_value | int_value | float_value
+ 
+arguments = group_start @(expression, comma_or_newline, 0, 0) group_end
 
-declare_symbol = id @(type_info, none, 0, 1)
+reference_token = id @(arguments, 0, 1)
 
-type_info = trim ":" trim type
+index = array_start expression array_end
 
-type = @(id, path_separator, 1, 0) @(optional_list_suffix, none, 0, 1)
+id_with_optional_index = id @(arguments, 0, 1)
 
-optional_list_suffix = trim "[" trim "]"
+reference = @(id_with_optional_index, path_separator, 1, 0) 
+
+declare_symbol = id @(type_info, 0, 1) @(optional_assignment, 0, 1)
+
+type_info = colon signature
+
+signature = @(const, 0, 1) @(value_type, path_separator, 1, 0) @(generic_info, 0, 1) @(empty_array, 0, 1)
+
+generic_info = < @(signature, comma, 1, 0) >
+
+empty_array = array_start array_end
+
+instantiate_array = array_start @(expression, comma_or_newline, 0, 0) array_end
 
 statement =
 	declare_variable
-	| if
-	| while
-	| return
-	| for
+	| if_chain
+	| while_statement
+	| return_statement
+	| for_statement
+	| preprocessor
 	| assignment
 	| expression
-
 
 expression_part =
 	  instantiate
@@ -62,60 +63,86 @@ expression_part =
 	| lambda
 	| reference	
 	| closed_expression
+	| null
+	| instantiate_array
+	| dictionary
 
+closed_expression = group_start expression group_end
 
-closed_expression = "(" trim expression ")"
+expression = @(expression_part, operator, 1, 0)
 
-expression = @(expression_part, operation_separator, 1, 0)
+import_statement = import @(id, path_separator, 1, 0)
 
-namespace = "namespace" ws id trim "{" trim @(class, newlines, 0, 0) trim "}"
+include_statement = include string_value
 
-function_definition = @(function_attribute, none, 0, 1) id trim "(" @(declare_symbol, comma, 0, 0) ")" @(type_info, none, 0, 1) @(optional_long_block, none, 0, 1)
+namespace_statement = namespace @(id, path_separator, 1, 0) block_start @(class_or_enum, newlines, 0, 0) block_end
 
-snippet_function = @(function_attribute, none, 0, 1) id trim "(" @(declare_symbol, comma, 0, 0) ")" @(type_info, none, 0, 1) trim long_block_any
+class_or_enum = class_definition | enum_definition
 
-function_attribute =  "private" ws
+function_definition = @(member_attribute, 0, 0) id group_start @(declare_symbol, comma, 0, 0) group_end @(type_info, 0, 1) @(long_block, 0, 1)
+
+member_attribute = abstract | external | public | private | static
+
+snippet_function = @(function_attribute, 0, 1) id group_start @(declare_symbol, comma, 0, 0) group_end @(type_info, 0, 1) long_block_any
+
+function_attribute = private
+
+class_definition = @(member_attribute, 0, 0) @(class_or_struct, 1, 1) id @(optional_parent_classes, 0, 0) block_start @(class_statements, newlines, 0, 0) block_end
 
 class_statements = function_definition | property_declaration
 
-property_declaration = id type_info
+class_or_struct = class | struct
 
-class = @(class_attribute, ws, 0, 0) trim "class" ws id trim @(optional_parent_classes, none, 0, 1) "{" trim @(class_statements, newlines, 0, 0) trim "}"
+property_declaration = @(member_attribute, 0, 0) id @(type_info, 0, 1) @(optional_assignment, 0, 1)
 
-class_attribute = "abstract"
+optional_parent_classes = colon @(id, comma_or_newline, 1, 0)
 
-optional_parent_classes = ":" trim @(id, comma_or_newline, 1, 0) trim
+block = long_block | @(statement, 1, 1)
 
-block = long_block | short_block
+long_block = block_start @(statement, semicolon_or_newline, 0, 0) block_end
 
-optional_long_block = trim long_block
+long_block_any = block_start any_statement block_end
 
-short_block = one_or_no_newline statement
-
-long_block = "{" trim @(statement, semicolon_or_newline, 0, 0) trim "}"
-
-long_block_any = "{" trim any_statement trim "}"
-
-any_statement = class | statements
+any_statement = class_definition | statements
 
 statements = @(statement, semicolon_or_newline, 0, 0)
 
-if = "if" trim "(" trim expression trim ")" trim block
+if_chain = @(if_statement, else, 1, 0) @(else_statement, 0, 1)
 
-while = "while" trim "(" trim expression trim ")" trim block
+if_statement = if group_start expression group_end block 
 
-optional_expression = spaces expression
+else_statement = else block
 
-return = "return" @(optional_expression, none, 0, 1)
+while_statement = while group_start expression group_end block
 
-optional_assignment = trim "=" trim expression
+return_statement = return @(optional_statement, 0, 1)
 
-declare_variable = "var" ws id @(type_info, none, 0, 1) @(optional_assignment, none, 0, 1)
+optional_statement = ws expression
 
-assignment = reference trim set_operator trim expression
+optional_assignment = equals expression
 
-for = "for" trim "(" trim "var" ws id ws "in" ws reference trim ")" trim long_block
+declare_variable = var id @(type_info, 0, 1) @(optional_assignment, 0, 1)
 
-instantiate = "new" ws type trim arguments
+assignment = reference set_operator expression
 
-lambda = "(" trim @(declare_symbol, comma, 0, 0) trim ")" trim "=>" trim block
+for_statement = for group_start var id in reference group_end long_block
+
+instantiate = new signature arguments
+
+lambda = group_start @(declare_symbol, comma, 0, 0) group_end arrow block
+
+enum_definition = enum id block_start @(enum_entry, comma_or_newline, 1, 0) block_end
+
+enum_entry = id @(optional_enum_assignment, 0, 1)
+
+optional_enum_assignment = equals int_value
+
+optional_group = group_start expression group_end
+
+preprocessor = preprocessor_start @(optional_group, 0, 1) block
+
+dictionary = block_start @(key_value, comma_or_newline, 0, 0) block_end
+
+key_value = string_or_id colon expression
+
+string_or_id = string_value | id

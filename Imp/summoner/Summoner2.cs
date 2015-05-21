@@ -81,6 +81,13 @@ namespace imperative.summoner
                         context.imported_realms.Add(overlord.root.get_realm(tokens));
                         break;
 
+                    case "include_statement":
+                        if (step != 0)
+                            break;
+                        
+                        overlord.summon_file(pattern.children[0].text);
+                        break;
+
                     case "namespace_statement":
 
                         var context2 = create_realm_context(pattern, context);
@@ -739,7 +746,7 @@ namespace imperative.summoner
         public static Legend translate_runes(string source, List<Rune> runes, string start = "start")
         {
             if (parser == null)
-                parser = new Parser(lexer, Resources.imp2_grammar);
+                parser = new Parser(lexer, Resources.imp_grammar);
 
             return parser.read(source, runes, start);
         }

@@ -138,12 +138,17 @@ namespace imperative
             return templates;
         }
 
+        public void summon_file(string path)
+        {
+            summon(File.ReadAllText(path), path);
+        }
+
         public static void run(Overlord_Configuration config)
         {
             var overlord = new Overlord(config.target);
             if (File.Exists(config.input))
             {
-                overlord.summon(File.ReadAllText(config.input), config.input);
+                overlord.summon_file(config.input);
             }
             else
             {
