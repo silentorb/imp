@@ -82,15 +82,15 @@ namespace imperative
             }
         }
 
-        public void summon(string code, string filename)
+        public void summon(string code, string filename, bool is_external = false)
         {
-            summon2(code, filename);
+            summon2(code, filename, is_external);
         }
 
-        public void summon2(string code, string filename)
+        public void summon2(string code, string filename, bool is_external = false)
         {
             var legend = summon_legend(code, filename);
-            var summoner = new Summoner2(this);
+            var summoner = new Summoner2(this, is_external);
             summoner.summon(legend);
         }
 
@@ -138,9 +138,9 @@ namespace imperative
             return templates;
         }
 
-        public void summon_file(string path)
+        public void summon_file(string path, bool is_external = false)
         {
-            summon(File.ReadAllText(path), path);
+            summon(File.ReadAllText(path), path, is_external);
         }
 
         public static void run(Overlord_Configuration config)

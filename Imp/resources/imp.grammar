@@ -73,7 +73,7 @@ expression = @(expression_part, operator, 1, 0)
 
 import_statement = import @(id, path_separator, 1, 0)
 
-include_statement = include string_value
+include_statement = include @(external, 0, 1) string_value
 
 namespace_statement = namespace @(id, path_separator, 1, 0) block_start @(class_or_enum, newlines, 0, 0) block_end
 

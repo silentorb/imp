@@ -23,10 +23,12 @@ namespace imperative.summoner
         public Overlord overlord;
         private static Lexer lexer;
         private static Parser parser;
+        private bool is_external;
 
-        public Summoner2(Overlord overlord)
+        public Summoner2(Overlord overlord, bool is_external = false)
         {
             this.overlord = overlord;
+            this.is_external = is_external;
         }
 
         public void summon(Legend source)
@@ -84,8 +86,8 @@ namespace imperative.summoner
                     case "include_statement":
                         if (step != 0)
                             break;
-                        
-                        overlord.summon_file(pattern.children[0].text);
+
+                        overlord.summon_file(pattern.children[1].text, pattern.children[0] != null);
                         break;
 
                     case "namespace_statement":
@@ -141,7 +143,7 @@ namespace imperative.summoner
                 if (parts[0] != null)
                 {
                     var attributes = parts[0].children;
-                    dungeon.is_external = attributes.Any(p => p.text == "external");
+                    dungeon.is_external = is_external || attributes.Any(p => p.text == "external");
                     dungeon.is_abstract = attributes.Any(p => p.text == "abstract");
                     //                    dungeon.is_value = attributes.Any(p => p.text == "value");
                 }
