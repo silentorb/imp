@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using imperative.schema;
 using imperative.expressions;
+using runic.parser;
 
 namespace imperative.summoner
 {
@@ -13,6 +14,7 @@ namespace imperative.summoner
         public Dungeon dungeon;
         public Scope scope;
         public Summoner_Context parent;
+        public Legend legend;
         protected Dictionary<string, string> string_inserts = new Dictionary<string, string>();
         protected Dictionary<string, Profession> profession_inserts = new Dictionary<string, Profession>();
         protected Dictionary<string, Expression_Generator> expression_lambda_inserts = new Dictionary<string, Expression_Generator>();
@@ -22,8 +24,15 @@ namespace imperative.summoner
         {
         }
 
-        public Summoner_Context(Dungeon dungeon = null)
+        public Summoner_Context(Legend legend, Summoner_Context parent)
         {
+            this.legend = legend;
+            this.parent = parent;
+        }
+
+        public Summoner_Context(Legend legend, Dungeon dungeon = null)
+        {
+            this.legend = legend;
             this.dungeon = dungeon;
         }
 

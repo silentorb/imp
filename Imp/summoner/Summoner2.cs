@@ -1,6 +1,7 @@
 ﻿using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -18,6 +19,11 @@ using Parser = runic.parser.Parser;
 
 namespace imperative.summoner
 {
+    public static class Legend_Types
+    {
+        public const string dungeon_definition = "dungeon_definition";
+    }
+
     public class Summoner2
     {
         public Overlord overlord;
@@ -38,33 +44,74 @@ namespace imperative.summoner
 
         public void summon(Group_Legend source)
         {
-            var context = new Summoner_Context(overlord.root);
-            ack(source, context, 0, process_dungeon1);
-            ack(source, context, 1, process_dungeon2);
-            ack(source, context, 2, process_dungeon3);
+            var context = new Summoner_Context(source, overlord.root);
+            var map = new Dictionary<string, List<Summoner_Context>>();
+            gather_parts(context, source.children, map);
+
+            if (map.ContainsKey(Legend_Types.dungeon_definition))
+            {
+                var dungeon_legends = map[Legend_Types.dungeon_definition];
+                foreach (var dungeon_context in dungeon_legends)
+                {
+                    process_dungeon1(dungeon_context);
+                }
+            }
+//            ack(source, context, 0, process_dungeon1);
+//            ack(source, context, 1, process_dungeon2);
+//            ack(source, context, 2, process_dungeon3);
+        }
+
+        public void summon_file(string path, bool is_external = false)
+        {
+            var was_external = this.is_external;
+            this.is_external = is_external;
+
+            var code = File.ReadAllText(path);
+            var legend = overlord.summon_legend(code, path);
+            summon(legend);
+
+            this.is_external = was_external;
+        }
+
+        public void gather_parts(Summoner_Context parent, List<Legend> parts, Dictionary<string, List<Summoner_Context>> map)
+        {
+            foreach (var child in parts)
+            {
+                var list = map.ContainsKey(child.type)
+                    ? map[child.type]
+                    : map[child.type] = new List<Summoner_Context>();
+
+                var child_context = new Summoner_Context(child, parent);
+                list.Add(child_context);
+
+                if (child.type == Legend_Types.dungeon_definition)
+                {
+                    gather_parts(child_context, child.children[3].children, map);
+                }
+            }
         }
 
         public void summon_many(IEnumerable<Legend> sources)
         {
             var contexts = new Summoner_Context[sources.Count()];
             var i = 0;
-            foreach (Group_Legend source in sources)
-            {
-                var context = contexts[i++] = new Summoner_Context(overlord.root);
-                ack(source, context, 0, process_dungeon1);
-            }
-
-            i = 0;
-            foreach (Group_Legend source in sources)
-            {
-                ack(source, contexts[i++], 1, process_dungeon2);
-            }
-
-            i = 0;
-            foreach (Group_Legend source in sources)
-            {
-                ack(source, contexts[i++], 2, process_dungeon3);
-            }
+//            foreach (Group_Legend source in sources)
+//            {
+//                var context = contexts[i++] = new Summoner_Context(null, overlord.root);
+//                ack(source, context, 0, process_dungeon1);
+//            }
+//
+//            i = 0;
+//            foreach (Group_Legend source in sources)
+//            {
+//                ack(source, contexts[i++], 1, process_dungeon2);
+//            }
+//
+//            i = 0;
+//            foreach (Group_Legend source in sources)
+//            {
+//                ack(source, contexts[i++], 2, process_dungeon3);
+//            }
         }
 
         private void ack(Group_Legend source, Summoner_Context context, int step,
@@ -87,15 +134,15 @@ namespace imperative.summoner
                         if (step != 0)
                             break;
 
-                        overlord.summon_file(pattern.children[1].text, pattern.children[0] != null);
+                        summon_file(pattern.children[1].text, pattern.children[0] != null);
                         break;
-
-                    case "namespace_statement":
-
-                        var context2 = create_realm_context(pattern, context);
-                        var statements = pattern.children[1].children;
-                        process_namespace(statements, context2, second);
-                        break;
+//
+//                    case "namespace_statement":
+//
+//                        var context2 = create_realm_context(pattern, context);
+//                        var statements = pattern.children[1].children;
+//                        process_namespace(statements, context2, second);
+//                        break;
 
                     case "class_definition":
                         second(pattern, context);
@@ -126,19 +173,19 @@ namespace imperative.summoner
             }
         }
 
-        public Dungeon process_dungeon1(Legend source, Summoner_Context context)
+        public Dungeon process_dungeon1(Summoner_Context context)
         {
-            var parts = source.children;
-            var name = source.children[2].text;
+            var parts = context.legend.children;
+            var name = parts[1].text;
             var replacement_name = context.get_string_pattern(name);
             if (replacement_name != null)
                 name = replacement_name;
 
-            if (!context.dungeon.dungeons.ContainsKey(name))
+            if (!context.parent.dungeon.dungeons.ContainsKey(name))
             {
-                var dungeon = context.dungeon.create_dungeon(name);
-                if (parts[1].text == "struct")
-                    dungeon.is_value = true;
+                var dungeon = context.dungeon = context.parent.dungeon.create_dungeon(name);
+//                if (parts[1].text == "struct")
+//                    dungeon.is_value = true;
 
                 if (parts[0] != null)
                 {
@@ -148,11 +195,12 @@ namespace imperative.summoner
                     //                    dungeon.is_value = attributes.Any(p => p.text == "value");
                 }
 
-                var parent_dungeons = source.children[3].children;
+                var parent_dungeons = parts[2].children;
                 if (parent_dungeons.Count > 0)
                     dungeon.parent = (Dungeon)get_dungeon(parent_dungeons[0].children);
 
                 dungeon.generate_code();
+                context.dungeon = dungeon;
                 return dungeon;
             }
 
@@ -161,13 +209,13 @@ namespace imperative.summoner
 
         public Dungeon process_dungeon2(Legend source, Summoner_Context context)
         {
-            var name = source.children[2].text;
+            var name = source.children[1].text;
 
             var replacement_name = context.get_string_pattern(name);
             if (replacement_name != null)
                 name = replacement_name;
 
-            var statements = source.children[4].children;
+            var statements = source.children[3].children;
             var dungeon = context.dungeon.dungeons[name];
             var dungeon_context = new Summoner_Context(context) { dungeon = dungeon };
             foreach (var statement in statements)
@@ -180,13 +228,13 @@ namespace imperative.summoner
 
         public Dungeon process_dungeon3(Legend source, Summoner_Context context)
         {
-            var name = source.children[2].text;
+            var name = source.children[1].text;
 
             var replacement_name = context.get_string_pattern(name);
             if (replacement_name != null)
                 name = replacement_name;
 
-            var statements = source.children[4].children;
+            var statements = source.children[3].children;
             var dungeon = context.dungeon.dungeons[name];
             var dungeon_context = new Summoner_Context(context) { dungeon = dungeon };
             foreach (var statement in statements)

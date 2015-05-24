@@ -1,3 +1,5 @@
-﻿class Barbarian {
-
+﻿Barbarian {
+	health:int
 }
+
+ugh:Barbarian

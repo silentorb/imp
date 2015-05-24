@@ -45,8 +45,7 @@ namespace imp_test.tests
         [Test]
         public void multifile_test()
         {
-            var input_path = Path.GetFullPath(@"..\..\resources\imp\part1.imp");
-            var overlord = Imp_Fixture.create_overlord_with_path("js", input_path);
+            var overlord = Imp_Fixture.create_overlord("js", new[] { "imp.part1.imp", "imp.part2.imp" });
             var target = (JavaScript)overlord.target;
             var output = target.generate();
             var goal = Utility.load_resource("js.part1-2.js");

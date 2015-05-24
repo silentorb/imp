@@ -1,9 +1,9 @@
-﻿class Archer {
+﻿Archer {
 
 }
 
-include "part2.imp"
-
-class Cleric {
-
+Cleric {
+	heal() {
+		ugh.health += 10
+	}
 }

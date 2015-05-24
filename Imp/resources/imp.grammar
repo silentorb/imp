@@ -1,13 +1,13 @@
-﻿start = @(namespace_class, newlines, 1, 0)
+﻿start = @(dungeon_statements, newlines, 1, 0)
 
-namespace_class = 
+dungeon_definition = @(member_attribute, 0, 0) id @(optional_parent_classes, 0, 0) block_start @(dungeon_statements, newlines, 0, 0) block_end
+
+dungeon_statements = 
 	  import_statement
 	| include_statement
-	| namespace_statement	
-	| class_definition 
-	| enum_definition
-	| external_var 
-	| function_definition
+	| function_definition 
+	| dungeon_definition
+	| property_declaration 
 
 snippets = @(snippet_function, semicolon_or_newline, 1, 0)
 
@@ -75,9 +75,7 @@ import_statement = import @(id, path_separator, 1, 0)
 
 include_statement = include @(external, 0, 1) string_value
 
-namespace_statement = namespace @(id, path_separator, 1, 0) block_start @(class_or_enum, newlines, 0, 0) block_end
-
-class_or_enum = class_definition | enum_definition
+class_or_enum = dungeon_definition | enum_definition
 
 function_definition = @(member_attribute, 0, 0) id group_start @(declare_symbol, comma, 0, 0) group_end @(type_info, 0, 1) @(long_block, 0, 1)
 
@@ -86,10 +84,6 @@ member_attribute = abstract | external | public | private | static
 snippet_function = @(function_attribute, 0, 1) id group_start @(declare_symbol, comma, 0, 0) group_end @(type_info, 0, 1) long_block_any
 
 function_attribute = private
-
-class_definition = @(member_attribute, 0, 0) @(class_or_struct, 1, 1) id @(optional_parent_classes, 0, 0) block_start @(class_statements, newlines, 0, 0) block_end
-
-class_statements = function_definition | property_declaration
 
 class_or_struct = class | struct
 
@@ -103,7 +97,7 @@ long_block = block_start @(statement, semicolon_or_newline, 0, 0) block_end
 
 long_block_any = block_start any_statement block_end
 
-any_statement = class_definition | statements
+any_statement = dungeon_definition | statements
 
 statements = @(statement, semicolon_or_newline, 0, 0)
 

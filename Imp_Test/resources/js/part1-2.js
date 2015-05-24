@@ -1,3 +1,5 @@
 ﻿Archer = function() {}
-Barbarian = function() {}
 Cleric = function() {}
+Barbarian = function () {}
+
+var ugh = new Barbarian()

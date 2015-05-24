@@ -82,19 +82,19 @@ namespace imperative
             }
         }
 
-        public void summon(string code, string filename, bool is_external = false)
-        {
-            summon2(code, filename, is_external);
-        }
+//        public void summon(string code, string filename, bool is_external = false)
+//        {
+//            summon2(code, filename, is_external);
+//        }
 
-        public void summon2(string code, string filename, bool is_external = false)
+        public void summon(string code, string filename, bool is_external = false)
         {
             var legend = summon_legend(code, filename);
             var summoner = new Summoner2(this, is_external);
             summoner.summon(legend);
         }
 
-        Legend summon_legend(string code, string filename)
+        public Legend summon_legend(string code, string filename)
         {
             var runes = Summoner2.read_runes(code, filename);
             return Summoner2.translate_runes(code, runes);
@@ -112,7 +112,8 @@ namespace imperative
         public Dungeon summon_dungeon(Snippet template, Summoner_Context context)
         {
             var summoner = new Summoner2(this);
-            summoner.process_dungeon1(template.source, context);
+            throw new Exception("Not implemented.");
+//            summoner.process_dungeon1(template.source, context);
             return summoner.process_dungeon2(template.source, context);
         }
 
@@ -201,7 +202,7 @@ namespace imperative
             if (!root.dungeons.ContainsKey("imp"))
             {
                 var code = Library.load_resource("imp.collections.Array.imp");
-                summon2(code, "Standard Library");
+                summon(code, "Standard Library");
                 root.dungeons["imp"].dungeons["collections"].is_virtual = true;
                 array = root.dungeons["imp"].dungeons["collections"].dungeons["Array"];
             }

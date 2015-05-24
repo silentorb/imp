@@ -25,7 +25,7 @@ namespace imp_test.fixtures
             foreach (var script_name in script_names)
             {
                 var code = Utility.load_resource(script_name);
-                overlord.summon2(code, script_name);
+                overlord.summon(code, script_name);
             }
 
             overlord.flatten();
