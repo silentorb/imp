@@ -89,12 +89,19 @@ namespace imperative.summoner
                     ? map[child.type]
                     : map[child.type] = new List<Summoner_Context>();
 
-                var child_context = new Summoner_Context(child, parent);
-                list.Add(child_context);
-
                 if (child.type == Legend_Types.dungeon_definition)
                 {
+                    var name = child.children[1].text;
+                    var child_context = parent.children.ContainsKey(name)
+                        ? parent.children[name]
+                        : parent.children[name] = new Summoner_Context(child, parent);
+
+                    list.Add(child_context);
                     gather_parts(child_context, child.children[3].children, map);
+                }
+                else
+                {
+                    list.Add(new Summoner_Context(child, parent));
                 }
             }
         }
@@ -115,15 +122,16 @@ namespace imperative.summoner
                 gather_parts(context, source.children, map);
             }
 
-            var dungeon_legends = map[Legend_Types.dungeon_definition];
-            foreach (var dungeon_context in dungeon_legends)
-            {
-                foreach (var legend in dungeon_context.legends)
-                {
-                    process_dungeon1(dungeon_context, legend);
-                }
-            }
+            ack2(context);
+//            foreach (var dungeon_context in dungeon_legends)
+//            {
+//                foreach (var legend in dungeon_context.legends)
+//                {
+//                    process_dungeon1(dungeon_context, legend);
+//                }
+//            }
 
+            var dungeon_legends = map[Legend_Types.dungeon_definition];
             foreach (var dungeon_context in dungeon_legends)
             {
                 foreach (var legend in dungeon_context.legends)
@@ -137,6 +145,18 @@ namespace imperative.summoner
                 foreach (var legend in dungeon_context.legends)
                 {
                     process_dungeon3(dungeon_context, legend);
+                }
+            }
+        }
+
+        void ack2(Summoner_Context context)
+        {
+            foreach (var dungeon_context in context.children.Values)
+            {
+                foreach (var legend in dungeon_context.legends)
+                {
+                    process_dungeon1(dungeon_context, legend);
+                    ack2(dungeon_context);
                 }
             }
         }
@@ -227,7 +247,7 @@ namespace imperative.summoner
 
                 var parent_dungeons = parts[2].children;
                 if (parent_dungeons.Count > 0)
-                    dungeon.parent = (Dungeon)get_dungeon(parent_dungeons[0].children);
+                    dungeon.parent = (Dungeon)get_dungeon(context.dungeon, parent_dungeons[0].children);
 
                 dungeon.generate_code();
                 context.dungeon = dungeon;
@@ -281,9 +301,9 @@ namespace imperative.summoner
             }
         }
 
-        public IDungeon get_dungeon(List<Legend> path)
+        public IDungeon get_dungeon(Dungeon dungeon, List<Legend> path)
         {
-            return overlord.root.get_dungeon(path.Select(p => p.text));
+            return dungeon.get_dungeon(path.Select(p => p.text));
         }
 
         private Summoner_Context create_realm_context(Legend source, Summoner_Context parent_context)
@@ -721,13 +741,14 @@ namespace imperative.summoner
         public Expression process_iterator(List<Legend> parts, Summoner_Context context)
         {
             var reference = process_expression_part(parts[1], context);
-            throw new Exception("Not implemented.");
-            //            var profession = reference.get_end().get_profession().get_reference();
-            //            var symbol = context.scope.create_symbol(parts[0].text, profession);
-            //            context.scope.add_map(symbol.name, c => new Variable(symbol));
-            //            return new Iterator(symbol,
-            //                                reference, process_block(parts[2], context)
-            //                );
+//            throw new Exception("Not implemented.");
+
+            var profession = reference.get_end().get_profession().children[0];
+            var symbol = context.scope.create_symbol(parts[0].text, profession);
+            context.scope.add_map(symbol.name, c => new Variable(symbol));
+            return new Iterator(symbol,
+                reference, process_block(parts[2], context)
+            );
         }
 
         public Expression summon_if_chain(List<Legend> parts, Summoner_Context context)

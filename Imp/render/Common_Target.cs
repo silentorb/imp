@@ -379,7 +379,8 @@ namespace imperative.render
                 return render_dungeon_path(profession.dungeon) + "()";
             }
 
-            throw new Exception("Invalid literal " + value + " type " + profession + ".");
+            return null;
+//            throw new Exception("Invalid literal " + value + " type " + profession.dungeon.name + ".");
         }
 
         //        virtual protected string render_enum_value(Treasury treasury, int value)

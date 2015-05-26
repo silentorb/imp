@@ -58,27 +58,16 @@ namespace imperative.summoner
 //                        context, step + 1));
             }
 
-            Expression result;
-
-            result = process_idungeon(context.dungeon,
-                summoner, patterns, context, 0);
-
-            if (result != null)
-                return result;
-
-            if (context.dungeon.realm != null)
+            var current_dungeon = context.dungeon;
+            while (current_dungeon != null)
             {
-                result = process_idungeon(context.dungeon.realm, summoner, patterns, context, 0);
+                var result = process_idungeon(current_dungeon, summoner, patterns, context, 0);
                 if (result != null)
                     return result;
+
+                current_dungeon = current_dungeon.realm;
             }
-
-            result = process_idungeon(context.dungeon.overlord.root, 
-                summoner, patterns, context, 0);
-
-            if (result != null)
-                return result;
-
+           
             throw new Parser_Exception("Unknown symbol: " + token, pattern.position);
         }
 
@@ -185,8 +174,8 @@ namespace imperative.summoner
                     context, step + 1);
 
             if (child == null)
-                throw new Exception("Dungeon " + symbol.profession.dungeon.name
-                    + " does not have a member named " + patterns[step + 1].children[0].text + ".");
+                throw new Parser_Exception("Dungeon " + symbol.profession.dungeon.name
+                    + " does not have a member named " + patterns[step + 1].children[0].text + ".", patterns[step + 1].position);
 
             return append(result, child);
         }

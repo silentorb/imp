@@ -93,7 +93,10 @@ namespace metahub.render.targets
                 + (total == 0 ? "" :
                 add(dungeon_prefix + ".prototype =") + render_scope(() =>
                 portals.Select(portal =>
-                    render_line(add(portal.name + ": " + get_default_value(portal))))
+                {
+                    var assignment = get_default_value(portal);
+                    return render_line(add(portal.name + (assignment != null ? ": " + assignment : "")));
+                })
                 .join("")
                 + minions.Select(minion =>
                     render_line(add(minion.name + ": " + render_function_definition(minion))))

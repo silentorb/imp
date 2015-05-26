@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using imperative.expressions;
+using metahub.render;
 using metahub.schema;
 using Expression = imperative.expressions.Expression;
 using Namespace = imperative.expressions.Namespace;
@@ -543,37 +544,53 @@ namespace imperative.schema
             return result;
         }
 
-        public IDungeon get_dungeon_from_path(string path)
+        public Dungeon get_dungeon_from_path(string path)
         {
             return get_dungeon(path.Split('.'));
         }
 
-        public IDungeon get_dungeon(string child_name)
+        public Dungeon get_dungeon(string child_name)
         {
-            if (dungeons.ContainsKey(child_name))
-                return dungeons[child_name];
-
-//            if (treasuries.ContainsKey(child_name))
-//                return treasuries[child_name];
-
-            return null;
+            return dungeons.ContainsKey(child_name) 
+                ? dungeons[child_name] 
+                : null;
         }
 
-        public IDungeon get_dungeon(IEnumerable<string> original_path, bool throw_error = true)
+        public Dungeon get_dungeon(IEnumerable<string> original_path, bool throw_error = true)
         {
-            var realm = this;
+            var result = this;
             var path = original_path.ToArray();
-            var tokens = path.Take(path.Length - 1).ToArray();
+            var tokens = path.ToArray();
             foreach (var token in tokens)
             {
-                realm = realm.get_child_realm(token, throw_error);
+                result = result.get_child_realm(token, throw_error);
+                if (result == null)
+                    break;
             }
 
-            if (realm == null && !throw_error)
-                return null;
+            if (result != null)
+                return result;
 
-            return realm.get_dungeon(path.Last());
+//            if (realm == null && !throw_error)
+//                return null;
+
+//            if (path.Length == 1)
+//                return realm.get_dungeon_descending(path.Last());
+
+            if (realm != null)
+            {
+                return realm.get_dungeon(original_path, throw_error);
+            }
+           
+            throw new Exception("Invalid path: " + original_path.join("."));
         }
+
+//        public Dungeon get_dungeon_descending(string path)
+//        {
+//            return get_dungeon(path) ?? (realm != null
+//                ? realm.get_dungeon_descending(path)
+//                : null);
+//        }
 
         public Dungeon get_child_realm(string token, bool throw_error = true)
         {

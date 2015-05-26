@@ -14,6 +14,7 @@ namespace imperative.summoner
         public Dungeon dungeon;
         public Scope scope;
         public Summoner_Context parent;
+        public Dictionary<string, Summoner_Context> children = new Dictionary<string, Summoner_Context>(); 
         public List<Legend> legends = new List<Legend>();
         protected Dictionary<string, string> string_inserts = new Dictionary<string, string>();
         protected Dictionary<string, Profession> profession_inserts = new Dictionary<string, Profession>();
