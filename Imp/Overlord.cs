@@ -114,7 +114,7 @@ namespace imperative
             var summoner = new Summoner2(this);
             throw new Exception("Not implemented.");
 //            summoner.process_dungeon1(template.source, context);
-            return summoner.process_dungeon2(template.source, context);
+//            return summoner.process_dungeon2(template.source, context);
         }
 
         public Expression summon_snippet(Snippet template, Summoner_Context context)

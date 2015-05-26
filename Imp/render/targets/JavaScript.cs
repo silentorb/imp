@@ -31,7 +31,9 @@ namespace metahub.render.targets
         override public void run(Overlord_Configuration settings)
         {
             var output = generate();
-            var output_path = File.Exists(settings.input)
+            var output_path = !string.IsNullOrEmpty(settings.output)
+                ? settings.output
+                : File.Exists(settings.input)
                 ? settings.output + Path.GetFileNameWithoutExtension(settings.input) + ".js"
                 : settings.output + "/" + "lib.js";
 
@@ -67,7 +69,7 @@ namespace metahub.render.targets
 
         override protected string render_dungeon(Dungeon dungeon, IEnumerable<Expression> statements)
         {
-            if (dungeon.is_abstract)
+            if (dungeon.is_abstract || dungeon.get_type() == Dungeon_Types.Namespace)
                 return "";
 
             current_dungeon = dungeon;
@@ -338,7 +340,8 @@ namespace metahub.render.targets
             if (realm.name == "")
                 return action();
 
-            var result = line("var " + realm.name + " = {}") + newline();
+            var fullname = "window." + render_dungeon_path(realm);
+            var result = line(fullname + " = " + fullname + " || {}") + newline();
 
             current_realm = realm;
             var body = action();

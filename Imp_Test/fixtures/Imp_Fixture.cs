@@ -21,12 +21,16 @@ namespace imp_test.fixtures
         public static Overlord create_overlord(string target_name, string[] script_names)
         {
             var overlord = new Overlord(target_name);
+            var summoner = new Summoner2(overlord);
+            summoner.summon_many(script_names.Select(s =>
+                overlord.summon_legend(Utility.load_resource(s), s)
+            ));
 
-            foreach (var script_name in script_names)
-            {
-                var code = Utility.load_resource(script_name);
-                overlord.summon(code, script_name);
-            }
+//            foreach (var script_name in script_names)
+//            {
+//                var code = Utility.load_resource(script_name);
+//                overlord.summon_many(code, script_name);
+//            }
 
             overlord.flatten();
             overlord.post_analyze();

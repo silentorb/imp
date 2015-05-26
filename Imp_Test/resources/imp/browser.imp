@@ -1,65 +1,64 @@
-﻿namespace browser {
-	external class Window {
+﻿browser {
+	external Window {
 		$q:Q
 	}
 	
-	external class Injector {
+	external Injector {
 		get(name:string)
 	}
 
-	external class Angular {
+	external Angular {
 		injector(name:string):Injector
 	}
 
-	external class Promise {
+	external Promise {
 		then(a):Promise
 	}
 
-	external class Element {
+	external Element {
 		addClass()
 		insertAfter()
 		remove()
 	}
 
-	external class Q {
+	external Q {
 		defer():Deferred
 	}
 
-	external class Deferred {
+	external Deferred {
 		resolve()
 		reject()
 		promise:Promise		
 	}
 
-	external class Json {
+	external Json {
 		stringify(input)
 		parse(input:string)
 	}
 
-	external class jQuery_Class {
+	external jQuery_Class {
 		ajax()
 	}
 }
 
-external var window:browser.Window
-external var angular:browser.Angular
-external var $q:browser.Q
-external var JSON:browser.Json
-external var jQuery:browser.jQuery_Class
+external window:browser.Window
+external angular:browser.Angular
+external $q:browser.Q
+external JSON:browser.Json
+external jQuery:browser.jQuery_Class
 external $():browser.Element
 
+bloom {
 
-namespace bloom {
-
-	abstract class Response {
+	abstract Response {
 		objects:any[]
 	}
 
-	abstract class User {
+	abstract User {
 		username:string
 	}
 
-  class Garden {
+  Garden {
     static vineyard_url:string = 'http://localhost:3000/'
 
     static start() {

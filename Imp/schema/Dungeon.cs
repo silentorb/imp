@@ -497,9 +497,9 @@ namespace imperative.schema
 
             var definition = new Function_Definition(minion);
 
-            var block = get_block("class_definition");
-            block.add(definition);
-            definition.scope = minion.scope = new Scope(block.scope);
+//            var block = get_block("class_definition");
+//            block.add(definition);
+            definition.scope = minion.scope = new Scope();
             minion.scope.minion = minion;
 
             if (on_add_minion != null)
@@ -635,6 +635,14 @@ namespace imperative.schema
             }
 
             return realm;
+        }
+
+        public Dungeon_Types get_type()
+        {
+            if (all_portals.Count == 0 && minions.Count == 0)
+                return Dungeon_Types.Namespace;
+
+            return Dungeon_Types.Class;
         }
 
 //        public Treasury create_treasury(string treasury_name, List<string> jewels)

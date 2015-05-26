@@ -14,7 +14,7 @@ namespace imperative.summoner
         public Dungeon dungeon;
         public Scope scope;
         public Summoner_Context parent;
-        public Legend legend;
+        public List<Legend> legends = new List<Legend>();
         protected Dictionary<string, string> string_inserts = new Dictionary<string, string>();
         protected Dictionary<string, Profession> profession_inserts = new Dictionary<string, Profession>();
         protected Dictionary<string, Expression_Generator> expression_lambda_inserts = new Dictionary<string, Expression_Generator>();
@@ -26,13 +26,17 @@ namespace imperative.summoner
 
         public Summoner_Context(Legend legend, Summoner_Context parent)
         {
-            this.legend = legend;
+            if (legend != null)
+                legends.Add(legend);
+
             this.parent = parent;
         }
 
         public Summoner_Context(Legend legend, Dungeon dungeon = null)
         {
-            this.legend = legend;
+            if (legend != null)
+                legends.Add(legend);
+
             this.dungeon = dungeon;
         }
 
