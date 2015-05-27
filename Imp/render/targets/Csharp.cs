@@ -24,7 +24,8 @@ namespace imperative.render.targets
                     indent = 4,
                     block_brace_same_line = false,
                     explicit_public_members = true,
-                    type_mode = Type_Mode.required_prefix
+                    type_mode = Type_Mode.required_prefix,
+                    foreach_symbol = "foreach"
                 };
 
             types["reference"] = "object";

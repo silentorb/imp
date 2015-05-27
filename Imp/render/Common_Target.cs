@@ -430,7 +430,7 @@ namespace imperative.render
             //            var it = parameter.scope.create_symbol(parameter.name, parameter.profession);
             var expression = render_iterator(parameter, statement.expression);
 
-            var result = add("foreach (" + expression + ")") + render_scope(statement.body);
+            var result = add(config.foreach_symbol + " (" + expression + ")") + render_scope(statement.body);
             return result;
         }
 

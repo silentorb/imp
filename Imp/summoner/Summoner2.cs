@@ -247,7 +247,11 @@ namespace imperative.summoner
 
                 var parent_dungeons = parts[2].children;
                 if (parent_dungeons.Count > 0)
-                    dungeon.parent = (Dungeon)get_dungeon(context.dungeon, parent_dungeons[0].children);
+                {
+                    var parent = (Dungeon)get_dungeon(context.dungeon, parent_dungeons[0].children);
+                    dungeon.parent = parent;
+                    parent.children.Add(dungeon);
+                }
 
                 dungeon.generate_code();
                 context.dungeon = dungeon;
@@ -303,7 +307,14 @@ namespace imperative.summoner
 
         public IDungeon get_dungeon(Dungeon dungeon, List<Legend> path)
         {
-            return dungeon.get_dungeon(path.Select(p => p.text));
+            try
+            {
+                return dungeon.get_dungeon(path.Select(p => p.text));
+            }
+            catch (Exception exception)
+            {
+                throw new Parser_Exception(exception.Message, path.First().position);
+            }
         }
 
         private Summoner_Context create_realm_context(Legend source, Summoner_Context parent_context)

@@ -23,6 +23,7 @@ namespace imperative.schema
         public Dictionary<string, Dungeon> dungeons = new Dictionary<string, Dungeon>();
 //        public Dictionary<string, Treasury> treasuries = new Dictionary<string, Treasury>();
         public Dungeon parent;
+        public List<Dungeon> children = new List<Dungeon>(); 
         public List<Expression> code;
         public Dictionary<string, string[]> inserts;
         Dictionary<string, Accordian> blocks = new Dictionary<string, Accordian>();
@@ -89,6 +90,7 @@ namespace imperative.schema
             if (parent != null)
             {
                 this.parent = parent;
+                parent.children.Add(this);
                 foreach (var portal in parent.all_portals.Values)
                 {
                     all_portals[portal.name] = new Portal(portal, this);
@@ -219,9 +221,18 @@ namespace imperative.schema
                 throw new Exception("Dungeon " + name + " already has a portal named " + portal.name + ".");
 
             portal.dungeon = this;
-            all_portals[portal.name] = portal;
             core_portals[portal.name] = portal;
+            add_inherited_portal(portal);
             return portal;
+        }
+
+        protected void add_inherited_portal(Portal portal)
+        {
+            all_portals[portal.name] = portal;
+            foreach (var child in children)
+            {
+                child.add_inherited_portal(portal);
+            }          
         }
 
         public bool has_portal(string portal_name)
@@ -563,7 +574,7 @@ namespace imperative.schema
             var tokens = path.ToArray();
             foreach (var token in tokens)
             {
-                result = result.get_child_realm(token, throw_error);
+                result = result.get_child_realm(token, false);
                 if (result == null)
                     break;
             }

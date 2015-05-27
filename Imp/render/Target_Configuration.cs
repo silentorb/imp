@@ -20,6 +20,7 @@ namespace imperative.render
         public bool explicit_public_members = false;    // Whether members require a "public" prefix to be public.
         public bool implicit_this = true;               // Whether "this" is required to reference local members.
         public bool float_suffix = false;               // Whether literal floats should be suffixed with 'f'.
+        public string foreach_symbol = "for";           // (Not for for loops, just foreach)
         public int indent = 2;                          // Default indentation.
         public string namespace_keyword = "namespace";  // Usually either namespace or module.
         public string namespace_separator = ".";        // Some languages use ::

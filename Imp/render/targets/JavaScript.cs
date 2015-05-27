@@ -75,33 +75,36 @@ namespace metahub.render.targets
             current_dungeon = dungeon;
 
             var i = 0;
-            var portals = dungeon.core_portals.Values.Where(p => !p.has_enchantment("static")).ToArray();
-            var static_portals = dungeon.core_portals.Values.Except(portals);
+            var portals = dungeon.core_portals.Values.Where(p => !p.has_enchantment("abstract")).ToArray();
+            var instance_portals = portals.Where(p => !p.has_enchantment("static")).ToArray();
+            var static_portals = portals.Except(instance_portals);
 
-            var minions = dungeon.minions.Values.Where(p => !p.has_enchantment("static")).ToArray();
-            var static_minions = dungeon.minions.Values.Except(minions);
+            var minions = dungeon.minions.Values.Where(p => !p.has_enchantment("abstract")).ToArray();
+            var instance_minions = minions.Where(p => !p.has_enchantment("static")).ToArray();
+            var static_minions = minions.Except(instance_minions);
 
-            var total = portals.Length + minions.Length;
+            var total = instance_portals.Length + instance_minions.Length;
             String_Delegate2 render_line = text => ++i < total
                     ? text + "," + newline()
                     : text;
 
             var dungeon_prefix = render_dungeon_path(dungeon);
-            var result = line(render_dungeon_path(dungeon) + " = function() {}")
+            var result = add(render_dungeon_path(dungeon) + " = function() {}") + newline()
                 + render_static_properties(dungeon_prefix, static_portals)
                 + render_static_minions(dungeon_prefix, static_minions)
                 + (total == 0 ? "" :
                 add(dungeon_prefix + ".prototype =") + render_scope(() =>
-                portals.Select(portal =>
+                instance_portals.Select(portal =>
                 {
-                    var assignment = get_default_value(portal);
-                    return render_line(add(portal.name + (assignment != null ? ": " + assignment : "")));
+                    var assignment = get_default_value(portal) ?? render_null();
+                    return render_line(add(portal.name + ": " + assignment));
                 })
                 .join("")
-                + minions.Select(minion =>
+                + instance_minions.Select(minion =>
                     render_line(add(minion.name + ": " + render_function_definition(minion))))
                 .join("")
-                + newline())
+                + newline()
+               ) + newline()
             );
 
             current_dungeon = null;
@@ -196,18 +199,18 @@ namespace metahub.render.targets
                 : "this";
         }
 
-        override protected string render_iterator_block(Iterator statement)
-        {
-            var parameter = statement.parameter;
-            var it = parameter.scope.create_symbol("it", parameter.profession);
-            var expression = render_iterator(it, statement.expression);
-
-            var result = add("for (" + expression + ")") + render_scope(new List<Expression> { 
-                    new Declare_Variable(parameter, new Insert("*" + it.name))
-                }.Concat(statement.body).ToList()
-            );
-            return result;
-        }
+//        override protected string render_iterator_block(Iterator statement)
+//        {
+//            var parameter = statement.parameter;
+//            var it = parameter.scope.create_symbol("it", parameter.profession);
+//            var expression = render_iterator(it, statement.expression);
+//
+//            var result = add("for (" + expression + ")") + render_scope(new List<Expression> { 
+//                    new Declare_Variable(parameter, new Insert("*" + it.name))
+//                }.Concat(statement.body).ToList()
+//            );
+//            return result;
+//        }
 
         //        string render_operation(Operation operation)
         //        {
@@ -218,14 +221,14 @@ namespace metahub.render.targets
         //            ).join(" " + operation.op + " ");
         //        }
 
-        override protected string render_iterator(Symbol parameter, Expression expression)
-        {
-            var path_string = render_expression(expression);
-            return
-                "::const_iterator " + parameter.name + " = "
-                + path_string + ".begin(); " + parameter.name + " != "
-                + path_string + ".end(); " + parameter.name + "++";
-        }
+//        override protected string render_iterator(Symbol parameter, Expression expression)
+//        {
+//            var path_string = render_expression(expression);
+//            return
+//                "::const_iterator " + parameter.name + " = "
+//                + path_string + ".begin(); " + parameter.name + " != "
+//                + path_string + ".end(); " + parameter.name + "++";
+//        }
 
         override protected string render_scope(String_Delegate action)
         {
@@ -344,7 +347,7 @@ namespace metahub.render.targets
                 return action();
 
             var fullname = "window." + render_dungeon_path(realm);
-            var result = line(fullname + " = " + fullname + " || {}") + newline();
+            var result = add(fullname + " = " + fullname + " || {}") + newline();
 
             current_realm = realm;
             var body = action();
