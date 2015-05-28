@@ -703,7 +703,7 @@ namespace imperative.summoner
             var last = reference.get_end();
             if (reference != null && reference.type == Expression_Type.operation)
                 throw new Exception("Cannot call function on operation.");
-
+            /*
             if (last.type == Expression_Type.portal && op != "@="
                 && (reference.get_profession().dungeon != Professions.List || op != "="))
             {
@@ -741,7 +741,7 @@ namespace imperative.summoner
             // @= forces direct assignment without setters
             if (op == "@=")
                 op = "=";
-
+            */
             return new Assignment(
                 reference,
                 op,

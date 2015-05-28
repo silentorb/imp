@@ -79,7 +79,8 @@ namespace metahub.render.targets
             var instance_portals = portals.Where(p => !p.has_enchantment("static")).ToArray();
             var static_portals = portals.Except(instance_portals);
 
-            var minions = dungeon.minions.Values.Where(p => !p.has_enchantment("abstract")).ToArray();
+            var minions = dungeon.minions.Values.Where(p => 
+                !p.has_enchantment("abstract") && p.name != "constructor").ToArray();
             var instance_minions = minions.Where(p => !p.has_enchantment("static")).ToArray();
             var static_minions = minions.Except(instance_minions);
 
@@ -89,7 +90,7 @@ namespace metahub.render.targets
                     : text;
 
             var dungeon_prefix = render_dungeon_path(dungeon);
-            var result = add(render_dungeon_path(dungeon) + " = function() {}") + newline()
+            var result = add(render_dungeon_path(dungeon) + " = " + render_constructor(dungeon)) + newline()
                 + render_static_properties(dungeon_prefix, static_portals)
                 + render_static_minions(dungeon_prefix, static_minions)
                 + (total == 0 ? "" :
@@ -110,6 +111,13 @@ namespace metahub.render.targets
             current_dungeon = null;
 
             return result;
+        }
+
+        string render_constructor(Dungeon dungeon)
+        {
+            return !dungeon.minions.ContainsKey("constructor")
+                ? "function() {}"
+                : render_function_definition(dungeon.minions["constructor"]);
         }
 
         string render_static_properties(string dungeon_prefix, IEnumerable<Portal> portals)

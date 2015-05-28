@@ -166,14 +166,14 @@ namespace imperative.render
         {
             var portal = portal_expression.portal;
             var result = portal.name;
-            if (portal_expression.parent == null || !portal_expression.parent.is_token())
+            if (portal_expression.parent == null || portal_expression.parent.next != portal_expression)
             {
                 if (portal.has_enchantment(Enchantments.Static))
                 {
                     if (portal.dungeon.name != "")
                         result = render_dungeon_path(portal.dungeon) + "." + result;
                 }
-                else if (!config.implicit_this && portal.dungeon.realm != null)
+                else if (!config.implicit_this && portal.dungeon.name != "")
                 {
                     result = render_this() + "." + result;
                 }
@@ -455,9 +455,9 @@ namespace imperative.render
                 ? render_expression(expression.reference) + "."
                 : "";
 
-            if (!config.implicit_this && expression.reference != null
-                && expression.reference.type == Expression_Type.portal
-                 && ((Portal_Expression)expression.reference).portal.dungeon.realm != null)
+            if (!config.implicit_this && (expression.reference == null
+                || (expression.reference.type == Expression_Type.portal 
+                && ((Portal_Expression)expression.reference).portal.dungeon.name != "")))
                 ref_full = render_this() + "." + ref_full;
 
             var args = expression.args.Select(e => render_expression(e)).join(", ");
