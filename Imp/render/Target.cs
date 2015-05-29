@@ -40,7 +40,7 @@ namespace metahub.render
             return add(text) + newline();
         }
 
-        public Renderer indent()
+        public string indent()
         {
             var tab = "\t";
             if (config.space_tabs)
@@ -53,7 +53,8 @@ namespace metahub.render
                 }
             }
 
-            return render.indent(tab);
+            render.indent(tab);
+            return "";
         }
 
         public string unindent()

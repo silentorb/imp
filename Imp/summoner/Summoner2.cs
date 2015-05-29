@@ -245,10 +245,9 @@ namespace imperative.summoner
                     //                    dungeon.is_value = attributes.Any(p => p.text == "value");
                 }
 
-                var parent_dungeons = parts[2].children;
-                if (parent_dungeons.Count > 0)
+                if (parts[2] != null)
                 {
-                    var parent = (Dungeon)get_dungeon(context.dungeon, parent_dungeons[0].children);
+                    var parent = (Dungeon)get_dungeon(context.dungeon, parts[2].children);
                     dungeon.parent = parent;
                     parent.children.Add(dungeon);
                 }

@@ -94,18 +94,22 @@ namespace metahub.render.targets
                 + render_static_properties(dungeon_prefix, static_portals)
                 + render_static_minions(dungeon_prefix, static_minions)
                 + (total == 0 ? "" :
-                add(dungeon_prefix + ".prototype =") + render_scope(() =>
-                instance_portals.Select(portal =>
+                add(dungeon_prefix + ".prototype = " + (dungeon.parent != null 
+                    ? "Object.create(" + render_dungeon_path(dungeon.parent) + ".prototype)"
+                    : "{}")) 
+                    + newline()
+
+                + instance_portals.Select(portal =>
                 {
                     var assignment = get_default_value(portal) ?? render_null();
-                    return render_line(add(portal.name + ": " + assignment));
+                    return add(render_dungeon_path(dungeon) + ".prototype." + portal.name + " = " + assignment) + newline();
                 })
                 .join("")
                 + instance_minions.Select(minion =>
-                    render_line(add(minion.name + ": " + render_function_definition(minion))))
+                    add(render_dungeon_path(dungeon) + ".prototype." + minion.name + " = " 
+                    + render_function_definition(minion)) + newline())
                 .join("")
                 + newline()
-               ) + newline()
             );
 
             current_dungeon = null;
@@ -116,7 +120,9 @@ namespace metahub.render.targets
         string render_constructor(Dungeon dungeon)
         {
             return !dungeon.minions.ContainsKey("constructor")
-                ? "function() {}"
+                ? "function() {" + (dungeon.parent != null 
+                    ? newline() + indent() + add(render_dungeon_path(dungeon.parent) + ".apply(this)") + newline() + unindent()
+                    : "") + add("}")
                 : render_function_definition(dungeon.minions["constructor"]);
         }
 
@@ -135,7 +141,8 @@ namespace metahub.render.targets
             var result = "";
             foreach (var portal in dungeon.core_portals.Values)
             {
-                result += line(portal.name + ": " + get_default_value(portal));
+                result += line(render_dungeon_path(dungeon) + ".prototype." + portal.name + " = "
+                    + get_default_value(portal));
             }
 
             return result;
@@ -207,18 +214,18 @@ namespace metahub.render.targets
                 : "this";
         }
 
-//        override protected string render_iterator_block(Iterator statement)
-//        {
-//            var parameter = statement.parameter;
-//            var it = parameter.scope.create_symbol("it", parameter.profession);
-//            var expression = render_iterator(it, statement.expression);
-//
-//            var result = add("for (" + expression + ")") + render_scope(new List<Expression> { 
-//                    new Declare_Variable(parameter, new Insert("*" + it.name))
-//                }.Concat(statement.body).ToList()
-//            );
-//            return result;
-//        }
+        //        override protected string render_iterator_block(Iterator statement)
+        //        {
+        //            var parameter = statement.parameter;
+        //            var it = parameter.scope.create_symbol("it", parameter.profession);
+        //            var expression = render_iterator(it, statement.expression);
+        //
+        //            var result = add("for (" + expression + ")") + render_scope(new List<Expression> { 
+        //                    new Declare_Variable(parameter, new Insert("*" + it.name))
+        //                }.Concat(statement.body).ToList()
+        //            );
+        //            return result;
+        //        }
 
         //        string render_operation(Operation operation)
         //        {
@@ -229,14 +236,14 @@ namespace metahub.render.targets
         //            ).join(" " + operation.op + " ");
         //        }
 
-//        override protected string render_iterator(Symbol parameter, Expression expression)
-//        {
-//            var path_string = render_expression(expression);
-//            return
-//                "::const_iterator " + parameter.name + " = "
-//                + path_string + ".begin(); " + parameter.name + " != "
-//                + path_string + ".end(); " + parameter.name + "++";
-//        }
+        //        override protected string render_iterator(Symbol parameter, Expression expression)
+        //        {
+        //            var path_string = render_expression(expression);
+        //            return
+        //                "::const_iterator " + parameter.name + " = "
+        //                + path_string + ".begin(); " + parameter.name + " != "
+        //                + path_string + ".end(); " + parameter.name + "++";
+        //        }
 
         override protected string render_scope(String_Delegate action)
         {
