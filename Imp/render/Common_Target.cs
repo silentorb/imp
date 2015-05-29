@@ -669,10 +669,11 @@ namespace imperative.render
 
         virtual protected string render_profession(Profession signature, bool is_parameter = false)
         {
-            throw new Exception("Not implemented.");
-            var name = signature.dungeon != null
-                ? signature.dungeon.name
-                : types[signature.dungeon.name.ToString().ToLower()];
+//            throw new Exception("Not implemented.");
+            var lower_name = signature.dungeon.name.ToLower();
+            var name = types.ContainsKey(lower_name)
+                ? types[lower_name]
+                : render_dungeon_path(signature.dungeon);
 
             return signature.dungeon == Professions.List
                 ? listify(name, signature)
