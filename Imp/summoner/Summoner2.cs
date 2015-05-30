@@ -420,7 +420,12 @@ namespace imperative.summoner
             }
             else if (parts[3] != null)
             {
-                context.dungeon.all_portals[portal_name].default_expression = process_expression(parts[3], context);
+                var base_portal = context.dungeon.all_portals[portal_name];
+                if (base_portal.dungeon != context.dungeon)
+                {
+                    var portal = context.dungeon.all_portals[portal_name] = new Portal(base_portal, context.dungeon);
+                    portal.default_expression = process_expression(parts[3], context);
+                }
             }
         }
 

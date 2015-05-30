@@ -182,6 +182,12 @@ namespace metahub.render.targets
                 + render_minion_scope(minion);
         }
 
+        private bool is_instance_start_portal(Portal_Expression portal_expression)
+        {
+            return is_start_portal(portal_expression)
+                   && !portal_expression.portal.has_enchantment(Enchantments.Static);
+        }
+
         protected string render_function_definition(Minion minion)
         {
             if (minion.is_abstract)
@@ -189,7 +195,10 @@ namespace metahub.render.targets
 
             // Search for any case of "this" inside an anonymous function.
             var minions = minion.expression.find(Expression_Type.anonymous_function);
-            if (minions.Any(m => m.find(e => e.type == Expression_Type.self || e.type == Expression_Type.property_function_call).Any()))
+            if (minions.Any(m => m.find(e => e.type == Expression_Type.self
+                || (e.type == Expression_Type.portal 
+                && is_instance_start_portal((Portal_Expression)e)
+                )).Any()))
             {
                 var self = minion.scope.create_symbol("self", current_dungeon.overlord.library.get(current_dungeon));
                 minion.expressions.Insert(0, new Declare_Variable(self, new Self(minion.dungeon)));

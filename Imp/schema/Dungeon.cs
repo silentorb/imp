@@ -288,7 +288,11 @@ namespace imperative.schema
                 return;
 
             transform_expressions(code, null);
-            analyze_expressions(code);
+            foreach (var minion in minions.Values)
+            {
+                analyze_expressions(minion.expressions);
+            }
+//            analyze_expressions(code);
         }
 
         void transform_expression(Expression expression, Expression parent)

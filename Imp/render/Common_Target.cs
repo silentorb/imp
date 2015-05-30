@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using imperative.expressions;
 using imperative.schema;
@@ -162,11 +163,17 @@ namespace imperative.render
             return "this";
         }
 
+        protected bool is_start_portal(Portal_Expression portal_expression)
+        {
+            return portal_expression.parent == null 
+                || portal_expression.parent.next != portal_expression;
+        }
+
         virtual protected string render_portal(Portal_Expression portal_expression)
         {
             var portal = portal_expression.portal;
             var result = portal.name;
-            if (portal_expression.parent == null || portal_expression.parent.next != portal_expression)
+            if (is_start_portal(portal_expression))
             {
                 if (portal.has_enchantment(Enchantments.Static))
                 {
@@ -488,18 +495,19 @@ namespace imperative.render
 
             if (method_call != null)
             {
-                if (method_call.minion == Professions.List.minions["get"])
+                var minion = method_call.minion;
+                if (minion == Professions.List.minions["get"])
                     return render_list(parent.get_profession(), expression.args);
 
                 if (method_call.parent == null || !method_call.parent.is_token())
                 {
-                    if (method_call.minion != null && method_call.minion.has_enchantment(Enchantments.Static))
+                    if (minion != null && minion.has_enchantment(Enchantments.Static))
                     {
-                        this_string = render_dungeon_path(current_dungeon);
+                        this_string = render_dungeon_path(minion.dungeon);
                     }
                     else if (!config.implicit_this
-                             && method_call.minion != null
-                             && method_call.minion.dungeon.realm != null)
+                             && minion != null
+                             && minion.dungeon.realm != null)
                     {
                         this_string = render_this();
                     }

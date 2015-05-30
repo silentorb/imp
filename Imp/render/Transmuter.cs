@@ -12,7 +12,7 @@ namespace metahub.render
 
         private static Expression_Type[] expression_ancestor_types = new []
             {
-                Expression_Type.property,
+                Expression_Type.portal,
                 Expression_Type.variable,
                 Expression_Type.property_function_call,
                 Expression_Type.function_call
