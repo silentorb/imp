@@ -137,7 +137,8 @@ namespace metahub.render.targets
 
             render = new Renderer();
             return render_includes(headers) + newline()
-                         + render_statements(dungeon.code);
+//                         + render_statements(dungeon.code);
+                   + render_dungeon(dungeon);
 
         }
         //
@@ -315,13 +316,9 @@ namespace metahub.render.targets
 
         override protected string render_dungeon(Dungeon dungeon)
         {
-            var result = "";
-
-            //result += pad(render_functions(trellis));
-            result += newline(); //+ render_statements(statements, newline());
-            unindent();
-
-            return result;
+            return render_realm(dungeon.realm, ()=>
+                dungeon.minions.Values.Select(render_function_definition).join("")
+            );
         }
 
         override protected string render_realm(Dungeon realm, String_Delegate action)
@@ -350,7 +347,7 @@ namespace metahub.render.targets
         //            return path.join("::");
         //        }
 
-        override protected string render_function_definition(Function_Definition definition)
+        override protected string render_function_definition(Minion definition)
         {
             if (definition.is_abstract)
                 return "";

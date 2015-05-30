@@ -190,7 +190,7 @@ namespace imperative.render
             switch (type)
             {
                 case Expression_Type.function_definition:
-                    return render_function_definition((Function_Definition)statement);
+                    return render_function_definition(((Function_Definition)statement).minion);
 
                 case Expression_Type.flow_control:
                     var flow_control = (Flow_Control)statement;
@@ -677,14 +677,14 @@ namespace imperative.render
             return type + "[]";
         }
 
-        virtual protected string render_function_definition(Function_Definition definition)
+        virtual protected string render_function_definition(Minion definition)
         {
             if (definition.is_abstract && !config.supports_abstract)
                 return "";
 
             var intro = (config.explicit_public_members ? "public " : "")
-                + (definition.minion.is_abstract ? "abstract " : "")
-                + (definition.minion.is_static ? "static " : "")
+                + (definition.is_abstract ? "abstract " : "")
+                + (definition.is_static ? "static " : "")
                 + (definition.return_type != null ? render_profession(definition.return_type) + " " : "")
                 + definition.name
                 + "(" + definition.parameters.Select(render_definition_parameter).join(", ") + ")";

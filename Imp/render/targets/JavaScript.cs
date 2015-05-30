@@ -163,7 +163,7 @@ namespace metahub.render.targets
             return first + newline();
         }
 
-        override protected string render_function_definition(Function_Definition definition)
+        protected string render_function_definition(Function_Definition definition)
         {
             if (definition.is_abstract)
                 return "";
