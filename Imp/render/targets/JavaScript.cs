@@ -45,12 +45,9 @@ namespace metahub.render.targets
             var output = "";
             foreach (var dungeon in overlord.dungeons)
             {
-                if (dungeon.is_external || (dungeon.is_abstract && dungeon.is_external))
+                if (dungeon.is_external || dungeon.is_external
+                    || dungeon.name == "")
                     continue;
-
-                //Console.WriteLine(dungeon.realm.name + "." + dungeon.name);
-
-                var space = Generator.get_namespace_path(dungeon.realm);
 
                 line_count = 0;
                 output += create_class_file(dungeon);
@@ -62,20 +59,27 @@ namespace metahub.render.targets
         string create_class_file(Dungeon dungeon)
         {
             render = new Renderer();
-            var result = render_statements(dungeon.code);
+            var result = render_dungeon(dungeon);
 
             return result;
         }
 
-        override protected string render_dungeon(Dungeon dungeon, IEnumerable<Expression> statements)
+        override protected string render_dungeon(Dungeon dungeon)
         {
-            if (dungeon.is_abstract || dungeon.get_type() == Dungeon_Types.Namespace)
+            if (dungeon.is_abstract)
                 return "";
+
+            if (dungeon.get_type() == Dungeon_Types.Namespace)
+            {
+                var fullname = "window." + render_dungeon_path(dungeon);
+                return add(fullname + " = " + fullname + " || {}") + newline();
+            }
 
             current_dungeon = dungeon;
 
             var i = 0;
-            var portals = dungeon.core_portals.Values.Where(p => !p.has_enchantment("abstract")).ToArray();
+            var portals = dungeon.all_portals.Values.Where(p => !p.has_enchantment("abstract")
+                && (dungeon.core_portals.ContainsKey(p.name) || p.default_expression != null)).ToArray();
             var instance_portals = portals.Where(p => !p.has_enchantment("static")).ToArray();
             var static_portals = portals.Except(instance_portals);
 

@@ -6,14 +6,14 @@
 
 test {
 
-	enum Crust {
-		crispy,
-		soft
-		burnt
-		missing
+	Crust {
+		static crispy:int = 1
+		static soft:int = 2
+		static burnt:int = 3
+		static missing:int = 4
 	}
 
-	class Pizza {
+	Pizza {
 		toppings:string[]
 		crust:Crust
 		variation:bool

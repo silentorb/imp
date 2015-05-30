@@ -15,7 +15,6 @@ namespace imperative.expressions
         create_dictionary,
         null_value,
         self,
-        path,
         portal,
         comment,
         profession,
@@ -24,8 +23,6 @@ namespace imperative.expressions
 
         // Statements
         statement,
-        space,
-        class_definition,
         function_definition,
         flow_control,
         assignment,
@@ -36,7 +33,6 @@ namespace imperative.expressions
 
         // Summoner
         statements,
-        snippet,
-        empty
+        snippet
     }
 }

@@ -189,14 +189,6 @@ namespace imperative.render
             Expression_Type type = statement.type;
             switch (type)
             {
-                case Expression_Type.space:
-                    var space = (Namespace)statement;
-                    return render_realm(space.realm, () => render_statements(space.body));
-
-                case Expression_Type.class_definition:
-                    var definition = (Class_Definition)statement;
-                    return render_dungeon(definition.dungeon, definition.body);
-
                 case Expression_Type.function_definition:
                     return render_function_definition((Function_Definition)statement);
 
@@ -243,7 +235,7 @@ namespace imperative.render
             return statements.Select(render_statement).join(glue);
         }
 
-        virtual protected string render_dungeon(Dungeon dungeon, IEnumerable<Expression> statements)
+        virtual protected string render_dungeon(Dungeon dungeon)
         {
             if (dungeon.is_abstract)
                 return "";
@@ -257,7 +249,7 @@ namespace imperative.render
             var intro = "public " + abstract_keyword + "class " + render_dungeon_path(dungeon);
             var result = add(intro) + render_scope(() =>
                 render_properties(dungeon) + newline()
-                + render_statements(statements, newline())
+//                + render_statements(statements, newline())
             );
 
             current_dungeon = null;

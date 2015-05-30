@@ -6,7 +6,6 @@ using imperative.expressions;
 using metahub.render;
 using metahub.schema;
 using Expression = imperative.expressions.Expression;
-using Namespace = imperative.expressions.Namespace;
 using Parameter = imperative.expressions.Parameter;
 using Variable = imperative.expressions.Variable;
 
@@ -172,28 +171,28 @@ namespace imperative.schema
             return dependencies[dungeon.name];
         }
 
-        public void generate_code()
-        {
-            if (initial_generation_is_done)
-                return;
-
-            initial_generation_is_done = true;
-            var root_scope = new Scope();
-            code = new List<Expression>();
-            var root = create_block("root", root_scope, code);
-            root.divide("pre");
-
-            var class_expressions = new List<Expression>();
-            create_block("class_definition", root_scope, class_expressions);
-
-            root.divide(null, new List<Expression> {
-			    new Namespace(realm, new List<Expression> { 
-                    new Class_Definition(this, class_expressions)
-                })
-            });
-
-            root.divide("post");
-        }
+//        public void generate_code()
+//        {
+//            if (initial_generation_is_done)
+//                return;
+//
+//            initial_generation_is_done = true;
+//            var root_scope = new Scope();
+//            code = new List<Expression>();
+//            var root = create_block("root", root_scope, code);
+//            root.divide("pre");
+//
+//            var class_expressions = new List<Expression>();
+//            create_block("class_definition", root_scope, class_expressions);
+//
+//            root.divide(null, new List<Expression> {
+//			    new Namespace(realm, new List<Expression> { 
+//                    new Class_Definition(this, class_expressions)
+//                })
+//            });
+//
+//            root.divide("post");
+//        }
 
         public Accordian create_block(string path, Scope scope, List<Expression> expressions = null)
         {
@@ -300,14 +299,6 @@ namespace imperative.schema
 
             switch (expression.type)
             {
-                case Expression_Type.space:
-                    transform_expressions(((Namespace)expression).body, expression);
-                    break;
-
-                case Expression_Type.class_definition:
-                    transform_expressions(((Class_Definition)expression).body, expression);
-                    break;
-
                 case Expression_Type.function_definition:
                     transform_expressions(((Function_Definition)expression).expressions, expression);
                     break;
@@ -366,14 +357,6 @@ namespace imperative.schema
 
             switch (expression.type)
             {
-                case Expression_Type.space:
-                    analyze_expressions(((Namespace)expression).body);
-                    break;
-
-                case Expression_Type.class_definition:
-                    analyze_expressions(((Class_Definition)expression).body);
-                    break;
-
                 case Expression_Type.function_definition:
                     analyze_expressions(((Function_Definition)expression).expressions);
                     break;

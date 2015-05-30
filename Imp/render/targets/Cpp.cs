@@ -78,10 +78,10 @@ namespace metahub.render.targets
                 else if (!portal.is_list)
                     scalars.Add(portal);
             }
-            var block = references.Select(portal => 
+            var block = references.Select(portal =>
                                           (Expression)new Assignment(new Portal_Expression(portal), "=", new Null_Value()))
-                                  .Union(scalars.Select(portal => 
-                                                        new Assignment(new Portal_Expression(portal), "=", 
+                                  .Union(scalars.Select(portal =>
+                                                        new Assignment(new Portal_Expression(portal), "=",
                                                                        new Literal(portal.get_default_value(),
                                                                                    portal.get_profession())))
                 );
@@ -140,69 +140,69 @@ namespace metahub.render.targets
                          + render_statements(dungeon.code);
 
         }
-//
-//        string render_statement(Expression statement)
-//        {
-//            Expression_Type type = statement.type;
-//            switch (type)
-//            {
-//                case Expression_Type.space:
-//                    var space = (Namespace)statement;
-//                    return render_realm(space.realm, () => render_statements(space.body));
-//
-//                case Expression_Type.class_definition:
-//                    var definition = (Class_Definition)statement;
-//                    return class_definition(definition.dungeon, definition.body);
-//
-//                case Expression_Type.function_definition:
-//                    return render_function_definition((Function_Definition)statement);
-//
-//                case Expression_Type.flow_control:
-//                    return render_flow_control((Flow_Control)statement);
-//
-//                case Expression_Type.iterator:
-//                    return render_iterator_block((Iterator)statement);
-//
-//                    //case Expression_Type.function_call:
-//                    //    return line(render_function_call((Class_Function_Call)statement, null) + ";");
-//
-//                    //case Expression_Type.platform_function:
-//                    //    return line(render_platform_function_call((Platform_Function)statement, null) + ";");
-//
-//                case Expression_Type.assignment:
-//                    return render_assignment((Assignment)statement);
-//
-//                case Expression_Type.comment:
-//                    return line(render_comment((Comment)statement));
-//
-//                case Expression_Type.declare_variable:
-//                    return render_variable_declaration((Declare_Variable)statement);
-//
-//                case Expression_Type.statement:
-//                    var state = (Statement)statement;
-//                    return line(state.name + (state.next != null
-//                                                  ? " " + render_expression(state.next)
-//                                                  : "") + ";");
-//
-//                case Expression_Type.insert:
-//                    return line(((Insert)statement).code);
-//
-//                default:
-//                    return line(render_expression(statement) + ";");
-//                    //throw new Exception("Unsupported statement type: " + statement.type + ".");
-//            }
-//        }
+        //
+        //        string render_statement(Expression statement)
+        //        {
+        //            Expression_Type type = statement.type;
+        //            switch (type)
+        //            {
+        //                case Expression_Type.space:
+        //                    var space = (Namespace)statement;
+        //                    return render_realm(space.realm, () => render_statements(space.body));
+        //
+        //                case Expression_Type.class_definition:
+        //                    var definition = (Class_Definition)statement;
+        //                    return class_definition(definition.dungeon, definition.body);
+        //
+        //                case Expression_Type.function_definition:
+        //                    return render_function_definition((Function_Definition)statement);
+        //
+        //                case Expression_Type.flow_control:
+        //                    return render_flow_control((Flow_Control)statement);
+        //
+        //                case Expression_Type.iterator:
+        //                    return render_iterator_block((Iterator)statement);
+        //
+        //                    //case Expression_Type.function_call:
+        //                    //    return line(render_function_call((Class_Function_Call)statement, null) + ";");
+        //
+        //                    //case Expression_Type.platform_function:
+        //                    //    return line(render_platform_function_call((Platform_Function)statement, null) + ";");
+        //
+        //                case Expression_Type.assignment:
+        //                    return render_assignment((Assignment)statement);
+        //
+        //                case Expression_Type.comment:
+        //                    return line(render_comment((Comment)statement));
+        //
+        //                case Expression_Type.declare_variable:
+        //                    return render_variable_declaration((Declare_Variable)statement);
+        //
+        //                case Expression_Type.statement:
+        //                    var state = (Statement)statement;
+        //                    return line(state.name + (state.next != null
+        //                                                  ? " " + render_expression(state.next)
+        //                                                  : "") + ";");
+        //
+        //                case Expression_Type.insert:
+        //                    return line(((Insert)statement).code);
+        //
+        //                default:
+        //                    return line(render_expression(statement) + ";");
+        //                    //throw new Exception("Unsupported statement type: " + statement.type + ".");
+        //            }
+        //        }
 
-//        string render_variable_declaration(Declare_Variable declaration)
-//        {
-//            var profession = declaration.symbol.get_profession(overlord);
-//            var first = render_signature(profession) + " " + declaration.symbol.name;
-//            if (declaration.expression != null)
-//                first += " = " + render_expression(declaration.expression);
-//
-//            current_scope[declaration.symbol.name] = profession;
-//            return line(first + ";");
-//        }
+        //        string render_variable_declaration(Declare_Variable declaration)
+        //        {
+        //            var profession = declaration.symbol.get_profession(overlord);
+        //            var first = render_signature(profession) + " " + declaration.symbol.name;
+        //            if (declaration.expression != null)
+        //                first += " = " + render_expression(declaration.expression);
+        //
+        //            current_scope[declaration.symbol.name] = profession;
+        //            return line(first + ";");
+        //        }
 
         private class Temp
         {
@@ -219,7 +219,7 @@ namespace metahub.render.targets
             foreach (var d in dungeon.dependencies.Values)
             {
                 var dependency = d.dungeon;
-                if (d.allow_partial && dependency.realm != dungeon.realm)
+                if (d.allow_partial && dependency.realm != dungeon.realm && dependency.realm != null)
                 {
                     if (!realms.ContainsKey(dependency.realm.name))
                     {
@@ -313,12 +313,12 @@ namespace metahub.render.targets
             return result;
         }
 
-        override protected string render_dungeon(Dungeon dungeon, IEnumerable<Expression> statements)
+        override protected string render_dungeon(Dungeon dungeon)
         {
             var result = "";
 
             //result += pad(render_functions(trellis));
-            result += newline() + render_statements(statements, newline());
+            result += newline(); //+ render_statements(statements, newline());
             unindent();
 
             return result;
@@ -344,13 +344,13 @@ namespace metahub.render.targets
             return dungeon.name;
         }
 
-//        string render_realm_name(Realm realm)
-//        {
-//            var path = Generator.get_namespace_path(realm);
-//            return path.join("::");
-//        }
+        //        string render_realm_name(Realm realm)
+        //        {
+        //            var path = Generator.get_namespace_path(realm);
+        //            return path.join("::");
+        //        }
 
-       override protected string render_function_definition(Function_Definition definition)
+        override protected string render_function_definition(Function_Definition definition)
         {
             if (definition.is_abstract)
                 return "";
@@ -421,82 +421,73 @@ namespace metahub.render.targets
                         + (definition.is_abstract ? " = 0;" : ";"));
         }
 
-       override protected string render_profession(Profession signature, bool is_parameter = false)
+        override protected string render_profession(Profession signature, bool is_parameter = false)
         {
-           throw new Exception("Not implemented");
+            var dungeon = (Dungeon)signature.dungeon;
+            var name = render_dungeon_path(signature.dungeon);
 
-//            if (signature.dungeon == null)
-//            {
-//                var name = !Professions.is_scalar(signature)
-//                    ? "void*"
-//                    : types[signature.dungeon.name.ToString().ToLower()];
-//                
-//                return signature.is_list
-//                    ? "std::vector<" + name + ">"
-//                    : name;
-//            }
-//            else if (signature.dungeon.GetType() == typeof (Dungeon))
-//            {
-//                var dungeon = (Dungeon) signature.dungeon;
-//                var name = dungeon.is_abstract
-//                    ? "void"
-//                    : render_dungeon_path(signature.dungeon);
-//
-//                if (!signature.is_list)
-//                {
-//                    return
-//                        dungeon.is_value
-//                            ? is_parameter ? name + "&" : name
-//                            : name + "*";
-//                }
-//                else
-//                {
-//                    return "std::vector<" + (dungeon.is_value
-//                        ? name
-//                        : name + "*")
-//                           + ">";
-//                }
-//            }
-//            else
-//            {
-////                var treasury = (Treasury) signature.dungeon;
-//                return render_dungeon_path(signature.dungeon);
-//            }
+            if (dungeon != Professions.List)
+            {
+                return is_value(signature)
+                    ? name
+                    : name + "*";
+            }
+            else
+            {
+                var target = signature.children[0];
+                return "std::vector<" + render_profession(target) + ">";
+            }
         }
 
-//        string render_symbol_signature(Symbol symbol, bool is_parameter = false)
-//        {
-//            if (symbol.profession != null)
-//                return render_signature(symbol.profession, is_parameter);
-//
-//            return render_signature(symbol.profession, is_parameter);
-//        }
+        private bool is_value(Profession profession)
+        {
+            return profession.dungeon.is_value;// && profession.dungeon != Professions.none.dungeon;
+        }
 
-//        override protected string render_profession(Profession signature, bool is_parameter = false)
-//        {
-//            if (signature.dungeon == null)
-//            {
-//                return signature.type == Kind.reference
-//                           ? "void*"
-//                           : types[signature.type.ToString().ToLower()];
-//            }
-//
-//            var name = signature.dungeon.is_abstract && !signature.dungeon.is_value
-//                           ? "void"
-//                           : render_dungeon_path(signature.dungeon);
-//
-//            if (!signature.is_list)
-//            {
-//                return signature.dungeon.is_value ? is_parameter ? name + "&" : name :
-//                           name + "*";
-//            }
-//
-//            var name2 = signature.dungeon.is_value
-//                            ? name
-//                            : name + "*";
-//
-//            return "std::vector<" + name2 + ">";
-//        }
+        protected override string render_dungeon_path(IDungeon dungeon)
+        {
+            if (dungeon == Professions.none.dungeon)
+                return "void";
+
+            if (dungeon == Professions.String.dungeon)
+                return "std::string";
+
+            return base.render_dungeon_path(dungeon);
+        }
+
+        //        string render_symbol_signature(Symbol symbol, bool is_parameter = false)
+        //        {
+        //            if (symbol.profession != null)
+        //                return render_signature(symbol.profession, is_parameter);
+        //
+        //            return render_signature(symbol.profession, is_parameter);
+        //        }
+
+        //        override protected string render_profession(Profession signature, bool is_parameter = false)
+        //        {
+        //            if (signature.dungeon == null)
+        //            {
+        //                return signature.type == Kind.reference
+        //                           ? "void*"
+        //                           : types[signature.type.ToString().ToLower()];
+        //            }
+        //
+        //            var name = signature.dungeon.is_abstract && !signature.dungeon.is_value
+        //                           ? "void"
+        //                           : render_dungeon_path(signature.dungeon);
+        //
+        //            if (!signature.is_list)
+        //            {
+        //                return signature.dungeon.is_value ? is_parameter ? name + "&" : name :
+        //                           name + "*";
+        //            }
+        //
+        //            var name2 = signature.dungeon.is_value
+        //                            ? name
+        //                            : name + "*";
+        //
+        //            return "std::vector<" + name2 + ">";
+        //        }
 
         public string render_block(string command, string expression, String_Delegate action)
         {
@@ -665,45 +656,45 @@ namespace metahub.render.targets
                 return expression.value.ToString();
 
             throw new Exception("Not implemented.");
-//            switch (signature.type)
-//            {
-//                case Kind.unknown:
-//                    return expression.value.ToString(); ;
-//
-//                case Kind.Float:
-//                    var result = expression.value.ToString();
-//                    return result.Contains(".")
-//                               ? result + "f"
-//                               : result;
-//
-//                case Kind.Int:
-//                    return expression.value.ToString();
-//
-//                case Kind.String:
-//                    return "\"" + expression.value + "\"";
-//
-//                case Kind.Bool:
-//                    return (bool)expression.value ? "true" : "false";
-//
-//                case Kind.reference:
-////                    if (!signature.dungeon.is_value)
-////                        throw new Exception("Literal expressions must be scalar values.");
-//
-//                    if (expression.value != null)
-//                        return expression.value.ToString();
-//
-//                    return render_trellis_name(signature.dungeon) + "()";
-//
-//                default:
-//                    throw new Exception("Invalid literal " + expression.value + " type " + expression.profession.type + ".");
-//            }
+            //            switch (signature.type)
+            //            {
+            //                case Kind.unknown:
+            //                    return expression.value.ToString(); ;
+            //
+            //                case Kind.Float:
+            //                    var result = expression.value.ToString();
+            //                    return result.Contains(".")
+            //                               ? result + "f"
+            //                               : result;
+            //
+            //                case Kind.Int:
+            //                    return expression.value.ToString();
+            //
+            //                case Kind.String:
+            //                    return "\"" + expression.value + "\"";
+            //
+            //                case Kind.Bool:
+            //                    return (bool)expression.value ? "true" : "false";
+            //
+            //                case Kind.reference:
+            ////                    if (!signature.dungeon.is_value)
+            ////                        throw new Exception("Literal expressions must be scalar values.");
+            //
+            //                    if (expression.value != null)
+            //                        return expression.value.ToString();
+            //
+            //                    return render_trellis_name(signature.dungeon) + "()";
+            //
+            //                default:
+            //                    throw new Exception("Invalid literal " + expression.value + " type " + expression.profession.type + ".");
+            //            }
         }
 
         bool is_pointer(Profession signature)
         {
             throw new Exception("Not implemented.");
-//            if (signature.type == null)
-//                throw new Exception();
+            //            if (signature.type == null)
+            //                throw new Exception();
 
             if (signature.dungeon == null)
                 return false;

@@ -252,7 +252,7 @@ namespace imperative.summoner
                     parent.children.Add(dungeon);
                 }
 
-                dungeon.generate_code();
+//                dungeon.generate_code();
                 context.dungeon = dungeon;
                 return dungeon;
             }
@@ -417,6 +417,10 @@ namespace imperative.summoner
                     portal.default_expression = process_expression(parts[3], context);
 
                 context.dungeon.add_portal(portal);
+            }
+            else if (parts[3] != null)
+            {
+                context.dungeon.all_portals[portal_name].default_expression = process_expression(parts[3], context);
             }
         }
 

@@ -59,6 +59,9 @@ namespace imperative
 
                 case "cs":
                     return new Csharp(this);
+
+                case "cpp":
+                    return new Cpp(this);
             }
 
             throw new Exception("Invalid imp target: " + name + ".");

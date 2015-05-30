@@ -46,10 +46,10 @@ namespace imperative.schema
             Float = create_type("float");
             String = create_type("string");
             Bool = create_type("bool");
-            none = create_type("unknown");
-            any = create_type("none");
-            unknown = create_type("any");
-            Function = create_type("function");
+            none = create_type("none");
+            any = create_type("any", false);
+            unknown = create_type("unknown", false);
+            Function = create_type("function", false);
 
             initialize_list();
 
@@ -63,11 +63,18 @@ namespace imperative.schema
             {
                 new Parameter(new Symbol("index", Int, null))
             });
+            List.spawn_simple_minion("add", new List<Parameter>
+            {
+                new Parameter(new Symbol("item", any, null))
+            });
         }
 
-        static Profession create_type(string name)
+        static Profession create_type(string name, bool is_value = true)
         {
-            var dungeon = new Dungeon(name, null, null);
+            var dungeon = new Dungeon(name, null, null)
+            {
+                is_value = is_value
+            };
             return Profession.create(dungeon);
         }
 

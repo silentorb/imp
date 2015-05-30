@@ -104,7 +104,6 @@
     <Compile Include="summoner\Template.cs" />
     <Compile Include="expressions\Anonymous_Function.cs" />
     <Compile Include="expressions\Assignment.cs" />
-    <Compile Include="expressions\Class_Definition.cs" />
     <Compile Include="expressions\Method_Call.cs" />
     <Compile Include="expressions\Comment.cs" />
     <Compile Include="expressions\Declare_Variable.cs" />
@@ -117,7 +116,6 @@
     <Compile Include="expressions\Instantiate.cs" />
     <Compile Include="expressions\Iterator.cs" />
     <Compile Include="expressions\Literal.cs" />
-    <Compile Include="expressions\Namespace.cs" />
     <Compile Include="expressions\Null_Value.cs" />
     <Compile Include="expressions\Operation.cs" />
     <Compile Include="expressions\Parameter.cs" />

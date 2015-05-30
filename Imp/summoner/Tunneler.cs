@@ -152,7 +152,7 @@ namespace imperative.summoner
                 summoner, patterns, context, step + 1);
 
             if (child == null)
-                throw new Parser_Exception("Dungeon " + portal.other_dungeon
+                throw new Parser_Exception("Dungeon " + portal.other_dungeon.name
                     + " does not have a member named " + patterns[step + 1].children[0].text + ".", pattern.position);
 
             return append(result, child);
