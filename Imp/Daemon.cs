@@ -20,8 +20,8 @@ namespace imperative
         {
             "Imp sucessfully stormed the Keep.",
             "Your code has been mutated.",
-            "Good news!  You're still alive and you're code compiled.",
-            "Sooner or later you're build will die horribly, but this wasn't that time.",
+            "Good news!  Your still alive and you're code compiled.",
+            "Sooner or later your build will die horribly, but this wasn't that time.",
             "Fresh code has been spawned.",
             "Imp laughs at your code, but compiled it anyway.",
             "The prophets were wrong—you're code sucessfully compiled."

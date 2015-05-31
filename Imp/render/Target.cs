@@ -8,7 +8,8 @@ namespace metahub.render
     public class Target
     {
         protected Renderer render = new Renderer();
-        protected int line_count = 0;
+        protected int line_count;
+        protected int column = 1;
         public Overlord overlord;
         public Transmuter transmuter;
         public Target_Configuration config;
@@ -70,15 +71,9 @@ namespace metahub.render
         public string newline(int amount = 1)
         {
             ++line_count;
+            column = 1;
             needs_indent = true;
             return render.newline(amount);
-        }
-
-        public string pad(string content)
-        {
-            return content == ""
-            ? content
-            : newline() + content;
         }
 
         public string add(string text = "")
@@ -86,9 +81,12 @@ namespace metahub.render
             if (needs_indent)
             {
                 needs_indent = false;
-                return render.indentation + text;
+                var result = render.indentation + text;
+                column += result.Length;
+                return result;
             }
 
+            column += text.Length;
             return text;
         }
 

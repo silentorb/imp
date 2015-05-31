@@ -314,6 +314,13 @@ namespace metahub.render.targets
             return result;
         }
 
+        string pad(string content)
+        {
+            return content == ""
+            ? content
+            : newline() + content;
+        }
+
         override protected string render_dungeon(Dungeon dungeon)
         {
             return render_realm(dungeon.realm, ()=>

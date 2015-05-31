@@ -46,6 +46,8 @@ namespace imperative.render
             }
         }
 
+        public List<Passage> passages = new List<Passage>();
+
         virtual protected void push_scope()
         {
             current_scope = new Dictionary<string, Profession>();
@@ -62,6 +64,8 @@ namespace imperative.render
 
         virtual protected string render_expression(Expression expression, Expression parent = null)
         {
+            passages.Add(new Passage(expression, column, line_count));
+
             string result;
             switch (expression.type)
             {
