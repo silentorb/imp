@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace imperative.render
+namespace imperative.render.artisan
 {
     public class Source_Map
     {
@@ -27,18 +27,11 @@ namespace imperative.render
 
             foreach (var passage in passages)
             {
-                
+
             }
+
+            throw new Exception("Not implemented.");
         }
     }
 
-    public static class Scribe
-    {
-
-        public static string render_source_map(List<Passage> passages)
-        {
-            var map = new Source_Map(passages);
-
-        }
-    }
 }
