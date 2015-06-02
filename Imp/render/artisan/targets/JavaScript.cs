@@ -10,7 +10,7 @@ using imperative.schema;
 
 using imperative.expressions;
 using metahub.render;
-
+/*
 namespace imperative.render.artisan.targets
 {
     public class JavaScript : Common_Target2
@@ -30,26 +30,32 @@ namespace imperative.render.artisan.targets
 
         override public void run(Overlord_Configuration settings)
         {
-            var output = generate();
+            var passages = generate();
+
+            var x = Summoning.Painter.render(1);
+
+//            var scribe = new Painter(passages);
+
             var output_path = !string.IsNullOrEmpty(settings.output)
                 ? settings.output
                 : File.Exists(settings.input)
                 ? settings.output + Path.GetFileNameWithoutExtension(settings.input) + ".js"
                 : settings.output + "/" + "lib.js";
 
-            Generator.create_file(output_path, output);
+            throw new Exception("Not implemented.");
+//            Generator.create_file(output_path, output);
         }
 
-        public string generate()
+        public List<Stroke> generate()
         {
-            var output = new Stroke();
+            var output = new List<Stroke>();
             foreach (var dungeon in overlord.dungeons)
             {
                 if (dungeon.is_external || dungeon.is_external
                     || dungeon.name == "")
                     continue;
 
-                output += create_class_file(dungeon);
+                output.Add( create_class_file(dungeon));
             }
 
             return output;
@@ -57,7 +63,7 @@ namespace imperative.render.artisan.targets
 
         Stroke create_class_file(Dungeon dungeon)
         {
-            render = new Renderer();
+//            render = new Renderer();
             var result = render_dungeon(dungeon);
 
             return result;
@@ -66,12 +72,12 @@ namespace imperative.render.artisan.targets
         override protected Stroke render_dungeon(Dungeon dungeon)
         {
             if (dungeon.is_abstract)
-                return "";
+                return new Stroke();
 
             if (dungeon.get_type() == Dungeon_Types.Namespace)
             {
                 var fullname = "window." + render_dungeon_path(dungeon);
-                return add(fullname + " = " + fullname + " || {}") + newline();
+                return new Stroke(fullname + " = " + fullname + " || {}");
             }
 
             current_dungeon = dungeon;
@@ -89,83 +95,79 @@ namespace imperative.render.artisan.targets
 
             var total = instance_portals.Length + instance_minions.Length;
             String_Delegate2 render_line = text => ++i < total
-                    ? text + "," + newline()
+                    ? text + ","
                     : text;
 
-            var dungeon_prefix = render_dungeon_path(dungeon);
-            var result = add(render_dungeon_path(dungeon) + " = " + render_constructor(dungeon)) + newline()
-                + render_static_properties(dungeon_prefix, static_portals)
-                + render_static_minions(dungeon_prefix, static_minions)
-                + (total == 0 ? "" :
-                add(dungeon_prefix + ".prototype = " + (dungeon.parent != null 
-                    ? "Object.create(" + render_dungeon_path(dungeon.parent) + ".prototype)"
-                    : "{}")) 
-                    + newline()
+            throw new Exception("Not implemented.");
+//            var dungeon_prefix = render_dungeon_path(dungeon).text;
+//            var result = render_dungeon_path(dungeon) + new Stroke(" = ") + render_constructor(dungeon);
+//            result.children.Concat(render_static_properties(dungeon_prefix, static_portals));
+//            result.children.Concat(render_static_properties(dungeon_prefix, static_portals));
+//                + 
+//                + render_static_minions(dungeon_prefix, static_minions)
+//                + (total == 0 ? "" :
+//                new Stroke(dungeon_prefix + ".prototype = " + (dungeon.parent != null 
+//                    ? "Object.create(" + render_dungeon_path(dungeon.parent) + ".prototype)"
+//                    : "{}"))
+//
+//                + instance_portals.Select(portal =>
+//                {
+//                    var assignment = get_default_value(portal) ?? render_null();
+//                    return render_dungeon_path(dungeon) + new Stroke(".prototype." + portal.name + " = " + assignment);
+//                })
+//                .join("")
+//                + instance_minions.Select(minion =>
+//                    render_dungeon_path(dungeon) + new Stroke(".prototype." + minion.name + " = " )
+//                    + render_function_definition(minion)))
+//            );
+//
+//            current_dungeon = null;
 
-                + instance_portals.Select(portal =>
-                {
-                    var assignment = get_default_value(portal) ?? render_null();
-                    return add(render_dungeon_path(dungeon) + ".prototype." + portal.name + " = " + assignment) + newline();
-                })
-                .join("")
-                + instance_minions.Select(minion =>
-                    add(render_dungeon_path(dungeon) + ".prototype." + minion.name + " = " 
-                    + render_function_definition(minion)) + newline())
-                .join("")
-                + newline()
-            );
-
-            current_dungeon = null;
-
-            return result;
+//            return result;
         }
 
         Stroke render_constructor(Dungeon dungeon)
         {
             return !dungeon.minions.ContainsKey("constructor")
-                ? "function() {" + (dungeon.parent != null 
-                    ? newline() + indent() + add(render_dungeon_path(dungeon.parent) + ".apply(this)") + newline() + unindent()
-                    : "") + add("}")
+                ? new Stroke("function() {") + ( dungeon.parent != null 
+                    ? render_dungeon_path(dungeon.parent) + new Stroke(".apply(this)")
+                    : new Stroke("}"))
                 : render_function_definition(dungeon.minions["constructor"]);
         }
 
-        Stroke render_static_properties(string dungeon_prefix, IEnumerable<Portal> portals)
+        List<Stroke> render_static_properties(string dungeon_prefix, IEnumerable<Portal> portals)
         {
-            return portals.Select(p => line(dungeon_prefix + "." + p.name + " = " + get_default_value(p))).join("");
+            return portals.Select(p => new Stroke(dungeon_prefix + "." + p.name + " = ") 
+                + get_default_value(p)).ToList();
         }
 
-        Stroke render_static_minions(string dungeon_prefix, IEnumerable<Minion> minions)
+        List<Stroke> render_static_minions(string dungeon_prefix, IEnumerable<Minion> minions)
         {
-            return minions.Select(p => line(dungeon_prefix + "." + p.name + " = " + render_function_definition(p))).join("");
+            return minions.Select(p => new Stroke(dungeon_prefix + "." + p.name + " = ") 
+                + render_function_definition(p)).ToList();
         }
 
-        override protected Stroke render_properties(Dungeon dungeon)
+        override protected List<Stroke> render_properties(Dungeon dungeon)
         {
-            var result = "";
-            foreach (var portal in dungeon.core_portals.Values)
-            {
-                result += line(render_dungeon_path(dungeon) + ".prototype." + portal.name + " = "
-                    + get_default_value(portal));
-            }
-
-            return result;
+            return dungeon.core_portals.Values.Select(portal => render_dungeon_path(dungeon) 
+                + new Stroke(".prototype." + portal.name + " = ") 
+                + get_default_value(portal)).ToList();
         }
 
         override protected Stroke render_variable_declaration(Declare_Variable declaration)
         {
             var profession = declaration.symbol.get_profession(overlord);
-            var first = add("var " + declaration.symbol.name);
+            var first = new Stroke("var " + declaration.symbol.name);
             if (declaration.expression != null)
-                first += " = " + render_expression(declaration.expression);
+                first += new Stroke(" = ") + render_expression(declaration.expression);
 
-            current_scope[declaration.symbol.name] = profession;
-            return first + newline();
+            return first;
         }
 
         protected Stroke render_function_definition(Function_Definition definition)
         {
             if (definition.is_abstract)
-                return "";
+                return new Stroke("");
 
             var minion = definition.minion;
 
@@ -177,7 +179,7 @@ namespace imperative.render.artisan.targets
                 minion.expressions.Insert(0, new Declare_Variable(self, new Self(minion.dungeon)));
             }
 
-            return "function(" + definition.parameters.Select(p => p.symbol.name).join(", ") + ")"
+            return new Stroke("function(" + definition.parameters.Select(p => p.symbol.name).join(", ") + ")")
                 + render_minion_scope(minion);
         }
 
@@ -190,7 +192,7 @@ namespace imperative.render.artisan.targets
         protected Stroke render_function_definition(Minion minion)
         {
             if (minion.is_abstract)
-                return "";
+                return new Stroke("");
 
             // Search for any case of "this" inside an anonymous function.
             var minions = minion.expression.find(Expression_Type.anonymous_function);
@@ -215,17 +217,17 @@ namespace imperative.render.artisan.targets
                         })
                 }));
             }
-            return "function(" + minion.parameters.Select(p => p.symbol.name).join(", ") + ")"
+            return new Stroke("function(" + minion.parameters.Select(p => p.symbol.name).join(", ") + ")")
                 + render_minion_scope(minion);
         }
         protected override Stroke render_this()
         {
-            return current_minion.GetType() == typeof(Ethereal_Minion)
+            return new Stroke(current_minion.GetType() == typeof(Ethereal_Minion)
                 && current_minion.scope.find_or_null("self") != null
                 ? "self"
-                : "this";
+                : "this");
         }
-
+        
         //        override protected string render_iterator_block(Iterator statement)
         //        {
         //            var parameter = statement.parameter;
@@ -257,21 +259,21 @@ namespace imperative.render.artisan.targets
         //                + path_string + ".end(); " + parameter.name + "++";
         //        }
 
-        Stroke protected string render_scope(String_Delegate action)
-        {
-            push_scope();
-            var result = config.block_brace_same_line
-                ? " {" + newline()
-                : newline() + line("{");
-
-            indent();
-            result += action();
-            unindent();
-            result += add("}");
-            pop_scope();
-            return result;
-        }
-
+//        Stroke protected string render_scope(String_Delegate action)
+//        {
+//            push_scope();
+//            var result = config.block_brace_same_line
+//                ? " {" + newline()
+//                : newline() + line("{");
+//
+//            indent();
+//            result += action();
+//            unindent();
+//            result += add("}");
+//            pop_scope();
+//            return result;
+//        }
+        /*
         override protected Stroke render_platform_function_call(Platform_Function expression, Expression parent)
         {
             var ref_string = expression.reference != null
@@ -334,7 +336,7 @@ namespace imperative.render.artisan.targets
                     throw new Exception("Unsupported platform-specific function: " + expression.name + ".");
             }
         }
-
+        */
         //        string render_function_call(Class_Function_Call expression, Expression parent)
         //        {
         //            var ref_string = expression.reference != null
@@ -386,5 +388,7 @@ namespace imperative.render.artisan.targets
 //            result += body;
 //            return result;
 //        }
+/*
     }
 }
+*/

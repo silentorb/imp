@@ -49,8 +49,6 @@ namespace imperative.render.artisan
             }
         }
 
-        public List<Passage> passages = new List<Passage>();
-
         public virtual void run(Overlord_Configuration config1)
         {
 

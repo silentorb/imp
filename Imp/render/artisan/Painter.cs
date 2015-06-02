@@ -5,13 +5,25 @@ using System.Text;
 
 namespace imperative.render.artisan
 {
-    public class Painter
+    public static class Painter
     {
-        public List<Passage> passages;
-
-        public Painter(List<Passage> passages)
+        public static IEnumerable<Passage> render_list(List<Stroke> strokes)
         {
-            this.passages = passages;
+            return strokes.SelectMany(s => render_stroke(s));
+        }
+
+        public static IEnumerable<Passage> render_stroke(Stroke stroke)
+        {
+            if (stroke.children != null && stroke.children.Count > 0)
+                return render_list(stroke.children);
+
+            if (string.IsNullOrEmpty(stroke.text))
+                return new Passage[] { };
+
+            return new []
+            {
+                new Passage(stroke),
+            };
         }
     }
 }
