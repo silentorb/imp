@@ -64,7 +64,7 @@ namespace imperative.render
 
         virtual protected string render_expression(Expression expression, Expression parent = null)
         {
-            passages.Add(new Passage(expression, column, line_count));
+//            passages.Add(new Passage(expression, column, line_count));
 
             string result;
             switch (expression.type)

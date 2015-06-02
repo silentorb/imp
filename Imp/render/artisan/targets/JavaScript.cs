@@ -10,7 +10,7 @@ using imperative.schema;
 
 using imperative.expressions;
 using metahub.render;
-/*
+
 namespace imperative.render.artisan.targets
 {
     public class JavaScript : Common_Target2
@@ -32,7 +32,7 @@ namespace imperative.render.artisan.targets
         {
             var passages = generate();
 
-            var x = Summoning.Painter.render(1);
+//            var x = Summoning.Painter.render(1);
 
 //            var scribe = new Painter(passages);
 
@@ -220,6 +220,7 @@ namespace imperative.render.artisan.targets
             return new Stroke("function(" + minion.parameters.Select(p => p.symbol.name).join(", ") + ")")
                 + render_minion_scope(minion);
         }
+
         protected override Stroke render_this()
         {
             return new Stroke(current_minion.GetType() == typeof(Ethereal_Minion)
@@ -273,34 +274,34 @@ namespace imperative.render.artisan.targets
 //            pop_scope();
 //            return result;
 //        }
-        /*
+        
         override protected Stroke render_platform_function_call(Platform_Function expression, Expression parent)
         {
             var ref_string = expression.reference != null
           ? render_expression(expression.reference)
-          : "";
+          : new Stroke("");
 
-            var ref_full = ref_string.Length > 0
+            var ref_full = ref_string.text.Length > 0
                 ? ref_string + "."
                 : "";
 
             switch (expression.name)
             {
                 case "count":
-                    return ref_full + "size()";
+                    return new Stroke(ref_full + "size()");
 
                 case "add":
                     {
                         var first = render_expression(expression.args[0]);
                         //var dereference = is_pointer(expression.args.Last().get_signature()) ? "*" : "";
-                        return ref_full + "push(" + first + ")";
+                        return new Stroke(ref_full + "push(" + first + ")");
                     }
 
                 case "contains":
                     {
                         var first = render_expression(expression.args[0]);
-                        return "std::find(" + ref_full + "begin(), "
-                               + ref_full + "end(), " + first + ") != " + ref_full + "end()";
+                        return new Stroke("std::find(" + ref_full + "begin(), "
+                               + ref_full + "end(), " + first + ") != " + ref_full + "end()");
                     }
 
                 case "distance":
@@ -308,35 +309,35 @@ namespace imperative.render.artisan.targets
                         //var signature = expression.args[0].get_signature();
                         var first = render_expression(expression.args[0]);
                         //var dereference = is_pointer(signature) ? "*" : "";
-                        return ref_full + "distance(" + first + ")";
+                        return new Stroke(ref_full + "distance(" + first + ")");
                     }
 
                 case "first":
-                    return "[0]";
+                    return new Stroke("[0]");
 
                 case "last":
-                    return ref_full + "back()";
+                    return new Stroke(ref_full + "back()");
 
                 case "pop":
-                    return ref_full + "pop_back()";
+                    return new Stroke(ref_full + "pop_back()");
 
                 case "remove":
                     {
                         var first = render_expression(expression.args[0]);
-                        return ref_full + "erase(std::remove(" + ref_full + "begin(), "
-                            + ref_full + "end(), " + first + "), " + ref_full + "end())";
+                        return new Stroke(ref_full + "erase(std::remove(" + ref_full + "begin(), "
+                            + ref_full + "end(), " + first + "), " + ref_full + "end())");
                     }
 
                 case "rand":
                     float min = ((Literal)expression.args[0]).get_float();
                     float max = ((Literal)expression.args[1]).get_float();
-                    return "rand() % " + (max - min) + (min < 0 ? " - " + -min : " + " + min);
+                    return new Stroke("rand() % " + (max - min) + (min < 0 ? " - " + -min : " + " + min));
 
                 default:
                     throw new Exception("Unsupported platform-specific function: " + expression.name + ".");
             }
         }
-        */
+        
         //        string render_function_call(Class_Function_Call expression, Expression parent)
         //        {
         //            var ref_string = expression.reference != null
@@ -357,12 +358,7 @@ namespace imperative.render.artisan.targets
         //            return line(render_expression(statement.target) + " " + statement.op + " " + render_expression(statement.expression));
         //        }
         //
-        //        string render_comment(Comment comment)
-        //        {
-        //            return comment.is_multiline
-        //                ? "/* " + comment.text + "*/"
-        //                : "// " + comment.text;
-        //        }
+    
         //
         //        string render_instantiation(Instantiate expression)
         //        {
@@ -388,7 +384,6 @@ namespace imperative.render.artisan.targets
 //            result += body;
 //            return result;
 //        }
-/*
+
     }
 }
-*/
