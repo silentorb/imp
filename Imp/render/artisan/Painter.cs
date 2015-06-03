@@ -23,6 +23,7 @@ namespace imperative.render.artisan
             return new []
             {
                 new Passage(stroke),
+                new Passage("\n"), 
             };
         }
     }

@@ -30,7 +30,7 @@ namespace imperative.render.artisan.targets
 
         override public void run(Overlord_Configuration settings)
         {
-            var passages = generate();
+            var passages = generate_strokes();
 
 //            var x = Summoning.Painter.render(1);
 
@@ -46,7 +46,7 @@ namespace imperative.render.artisan.targets
 //            Generator.create_file(output_path, output);
         }
 
-        public List<Stroke> generate()
+        public List<Stroke> generate_strokes()
         {
             var output = new List<Stroke>();
             foreach (var dungeon in overlord.dungeons)
@@ -76,7 +76,7 @@ namespace imperative.render.artisan.targets
 
             if (dungeon.get_type() == Dungeon_Types.Namespace)
             {
-                var fullname = "window." + render_dungeon_path(dungeon);
+                var fullname = "window." + render_dungeon_path(dungeon).text;
                 return new Stroke(fullname + " = " + fullname + " || {}");
             }
 
@@ -86,7 +86,7 @@ namespace imperative.render.artisan.targets
             var portals = dungeon.all_portals.Values.Where(p => !p.has_enchantment("abstract")
                 && (dungeon.core_portals.ContainsKey(p.name) || p.default_expression != null)).ToArray();
             var instance_portals = portals.Where(p => !p.has_enchantment("static")).ToArray();
-            var static_portals = portals.Except(instance_portals);
+            var static_portals = portals.Except(instance_portals).ToList();
 
             var minions = dungeon.minions.Values.Where(p => 
                 !p.has_enchantment("abstract") && p.name != "constructor").ToArray();
@@ -98,32 +98,34 @@ namespace imperative.render.artisan.targets
                     ? text + ","
                     : text;
 
-            throw new Exception("Not implemented.");
-//            var dungeon_prefix = render_dungeon_path(dungeon).text;
-//            var result = render_dungeon_path(dungeon) + new Stroke(" = ") + render_constructor(dungeon);
-//            result.children.Concat(render_static_properties(dungeon_prefix, static_portals));
-//            result.children.Concat(render_static_properties(dungeon_prefix, static_portals));
-//                + 
-//                + render_static_minions(dungeon_prefix, static_minions)
-//                + (total == 0 ? "" :
-//                new Stroke(dungeon_prefix + ".prototype = " + (dungeon.parent != null 
-//                    ? "Object.create(" + render_dungeon_path(dungeon.parent) + ".prototype)"
-//                    : "{}"))
-//
-//                + instance_portals.Select(portal =>
-//                {
-//                    var assignment = get_default_value(portal) ?? render_null();
-//                    return render_dungeon_path(dungeon) + new Stroke(".prototype." + portal.name + " = " + assignment);
-//                })
-//                .join("")
-//                + instance_minions.Select(minion =>
-//                    render_dungeon_path(dungeon) + new Stroke(".prototype." + minion.name + " = " )
-//                    + render_function_definition(minion)))
-//            );
-//
-//            current_dungeon = null;
+            var dungeon_prefix = render_dungeon_path(dungeon).text;
+            var result = render_dungeon_path(dungeon) + new Stroke(" = ") + render_constructor(dungeon)
+                + render_static_properties(dungeon_prefix, static_portals)
+                + render_static_properties(dungeon_prefix, static_portals)
+                + render_static_minions(dungeon_prefix, static_minions);
 
-//            return result;
+            result
+                += (total == 0
+                    ? new Stroke()
+                    : new Stroke(dungeon_prefix + ".prototype = ") + (dungeon.parent != null
+                        ? new Stroke("Object.create(") + render_dungeon_path(dungeon.parent) + new Stroke(".prototype)")
+                        : new Stroke("{}")
+                        )
+                    );
+
+            result += instance_portals.Select(portal =>
+            {
+                var assignment = get_default_value(portal) ?? render_null();
+                return render_dungeon_path(dungeon) + new Stroke(".prototype." + portal.name + " = " + assignment);
+            }).ToList();
+
+            result += instance_minions.Select(minion =>
+                render_dungeon_path(dungeon) + new Stroke(".prototype." + minion.name + " = " )
+                + render_function_definition(minion)).ToList();
+
+            current_dungeon = null;
+
+            return result;
         }
 
         Stroke render_constructor(Dungeon dungeon)

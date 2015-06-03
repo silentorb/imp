@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using imperative.expressions;
 
@@ -51,6 +52,23 @@ namespace imperative.render.artisan
         public static Stroke operator +(Stroke a, Stroke b)
         {
             return a.chain(b);
+        }
+
+        public static Stroke operator +(Stroke a, List<Stroke> b)
+        {
+            if (b.Count == 0)
+                return a;
+
+            if (a.type == Stroke_Type.chain)
+            {
+                a.children = a.children.Concat(b).ToList();
+                return a;
+            }
+
+            return new Stroke(Stroke_Type.chain, new List<Stroke>
+            {
+                a
+            }.Concat(b).ToList());
         }
 
         public Stroke chain(Stroke next)

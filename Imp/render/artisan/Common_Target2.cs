@@ -136,8 +136,8 @@ namespace imperative.render.artisan
                     break;
 
                 case Expression_Type.insert:
-                    throw new Exception("Not implemented");
-//                    result = ((Insert)expression).code;
+//                    throw new Exception("Not implemented");
+                    result = new Stroke(((Insert)expression).code);
                     break;
 
                 //                case Expression_Type.jewel:
@@ -154,7 +154,7 @@ namespace imperative.render.artisan
             if (expression.next != null)
             {
                 var child = render_expression(expression.next, expression);
-                result += child.text.Length > 0 && child.text[0] == '['
+                result += !string.IsNullOrEmpty(child.text) && child.text[0] == '['
                     ? child
                     : new Stroke(".") + child;
             }
@@ -601,14 +601,15 @@ namespace imperative.render.artisan
             if (statement.else_block != null)
                 ++block_count;
 
-
-            throw new Exception("Not implemented");
-//            var i = 0;
-//            var result = statement.if_statements.Select(e => render_flow_control(e, minimal, ++i < block_count));
-//            if (statement.else_block != null)
-//                result += new Stroke("else") + new Stroke(Stroke_Type.scope ,render_statements( statement.else_block));
-//
-//            return result;
+//            throw new Exception("Not implemented");
+            var i = 0;
+            var strokes = statement.if_statements.Select(e => render_flow_control(e, minimal, ++i < block_count)).ToList();
+            if (statement.else_block != null)
+                strokes.Add(new Stroke("else") + new Stroke(Stroke_Type.scope, render_statements(statement.else_block)));
+            
+            return strokes.Count == 1
+                ? strokes.First()
+                : new Stroke(Stroke_Type.group, strokes);
         }
 
         virtual protected Stroke render_dungeon_path(IDungeon dungeon)

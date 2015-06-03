@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using imperative.render.artisan;
 using NUnit.Framework;
 using imp_test.fixtures;
 using metahub.render.targets;
@@ -38,6 +39,18 @@ namespace imp_test.tests
             var overlord = Imp_Fixture.create_overlord("js", "imp.browser.imp");
             var target = (JavaScript)overlord.target;
             var output = target.generate();
+            var goal = Utility.load_resource("js.browser.js");
+            Utility.diff(goal, output);
+        }
+
+        [Test]
+        public void browser_test_new()
+        {
+            var overlord = Imp_Fixture.create_overlord("js", "imp.browser.imp");
+            var target = new imperative.render.artisan.targets.JavaScript(overlord);
+            var strokes = target.generate_strokes();
+            var passages = Painter.render_list(strokes).ToList();
+            var output = Scribe.render_source_map(passages);
             var goal = Utility.load_resource("js.browser.js");
             Utility.diff(goal, output);
         }

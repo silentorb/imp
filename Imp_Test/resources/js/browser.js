@@ -1,5 +1,5 @@
-﻿var bloom = {}
-
+﻿window.browser = window.browser || {}
+window.bloom = window.bloom || {}
 bloom.Garden = function() {}
 bloom.Garden.vineyard_url = 'http://localhost:3000/'
 bloom.Garden.start = function() {
