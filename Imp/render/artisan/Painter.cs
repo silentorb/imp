@@ -58,13 +58,13 @@ namespace imperative.render.artisan
             }
         }
 
-        public static IEnumerable<Passage> render_tokens(List<Stroke> strokes, string indent)
+        public static IEnumerable<Passage> render_tokens(List<Stroke> strokes)
         {
             var result = new List<Passage>();
 
             foreach (Stroke t in strokes)
             {
-                var addition = render_stroke(t, indent);
+                var addition = render_stroke(t, "");
                 if (addition != null)
                     result.AddRange(addition);
             }
@@ -86,7 +86,7 @@ namespace imperative.render.artisan
                         : render_single_block(stroke.children, indent);
                 }
 
-                return render_tokens(stroke.children, indent);
+                return render_tokens(stroke.children);
             }
 
             if (string.IsNullOrEmpty(stroke.text))

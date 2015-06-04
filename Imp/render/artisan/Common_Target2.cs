@@ -136,7 +136,7 @@ namespace imperative.render.artisan
                     break;
 
                 case Expression_Type.insert:
-//                    throw new Exception("Not implemented");
+                    //                    throw new Exception("Not implemented");
                     result = new Stroke(((Insert)expression).code);
                     break;
 
@@ -187,7 +187,7 @@ namespace imperative.render.artisan
                 if (portal.has_enchantment(Enchantments.Static))
                 {
                     if (portal.dungeon.name != "")
-                        result = render_dungeon_path(portal.dungeon) + new Stroke("." + result);
+                        result = render_dungeon_path(portal.dungeon) + new Stroke(".") + result;
                 }
                 else if (!config.implicit_this && portal.dungeon.name != "")
                 {
@@ -229,9 +229,9 @@ namespace imperative.render.artisan
 
                 case Expression_Type.statement:
                     var state = (Statement)statement;
-                    return new Stroke(state.name + (state.next != null
-                        ? " " + render_expression(state.next)
-                        : "") + terminate_statement());
+                    return new Stroke(state.name) + (state.next != null
+                        ? new Stroke(" ") + render_expression(state.next)
+                        : terminate_statement());
 
                 case Expression_Type.insert:
                     return new Stroke(((Insert)statement).code);
@@ -264,8 +264,8 @@ namespace imperative.render.artisan
 
             var intro = "public " + abstract_keyword + "class " + render_dungeon_path(dungeon);
             var result = new Stroke(intro) + new Stroke(Stroke_Type.scope, render_properties(dungeon));
-                //                + render_statements(statements, newline())
-//            );
+            //                + render_statements(statements, newline())
+            //            );
 
             current_dungeon = null;
 
@@ -319,15 +319,15 @@ namespace imperative.render.artisan
             if (args == null)
                 return new Stroke("[]");
 
-            var arg_string = args.Select(a => render_expression(a)).join(", ");
-            if (arg_string.Contains("\n"))
-            {
-//                arg_string = arg_string;
-            }
-            else
-            {
-            }
-            return new Stroke("[" + arg_string + "]");
+            var arg_string = Stroke.join(args.Select(a => render_expression(a)).ToList(), ", ");
+            //            if (arg_string.Contains("\n"))
+            //            {
+            //                arg_string = arg_string;
+            //            }
+            //            else
+            //            {
+            //            }
+            return new Stroke("[") + arg_string + new Stroke("]");
         }
 
         virtual protected Stroke render_variable_declaration(Declare_Variable declaration)
@@ -378,7 +378,7 @@ namespace imperative.render.artisan
                 if (value != null)
                     return new Stroke(value.ToString());
 
-//                return new Stroke(render_dungeon_path(profession.dungeon) + "()");
+                //                return new Stroke(render_dungeon_path(profession.dungeon) + "()");
             }
 
             return null;
@@ -391,7 +391,7 @@ namespace imperative.render.artisan
             //            var it = parameter.scope.create_symbol(parameter.name, parameter.profession);
             var expression = render_iterator(parameter, statement.expression);
 
-            return new Stroke(config.foreach_symbol + " (" + expression + ")") 
+            return new Stroke(config.foreach_symbol + " (" + expression + ")")
                 + new Stroke(Stroke_Type.scope, render_statements(statement.body));
         }
 
@@ -405,11 +405,11 @@ namespace imperative.render.artisan
         {
             return new Stroke(Stroke_Type.operation,
                 operation.children.Select(c =>
-                    c.type == Expression_Type.operation 
-                        && ((Operation) c).is_condition() == operation.is_condition()
+                    c.type == Expression_Type.operation
+                        && ((Operation)c).is_condition() == operation.is_condition()
                         ? new Stroke(c, "(" + render_expression(c) + ")")
                         : render_expression(c)
-                    ).ToList()) {text = operation.op};
+                    ).ToList()) { text = operation.op };
         }
 
         virtual protected Stroke render_property_function_call(Property_Function_Call expression, Expression parent)
@@ -482,24 +482,28 @@ namespace imperative.render.artisan
                ? this_string + render_expression(expression.reference)
                : this_string;
 
-//            var ref_full = ref_string.Length > 0
-//                ? ref_string + "."
-//                : "";
+            //            var ref_full = ref_string.Length > 0
+            //                ? ref_string + "."
+            //                : "";
 
-            var ref_full = ref_string;
+            var second = new Stroke(expression.get_name() + "(");
+            var ref_full = ref_string != null
+                ? ref_string + second
+                : second;
 
-            return new Stroke(ref_full + expression.get_name() + "(" + render_arguments(expression.args)
-                 + ")");
+            
+            return ref_full + render_arguments(expression.args)
+                 + new Stroke(")");
         }
 
         private Stroke render_arguments(List<Expression> args)
         {
-            return new Stroke(args.Select(a => render_expression(a)).join(", "));
+            return new Stroke(Stroke_Type.group, Stroke.join(args.Select(a => render_expression(a)).ToList(), ", "));
         }
 
         virtual protected Stroke render_assignment(Assignment statement)
         {
-            return new Stroke(render_expression(statement.target) + " " + statement.op + " " + render_expression(statement.expression))
+            return render_expression(statement.target) + new Stroke(" " + statement.op + " ") + render_expression(statement.expression)
                 + terminate_statement();
         }
 
@@ -531,7 +535,7 @@ namespace imperative.render.artisan
         virtual protected Stroke render_anonymous_function(Anonymous_Function definition)
         {
             return new Stroke("function(" + definition.parameters.Select(p => p.symbol.name).join(", ") + ")")
-            + render_minion_scope(definition.minion);
+            + new Stroke(Stroke_Type.scope, render_statements(definition.minion.expressions));
         }
 
         virtual protected Stroke render_minion_scope(Minion_Base minion)
@@ -547,9 +551,9 @@ namespace imperative.render.artisan
         virtual protected Stroke render_realm(Dungeon realm, Stroke_List_Delegate action)
         {
             current_realm = realm;
-            var result = new Stroke(config.namespace_keyword + " " 
-                + render_realm_path(realm, config.namespace_separator)) 
-                + new Stroke(Stroke_Type.scope,  action());
+            var result = new Stroke(config.namespace_keyword + " "
+                + render_realm_path(realm, config.namespace_separator))
+                + new Stroke(Stroke_Type.scope, action());
 
             current_realm = null;
             return result;
@@ -562,20 +566,20 @@ namespace imperative.render.artisan
                 : realm.name);
         }
 
-//        virtual protected Stroke render_scope(String_Delegate action)
-//        {
-//            push_scope();
-//            var result = config.block_brace_same_line
-//                ? " {" + newline()
-//                : newline() + line("{");
-//
-//            indent();
-//            result += action();
-//            unindent();
-//            result += line("}");
-//            pop_scope();
-//            return result;
-//        }
+        //        virtual protected Stroke render_scope(String_Delegate action)
+        //        {
+        //            push_scope();
+        //            var result = config.block_brace_same_line
+        //                ? " {" + newline()
+        //                : newline() + line("{");
+        //
+        //            indent();
+        //            result += action();
+        //            unindent();
+        //            result += line("}");
+        //            pop_scope();
+        //            return result;
+        //        }
 
         //        virtual protected Stroke render_treasury(Treasury treasury)
         //        {
@@ -590,7 +594,7 @@ namespace imperative.render.artisan
         {
             var expression = render_expression(statement.condition);
 
-            return new Stroke(statement.flow_type.ToString().ToLower() + " (" + expression + ")")
+            return new Stroke(statement.flow_type.ToString().ToLower() + " (") + expression + new Stroke(")")
                 + new Stroke(Stroke_Type.scope, render_statements(statement.body));
         }
 
@@ -601,12 +605,12 @@ namespace imperative.render.artisan
             if (statement.else_block != null)
                 ++block_count;
 
-//            throw new Exception("Not implemented");
+            //            throw new Exception("Not implemented");
             var i = 0;
             var strokes = statement.if_statements.Select(e => render_flow_control(e, minimal, ++i < block_count)).ToList();
             if (statement.else_block != null)
                 strokes.Add(new Stroke("else") + new Stroke(Stroke_Type.scope, render_statements(statement.else_block)));
-            
+
             return strokes.Count == 1
                 ? strokes.First()
                 : new Stroke(Stroke_Type.group, strokes);
@@ -616,7 +620,7 @@ namespace imperative.render.artisan
         {
             return dungeon.realm != null && dungeon.realm.name != ""
                 && (dungeon.realm != current_realm || !config.supports_namespaces)
-                ? new Stroke(render_dungeon_path(dungeon.realm) + config.namespace_separator + dungeon.name)
+                ? render_dungeon_path(dungeon.realm) + new Stroke(config.namespace_separator + dungeon.name)
                 : new Stroke(dungeon.name);
         }
 
@@ -691,15 +695,16 @@ namespace imperative.render.artisan
             var most = items.Take(items.Count - 1);
             var last = items.Last();
 
-            var first = new Stroke("{");
+            var result = new Stroke(Stroke_Type.@group, new List<Stroke>
+            {
+                new Stroke("{")
+            });
+            result.children.AddRange(most.Select(pair =>
+                new Stroke(pair.Key + ": ") + render_expression(pair.Value) + new Stroke(",")
+            ));
 
-
-            var second = most.Select(pair => pair.Key + ": " + render_expression(pair.Value) + ",")
-                .@join("")
-                         + last.Key + ": " + render_expression(last.Value);
-
-
-            return new Stroke(first + second) + new Stroke("}");
+            result.children.Add(new Stroke(last.Key + ": ") + render_expression(last.Value) + new Stroke("}"));
+            return result;
         }
     }
 }
