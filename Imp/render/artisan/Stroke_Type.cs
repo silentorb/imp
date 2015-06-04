@@ -7,6 +7,7 @@ namespace imperative.render.artisan
 {
     public enum Stroke_Type
     {
+        block,
         chain,
         empty,
         group,

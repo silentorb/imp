@@ -49,7 +49,7 @@ namespace imp_test.tests
             var overlord = Imp_Fixture.create_overlord("js", "imp.browser.imp");
             var target = new imperative.render.artisan.targets.JavaScript(overlord);
             var strokes = target.generate_strokes();
-            var passages = Painter.render_list(strokes).ToList();
+            var passages = Painter.render_root(strokes).ToList();
             var output = Scribe.render_source_map(passages);
             var goal = Utility.load_resource("js.browser.js");
             Utility.diff(goal, output);

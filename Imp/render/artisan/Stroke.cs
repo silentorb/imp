@@ -49,6 +49,11 @@ namespace imperative.render.artisan
             this.text = text;
         }
 
+        public override string ToString()
+        {
+            return text ?? "";
+        }
+
         public static Stroke operator +(Stroke a, Stroke b)
         {
             return a.chain(b);

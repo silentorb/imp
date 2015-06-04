@@ -127,7 +127,7 @@ namespace imperative.render.artisan
 
                     result = new Stroke(variable_expression, variable_expression.symbol.name);
                     if (variable_expression.index != null)
-                        result = result.chain(new Stroke("[" + render_expression(variable_expression.index) + "]"));
+                        result = result.chain(new Stroke("[" + render_expression(variable_expression.index).text + "]"));
 
                     break;
 

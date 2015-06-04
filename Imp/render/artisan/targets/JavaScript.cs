@@ -99,33 +99,35 @@ namespace imperative.render.artisan.targets
                     : text;
 
             var dungeon_prefix = render_dungeon_path(dungeon).text;
-            var result = render_dungeon_path(dungeon) + new Stroke(" = ") + render_constructor(dungeon)
-                + render_static_properties(dungeon_prefix, static_portals)
-                + render_static_properties(dungeon_prefix, static_portals)
-                + render_static_minions(dungeon_prefix, static_minions);
+            var result = new List<Stroke>
+            {
+                render_dungeon_path(dungeon) + new Stroke(" = ") + render_constructor(dungeon)
+            }
+                .Concat(render_static_properties(dungeon_prefix, static_portals))
+                .Concat(render_static_properties(dungeon_prefix, static_portals))
+                .Concat(render_static_minions(dungeon_prefix, static_minions)).ToList();
 
-            result
-                += (total == 0
-                    ? new Stroke()
-                    : new Stroke(dungeon_prefix + ".prototype = ") + (dungeon.parent != null
-                        ? new Stroke("Object.create(") + render_dungeon_path(dungeon.parent) + new Stroke(".prototype)")
-                        : new Stroke("{}")
-                        )
-                    );
+            result.Add(total == 0
+                ? new Stroke()
+                : new Stroke(dungeon_prefix + ".prototype = ") + (dungeon.parent != null
+                    ? new Stroke("Object.create(") + render_dungeon_path(dungeon.parent) + new Stroke(".prototype)")
+                    : new Stroke("{}")
+                    )
+                );
 
-            result += instance_portals.Select(portal =>
+            result.AddRange(instance_portals.Select(portal =>
             {
                 var assignment = get_default_value(portal) ?? render_null();
                 return render_dungeon_path(dungeon) + new Stroke(".prototype." + portal.name + " = " + assignment);
-            }).ToList();
-
-            result += instance_minions.Select(minion =>
+            })
+            .Concat(instance_minions.Select(minion =>
                 render_dungeon_path(dungeon) + new Stroke(".prototype." + minion.name + " = " )
-                + render_function_definition(minion)).ToList();
+                + render_function_definition(minion)))
+            );
 
             current_dungeon = null;
 
-            return result;
+            return new Stroke(Stroke_Type.@group, result);
         }
 
         Stroke render_constructor(Dungeon dungeon)
