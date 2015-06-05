@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using imperative.expressions;
+using metahub.render;
 
 namespace imperative.render.artisan
 {
@@ -45,7 +46,7 @@ namespace imperative.render.artisan
 
         public Stroke(string text)
         {
-            type = Stroke_Type.literal;
+            type = Stroke_Type.token;
             this.text = text;
         }
 
@@ -58,10 +59,20 @@ namespace imperative.render.artisan
             };
         }
 
-        public override string ToString()
+//        public override string ToString()
+//        {
+//            throw new Exception();
+////            return text ?? "";
+//        }
+
+        public string full_text()
         {
-            throw new Exception();
-//            return text ?? "";
+            if (children.Count > 0)
+            {
+                return children.Select(c => c.text).join("");
+            }
+
+            return text;
         }
 
         public static Stroke operator +(Stroke a, Stroke b)
@@ -112,7 +123,7 @@ namespace imperative.render.artisan
             var result = new List<Stroke>(list.Count + list.Count - 1);
             result.Add(list[0]);
             
-            for (int i = 1; i < result.Count; i++)
+            for (int i = 1; i < list.Count; i++)
             {
                 result.Add(new Stroke(separator));
                 result.Add(list[i]);

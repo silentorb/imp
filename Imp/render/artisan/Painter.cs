@@ -8,6 +8,7 @@ namespace imperative.render.artisan
     public static class Painter
     {
         public const string spacer = "    ";
+        private static int counter = 1;
 
         public static IEnumerable<Passage> render_root(List<Stroke> strokes)
         {
@@ -45,26 +46,26 @@ namespace imperative.render.artisan
         {
             for (var i = 0; i < strokes.Count; ++i)
             {
-                result.Add(new Passage(indent));
-
                 var addition = render_stroke(strokes[i], indent);
                 if (addition == null)
                     continue;
 
                 if (i > 0 && result.Count > 0)
+                {
                     result.Add(new Passage("\n"));
-
+                    result.Add(new Passage(indent));
+                }
                 result.AddRange(addition);
             }
         }
 
-        public static IEnumerable<Passage> render_tokens(List<Stroke> strokes)
+        public static IEnumerable<Passage> render_tokens(List<Stroke> strokes, string indent)
         {
             var result = new List<Passage>();
 
             foreach (Stroke t in strokes)
             {
-                var addition = render_stroke(t, "");
+                var addition = render_stroke(t, indent);
                 if (addition != null)
                     result.AddRange(addition);
             }
@@ -86,7 +87,7 @@ namespace imperative.render.artisan
                         : render_single_block(stroke.children, indent);
                 }
 
-                return render_tokens(stroke.children);
+                return render_tokens(stroke.children, indent);
             }
 
             if (string.IsNullOrEmpty(stroke.text))

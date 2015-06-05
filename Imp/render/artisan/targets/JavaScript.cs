@@ -98,12 +98,11 @@ namespace imperative.render.artisan.targets
                     ? text + ","
                     : text;
 
-            var dungeon_prefix = render_dungeon_path(dungeon).text;
+            var dungeon_prefix = render_dungeon_path(dungeon).full_text();
             var result = new List<Stroke>
             {
                 render_dungeon_path(dungeon) + new Stroke(" = ") + render_constructor(dungeon)
             }
-                .Concat(render_static_properties(dungeon_prefix, static_portals))
                 .Concat(render_static_properties(dungeon_prefix, static_portals))
                 .Concat(render_static_minions(dungeon_prefix, static_minions)).ToList();
 

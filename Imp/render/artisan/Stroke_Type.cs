@@ -11,8 +11,6 @@ namespace imperative.render.artisan
         chain,
         empty,
         group,
-        line,
-        literal,
         operation,
         scope,
         token

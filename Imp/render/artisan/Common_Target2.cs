@@ -403,13 +403,13 @@ namespace imperative.render.artisan
 
         virtual protected Stroke render_operation(Operation operation)
         {
-            return new Stroke(Stroke_Type.operation,
+            return new Stroke(Stroke_Type.chain, Stroke.join(
                 operation.children.Select(c =>
                     c.type == Expression_Type.operation
                         && ((Operation)c).is_condition() == operation.is_condition()
-                        ? new Stroke(c, "(" + render_expression(c) + ")")
+                        ? new Stroke("(") + render_expression(c) + new Stroke(")")
                         : render_expression(c)
-                    ).ToList()) { text = operation.op };
+                    ).ToList(), " " + operation.op + " "));
         }
 
         virtual protected Stroke render_property_function_call(Property_Function_Call expression, Expression parent)
@@ -467,7 +467,7 @@ namespace imperative.render.artisan
                 {
                     if (minion != null && minion.has_enchantment(Enchantments.Static))
                     {
-                        this_string = render_dungeon_path(minion.dungeon);
+                        this_string = render_dungeon_path(minion.dungeon) + new Stroke(".");
                     }
                     else if (!config.implicit_this
                              && minion != null
@@ -498,7 +498,7 @@ namespace imperative.render.artisan
 
         private Stroke render_arguments(List<Expression> args)
         {
-            return new Stroke(Stroke_Type.group, Stroke.join(args.Select(a => render_expression(a)).ToList(), ", "));
+            return new Stroke(Stroke_Type.chain, Stroke.join(args.Select(a => render_expression(a)).ToList(), ", "));
         }
 
         virtual protected Stroke render_assignment(Assignment statement)
