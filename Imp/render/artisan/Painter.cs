@@ -7,7 +7,7 @@ namespace imperative.render.artisan
 {
     public static class Painter
     {
-        public const string spacer = "    ";
+        public const string spacer = "  ";
         private static int counter = 1;
 
         public static IEnumerable<Passage> render_root(List<Stroke> strokes)
@@ -18,27 +18,11 @@ namespace imperative.render.artisan
             return result;
         }
 
-        public static IEnumerable<Passage> render_single_block(List<Stroke> strokes, string indent)
+        public static IEnumerable<Passage> render_block(List<Stroke> strokes, string indent)
         {
             var result = new List<Passage>();
             result.Add(new Passage("\n"));
             render_statements(result, strokes, indent + spacer);
-            return result;
-        }
-
-        public static IEnumerable<Passage> render_block(List<Stroke> strokes, string indent)
-        {
-            var result = new List<Passage>();
-            result.Add(new Passage(" {\n"));
-            render_statements(result, strokes, indent + spacer);
-            result.Add(new Passage("\n" + indent + "}"));
-            return result;
-        }
-
-        public static IEnumerable<Passage> render_group(List<Stroke> strokes, string indent)
-        {
-            var result = new List<Passage>();
-            render_statements(result, strokes, indent);
             return result;
         }
 
@@ -75,28 +59,34 @@ namespace imperative.render.artisan
 
         public static IEnumerable<Passage> render_stroke(Stroke stroke, string indent)
         {
-            if (stroke.children != null && stroke.children.Count > 0)
+            if (stroke.type == Stroke_Type.token)
             {
-                if (stroke.type == Stroke_Type.group)
-                    return render_group(stroke.children, indent);
+                if (string.IsNullOrEmpty(stroke.full_text()))
+                    return null;
 
-                if (stroke.type == Stroke_Type.scope || stroke.type == Stroke_Type.block)
+                return new[]
                 {
-                    return stroke.type == Stroke_Type.scope || stroke.children.Count > 1
-                        ? render_block(stroke.children, indent)
-                        : render_single_block(stroke.children, indent);
-                }
-
-                return render_tokens(stroke.children, indent);
+                    new Passage(stroke)
+                };
             }
 
-            if (string.IsNullOrEmpty(stroke.text))
-                return null;
-
-            return new[]
+            var list = (Stroke_List)stroke;
+            if (list.children != null && list.children.Count > 0)
             {
-                new Passage(stroke)
-            };
+                if (stroke.type == Stroke_Type.statements)
+                {
+                    var result = new List<Passage>();
+                    render_statements(result, list.children, indent);
+                    return result;
+                }
+
+                if (stroke.type == Stroke_Type.block)
+                    render_block(list.children, indent);
+
+                return render_tokens(list.children, indent);
+            }
+
+            return null;
         }
     }
 }

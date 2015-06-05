@@ -32,9 +32,9 @@ namespace imperative.render.artisan.targets
         {
             var passages = generate_strokes();
 
-//            var x = Summoning.Painter.render(1);
+            //            var x = Summoning.Painter.render(1);
 
-//            var scribe = new Painter(passages);
+            //            var scribe = new Painter(passages);
 
             var output_path = !string.IsNullOrEmpty(settings.output)
                 ? settings.output
@@ -43,7 +43,7 @@ namespace imperative.render.artisan.targets
                 : settings.output + "/" + "lib.js";
 
             throw new Exception("Not implemented.");
-//            Generator.create_file(output_path, output);
+            //            Generator.create_file(output_path, output);
         }
 
         public List<Stroke> generate_strokes()
@@ -55,7 +55,7 @@ namespace imperative.render.artisan.targets
                     || dungeon.name == "")
                     continue;
 
-                output.Add( create_class_file(dungeon));
+                output.Add(create_class_file(dungeon));
             }
 
             return output;
@@ -63,7 +63,7 @@ namespace imperative.render.artisan.targets
 
         Stroke create_class_file(Dungeon dungeon)
         {
-//            render = new Renderer();
+            //            render = new Renderer();
             var result = render_dungeon(dungeon);
 
             return result;
@@ -72,12 +72,12 @@ namespace imperative.render.artisan.targets
         override protected Stroke render_dungeon(Dungeon dungeon)
         {
             if (dungeon.is_abstract)
-                return new Stroke();
+                return new Stroke_Token("");
 
             if (dungeon.get_type() == Dungeon_Types.Namespace)
             {
-                var fullname = "window." + render_dungeon_path(dungeon).text;
-                return new Stroke(fullname + " = " + fullname + " || {}");
+                var fullname = "window." + render_dungeon_path(dungeon).full_text();
+                return new Stroke_Token(fullname + " = " + fullname + " || {}");
             }
 
             current_dungeon = dungeon;
@@ -88,7 +88,7 @@ namespace imperative.render.artisan.targets
             var instance_portals = portals.Where(p => !p.has_enchantment("static")).ToArray();
             var static_portals = portals.Except(instance_portals).ToList();
 
-            var minions = dungeon.minions.Values.Where(p => 
+            var minions = dungeon.minions.Values.Where(p =>
                 !p.has_enchantment("abstract") && p.name != "constructor").ToArray();
             var instance_minions = minions.Where(p => !p.has_enchantment("static")).ToArray();
             var static_minions = minions.Except(instance_minions);
@@ -101,68 +101,68 @@ namespace imperative.render.artisan.targets
             var dungeon_prefix = render_dungeon_path(dungeon).full_text();
             var result = new List<Stroke>
             {
-                render_dungeon_path(dungeon) + new Stroke(" = ") + render_constructor(dungeon)
+                render_dungeon_path(dungeon) + new Stroke_Token(" = ") + render_constructor(dungeon)
             }
                 .Concat(render_static_properties(dungeon_prefix, static_portals))
                 .Concat(render_static_minions(dungeon_prefix, static_minions)).ToList();
 
             result.Add(total == 0
-                ? new Stroke()
-                : new Stroke(dungeon_prefix + ".prototype = ") + (dungeon.parent != null
-                    ? new Stroke("Object.create(") + render_dungeon_path(dungeon.parent) + new Stroke(".prototype)")
-                    : new Stroke("{}")
+                ? new Stroke_Token("")
+                : new Stroke_Token(dungeon_prefix + ".prototype = ") + (dungeon.parent != null
+                    ? new Stroke_Token("Object.create(") + render_dungeon_path(dungeon.parent) + new Stroke_Token(".prototype)")
+                    : new Stroke_Token("{}")
                     )
                 );
 
             result.AddRange(instance_portals.Select(portal =>
             {
                 var assignment = get_default_value(portal) ?? render_null();
-                return render_dungeon_path(dungeon) + new Stroke(".prototype." + portal.name + " = " + assignment);
+                return render_dungeon_path(dungeon) + new Stroke_Token(".prototype." + portal.name + " = " + assignment);
             })
             .Concat(instance_minions.Select(minion =>
-                render_dungeon_path(dungeon) + new Stroke(".prototype." + minion.name + " = " )
+                render_dungeon_path(dungeon) + new Stroke_Token(".prototype." + minion.name + " = ")
                 + render_function_definition(minion)))
             );
 
             current_dungeon = null;
 
-            return new Stroke(Stroke_Type.@group, result);
+            return new Stroke_List(Stroke_Type.statements, result);
         }
 
         Stroke render_constructor(Dungeon dungeon)
         {
             return !dungeon.minions.ContainsKey("constructor")
-                ? new Stroke("function() {") + ( dungeon.parent != null 
-                    ? render_dungeon_path(dungeon.parent) + new Stroke(".apply(this)")
-                    : new Stroke("}"))
+                ? new Stroke_Token("function() {") + (dungeon.parent != null
+                    ? render_dungeon_path(dungeon.parent) + new Stroke_Token(".apply(this)")
+                    : new Stroke_Token("}"))
                 : render_function_definition(dungeon.minions["constructor"]);
         }
 
         List<Stroke> render_static_properties(string dungeon_prefix, IEnumerable<Portal> portals)
         {
-            return portals.Select(p => new Stroke(dungeon_prefix + "." + p.name + " = ") 
+            return portals.Select(p => new Stroke_Token(dungeon_prefix + "." + p.name + " = ")
                 + get_default_value(p)).ToList();
         }
 
         List<Stroke> render_static_minions(string dungeon_prefix, IEnumerable<Minion> minions)
         {
-            return minions.Select(p => new Stroke(dungeon_prefix + "." + p.name + " = ") 
+            return minions.Select(p => new Stroke_Token(dungeon_prefix + "." + p.name + " = ")
                 + render_function_definition(p)).ToList();
         }
 
         override protected List<Stroke> render_properties(Dungeon dungeon)
         {
-            return dungeon.core_portals.Values.Select(portal => render_dungeon_path(dungeon) 
-                + new Stroke(".prototype." + portal.name + " = ") 
+            return dungeon.core_portals.Values.Select(portal => render_dungeon_path(dungeon)
+                + new Stroke_Token(".prototype." + portal.name + " = ")
                 + get_default_value(portal)).ToList();
         }
 
         override protected Stroke render_variable_declaration(Declare_Variable declaration)
         {
             var profession = declaration.symbol.get_profession(overlord);
-            var first = new Stroke("var " + declaration.symbol.name);
+            Stroke first = new Stroke_Token("var " + declaration.symbol.name);
             if (declaration.expression != null)
-                first += new Stroke(" = ") + render_expression(declaration.expression);
+                first += new Stroke_Token(" = ") + render_expression(declaration.expression);
 
             return first;
         }
@@ -170,7 +170,7 @@ namespace imperative.render.artisan.targets
         protected Stroke render_function_definition(Function_Definition definition)
         {
             if (definition.is_abstract)
-                return new Stroke("");
+                return new Stroke_Token("");
 
             var minion = definition.minion;
 
@@ -182,8 +182,8 @@ namespace imperative.render.artisan.targets
                 minion.expressions.Insert(0, new Declare_Variable(self, new Self(minion.dungeon)));
             }
 
-            return new Stroke("function(" + definition.parameters.Select(p => p.symbol.name).join(", ") + ")")
-                + new Stroke(Stroke_Type.scope, render_statements(minion.expressions));
+            return new Stroke_Token("function(" + definition.parameters.Select(p => p.symbol.name).join(", ") + ")")
+                + render_block(render_statements(minion.expressions));
         }
 
         private bool is_instance_start_portal(Portal_Expression portal_expression)
@@ -195,12 +195,12 @@ namespace imperative.render.artisan.targets
         protected Stroke render_function_definition(Minion minion)
         {
             if (minion.is_abstract)
-                return new Stroke("");
+                return new Stroke_Token("");
 
             // Search for any case of "this" inside an anonymous function.
             var minions = minion.expression.find(Expression_Type.anonymous_function);
             if (minions.Any(m => m.find(e => e.type == Expression_Type.self
-                || (e.type == Expression_Type.portal 
+                || (e.type == Expression_Type.portal
                 && is_instance_start_portal((Portal_Expression)e)
                 )).Any()))
             {
@@ -220,18 +220,18 @@ namespace imperative.render.artisan.targets
                         })
                 }));
             }
-            return new Stroke("function(" + minion.parameters.Select(p => p.symbol.name).join(", ") + ")")
-                + new Stroke(Stroke_Type.scope, render_statements(minion.expressions));
+            return new Stroke_Token("function(" + minion.parameters.Select(p => p.symbol.name).join(", ") + ")")
+                + render_block(render_statements(minion.expressions));
         }
 
         protected override Stroke render_this()
         {
-            return new Stroke(current_minion.GetType() == typeof(Ethereal_Minion)
+            return new Stroke_Token(current_minion.GetType() == typeof(Ethereal_Minion)
                 && current_minion.scope.find_or_null("self") != null
                 ? "self"
                 : "this");
         }
-        
+
         //        override protected string render_iterator_block(Iterator statement)
         //        {
         //            var parameter = statement.parameter;
@@ -263,47 +263,47 @@ namespace imperative.render.artisan.targets
         //                + path_string + ".end(); " + parameter.name + "++";
         //        }
 
-//        Stroke protected string render_scope(String_Delegate action)
-//        {
-//            push_scope();
-//            var result = config.block_brace_same_line
-//                ? " {" + newline()
-//                : newline() + line("{");
-//
-//            indent();
-//            result += action();
-//            unindent();
-//            result += add("}");
-//            pop_scope();
-//            return result;
-//        }
-        
+        //        Stroke protected string render_scope(String_Delegate action)
+        //        {
+        //            push_scope();
+        //            var result = config.block_brace_same_line
+        //                ? " {" + newline()
+        //                : newline() + line("{");
+        //
+        //            indent();
+        //            result += action();
+        //            unindent();
+        //            result += add("}");
+        //            pop_scope();
+        //            return result;
+        //        }
+
         override protected Stroke render_platform_function_call(Platform_Function expression, Expression parent)
         {
             var ref_string = expression.reference != null
           ? render_expression(expression.reference)
-          : new Stroke("");
+          : new Stroke_Token("");
 
-            var ref_full = ref_string.text.Length > 0
+            var ref_full = ref_string.full_text().Length > 0
                 ? ref_string + "."
                 : "";
 
             switch (expression.name)
             {
                 case "count":
-                    return new Stroke(ref_full + "size()");
+                    return new Stroke_Token(ref_full + "size()");
 
                 case "add":
                     {
                         var first = render_expression(expression.args[0]);
                         //var dereference = is_pointer(expression.args.Last().get_signature()) ? "*" : "";
-                        return new Stroke(ref_full + "push(" + first + ")");
+                        return new Stroke_Token(ref_full + "push(" + first + ")");
                     }
 
                 case "contains":
                     {
                         var first = render_expression(expression.args[0]);
-                        return new Stroke("std::find(" + ref_full + "begin(), "
+                        return new Stroke_Token("std::find(" + ref_full + "begin(), "
                                + ref_full + "end(), " + first + ") != " + ref_full + "end()");
                     }
 
@@ -312,35 +312,35 @@ namespace imperative.render.artisan.targets
                         //var signature = expression.args[0].get_signature();
                         var first = render_expression(expression.args[0]);
                         //var dereference = is_pointer(signature) ? "*" : "";
-                        return new Stroke(ref_full + "distance(" + first + ")");
+                        return new Stroke_Token(ref_full + "distance(" + first + ")");
                     }
 
                 case "first":
-                    return new Stroke("[0]");
+                    return new Stroke_Token("[0]");
 
                 case "last":
-                    return new Stroke(ref_full + "back()");
+                    return new Stroke_Token(ref_full + "back()");
 
                 case "pop":
-                    return new Stroke(ref_full + "pop_back()");
+                    return new Stroke_Token(ref_full + "pop_back()");
 
                 case "remove":
                     {
                         var first = render_expression(expression.args[0]);
-                        return new Stroke(ref_full + "erase(std::remove(" + ref_full + "begin(), "
+                        return new Stroke_Token(ref_full + "erase(std::remove(" + ref_full + "begin(), "
                             + ref_full + "end(), " + first + "), " + ref_full + "end())");
                     }
 
                 case "rand":
                     float min = ((Literal)expression.args[0]).get_float();
                     float max = ((Literal)expression.args[1]).get_float();
-                    return new Stroke("rand() % " + (max - min) + (min < 0 ? " - " + -min : " + " + min));
+                    return new Stroke_Token("rand() % " + (max - min) + (min < 0 ? " - " + -min : " + " + min));
 
                 default:
                     throw new Exception("Unsupported platform-specific function: " + expression.name + ".");
             }
         }
-        
+
         //        string render_function_call(Class_Function_Call expression, Expression parent)
         //        {
         //            var ref_string = expression.reference != null
@@ -361,7 +361,7 @@ namespace imperative.render.artisan.targets
         //            return line(render_expression(statement.target) + " " + statement.op + " " + render_expression(statement.expression));
         //        }
         //
-    
+
         //
         //        string render_instantiation(Instantiate expression)
         //        {
@@ -369,24 +369,24 @@ namespace imperative.render.artisan.targets
         //            return "new " + full_dungeon_name(expression.dungeon) + "(" + args + ")";
         //        }
 
-//        override protected Stroke render_realm(Dungeon realm, Stroke_Delegate action)
-//        {
-//            if (realm.name == "")
-//                return action();
-//
-//            var fullname = "window." + render_dungeon_path(realm);
-//            var result = add(fullname + " = " + fullname + " || {}") + newline();
-//
-//            current_realm = realm;
-//            var body = action();
-//            current_realm = null;
-//
-//            if (body == "")
-//                return "";
-//
-//            result += body;
-//            return result;
-//        }
+        //        override protected Stroke render_realm(Dungeon realm, Stroke_Delegate action)
+        //        {
+        //            if (realm.name == "")
+        //                return action();
+        //
+        //            var fullname = "window." + render_dungeon_path(realm);
+        //            var result = add(fullname + " = " + fullname + " || {}") + newline();
+        //
+        //            current_realm = realm;
+        //            var body = action();
+        //            current_realm = null;
+        //
+        //            if (body == "")
+        //                return "";
+        //
+        //            result += body;
+        //            return result;
+        //        }
 
     }
 }

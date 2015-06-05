@@ -8,72 +8,27 @@ using metahub.render;
 
 namespace imperative.render.artisan
 {
-    public class Stroke
+    public abstract class Stroke
     {
         public Expression expression;
-        public string text;
         public Stroke_Type type;
-        public List<Stroke> children = new List<Stroke>();
 
-        public Stroke()
-        {
-            type = Stroke_Type.empty;
-        }
+        //
+        //        public Stroke(string text)
+        //        {
+        //            type = Stroke_Type.chain;
+        //            this.text = text;
+        //        }
 
-        public Stroke(Stroke_Type type)
-        {
-            this.type = type;
-        }
+        public abstract Stroke copy();
 
-        public Stroke(Expression expression, string text)
-        {
-            type = Stroke_Type.token;
-            this.expression = expression;
-            this.text = text;
-        }
+        //        public override string ToString()
+        //        {
+        //            throw new Exception();
+        ////            return text ?? "";
+        //        }
 
-        public Stroke(Stroke_Type type, Expression expression)
-        {
-            this.type = type;
-            this.expression = expression;
-        }
-
-        public Stroke(Stroke_Type type, List<Stroke> children)
-        {
-            this.type = type;
-            this.children = children;
-        }
-
-        public Stroke(string text)
-        {
-            type = Stroke_Type.token;
-            this.text = text;
-        }
-
-        public Stroke copy()
-        {
-            return new Stroke(type, expression)
-            {
-                children = children,
-                text = text
-            };
-        }
-
-//        public override string ToString()
-//        {
-//            throw new Exception();
-////            return text ?? "";
-//        }
-
-        public string full_text()
-        {
-            if (children.Count > 0)
-            {
-                return children.Select(c => c.text).join("");
-            }
-
-            return text;
-        }
+        public abstract string full_text();
 
         public static Stroke operator +(Stroke a, Stroke b)
         {
@@ -87,11 +42,12 @@ namespace imperative.render.artisan
 
             if (a.type == Stroke_Type.chain)
             {
-                a.children = a.children.Concat(b).ToList();
+                var a2 = (Stroke_List)a;
+                a2.children = a2.children.Concat(b).ToList();
                 return a.copy();
             }
 
-            return new Stroke(Stroke_Type.chain, new List<Stroke>
+            return new Stroke_List(Stroke_Type.chain, new List<Stroke>
             {
                 a.copy()
             }.Concat(b).ToList());
@@ -104,12 +60,12 @@ namespace imperative.render.artisan
 
             if (type == Stroke_Type.chain)
             {
-                var result = copy();
+                var result = (Stroke_List)copy();
                 result.children.Add(next);
                 return result;
             }
 
-            return new Stroke(Stroke_Type.chain, new List<Stroke>
+            return new Stroke_List(Stroke_Type.chain, new List<Stroke>
             {
                 copy(), next.copy()
             });
@@ -122,14 +78,59 @@ namespace imperative.render.artisan
 
             var result = new List<Stroke>(list.Count + list.Count - 1);
             result.Add(list[0]);
-            
+
             for (int i = 1; i < list.Count; i++)
             {
-                result.Add(new Stroke(separator));
+                result.Add(new Stroke_Token(separator));
                 result.Add(list[i]);
             }
 
             return result;
-        } 
+        }
     }
+
+    public class Stroke_Token : Stroke
+    {
+        public string text;
+
+        public Stroke_Token(string text, Expression expression = null)
+        {
+            this.text = text;
+            type = Stroke_Type.token;
+            this.expression = expression;
+        }
+
+        public override Stroke copy()
+        {
+            return this;
+        }
+
+        public override string full_text()
+        {
+            return text;
+        }
+    }
+
+    public class Stroke_List : Stroke
+    {
+        public List<Stroke> children = new List<Stroke>();
+
+        public Stroke_List(Stroke_Type type, List<Stroke> children, Expression expression = null)
+        {
+            this.type = type;
+            this.expression = expression;
+            this.children = children;
+        }
+
+        public override Stroke copy()
+        {
+            return new Stroke_List(type, children, expression);
+        }
+
+        public override string full_text()
+        {
+            return children.Select(c => c.full_text()).join("");
+        }
+    }
+
 }

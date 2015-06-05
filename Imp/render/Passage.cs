@@ -24,7 +24,7 @@ namespace imperative.render
        public Passage(Stroke stroke)
        {
            this.stroke = stroke;
-           text = stroke.text;
+           text = stroke.full_text();
        }
 
        public Passage(string text)

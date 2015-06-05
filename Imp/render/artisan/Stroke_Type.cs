@@ -9,10 +9,7 @@ namespace imperative.render.artisan
     {
         block,
         chain,
-        empty,
-        group,
-        operation,
-        scope,
+        statements,
         token
     }
 }
