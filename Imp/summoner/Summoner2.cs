@@ -123,13 +123,13 @@ namespace imperative.summoner
             }
 
             ack2(context);
-//            foreach (var dungeon_context in dungeon_legends)
-//            {
-//                foreach (var legend in dungeon_context.legends)
-//                {
-//                    process_dungeon1(dungeon_context, legend);
-//                }
-//            }
+            //            foreach (var dungeon_context in dungeon_legends)
+            //            {
+            //                foreach (var legend in dungeon_context.legends)
+            //                {
+            //                    process_dungeon1(dungeon_context, legend);
+            //                }
+            //            }
 
             var dungeon_legends = map[Legend_Types.dungeon_definition];
             foreach (var dungeon_context in dungeon_legends)
@@ -252,7 +252,7 @@ namespace imperative.summoner
                     parent.children.Add(dungeon);
                 }
 
-//                dungeon.generate_code();
+                //                dungeon.generate_code();
                 context.dungeon = dungeon;
                 return dungeon;
             }
@@ -760,7 +760,7 @@ namespace imperative.summoner
         public Expression process_iterator(List<Legend> parts, Summoner_Context context)
         {
             var reference = process_expression_part(parts[1], context);
-//            throw new Exception("Not implemented.");
+            //            throw new Exception("Not implemented.");
 
             var profession = reference.get_end().get_profession().children[0];
             var symbol = context.scope.create_symbol(parts[0].text, profession);
@@ -776,7 +776,10 @@ namespace imperative.summoner
             //            var expressions = summon_statements(parts[0].children, context).ToList();
             var result = new If(ifs);
             if (parts[1] != null)
-                result.else_block = summon_statements(parts[1].children, context);
+            {
+                result.if_statements.Add(new Flow_Control(Flow_Control_Type.Else, null,
+                    summon_statements(parts[1].children, context)));
+            }
 
             return result;
         }

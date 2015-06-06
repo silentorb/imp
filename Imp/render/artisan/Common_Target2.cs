@@ -264,7 +264,7 @@ namespace imperative.render.artisan
                 : "";
 
             var intro = "public " + abstract_keyword + "class " + render_dungeon_path(dungeon);
-            var result = new Stroke_Token(intro) + render_block(render_properties(dungeon));
+            var result = new Stroke_Token(intro) + render_block(render_properties(dungeon), false);
             //                + render_statements(statements, newline())
             //            );
 
@@ -321,13 +321,14 @@ namespace imperative.render.artisan
                 return new Stroke_Token("[]");
 
             var arg_string = Stroke.join(args.Select(a => render_expression(a)).ToList(), ", ");
-            //            if (arg_string.Contains("\n"))
-            //            {
-            //                arg_string = arg_string;
-            //            }
-            //            else
-            //            {
-            //            }
+
+            if (arg_string.Any(Stroke.contains_block))
+            {
+                return new Stroke_Token("[")
+                    + new Stroke_List(Stroke_Type.block, arg_string)
+                    + new Stroke_Newline() + new Stroke_Token("]");
+            }
+
             return new Stroke_Token("[") + arg_string + new Stroke_Token("]");
         }
 
@@ -492,7 +493,7 @@ namespace imperative.render.artisan
                 ? ref_string + second
                 : second;
 
-            
+
             return ref_full + render_arguments(expression.args)
                  + new Stroke_Token(")");
         }
@@ -536,7 +537,7 @@ namespace imperative.render.artisan
         virtual protected Stroke render_anonymous_function(Anonymous_Function definition)
         {
             return new Stroke_Token("function(" + definition.parameters.Select(p => p.symbol.name).join(", ") + ")")
-            + render_block(render_statements(definition.minion.expressions));
+            + render_block(render_statements(definition.minion.expressions), false);
         }
 
         virtual protected Stroke render_minion_scope(Minion_Base minion)
@@ -593,25 +594,34 @@ namespace imperative.render.artisan
 
         virtual protected Stroke render_flow_control(Flow_Control statement, bool minimal, bool is_succeeded = false)
         {
-            var expression = render_expression(statement.condition);
+            var start = new Stroke_Token(statement.flow_type.ToString().ToLower());
+            var block = render_block(render_statements(statement.body), true, is_succeeded);
 
-            return new Stroke_Token(statement.flow_type.ToString().ToLower() + " (") + expression + new Stroke_Token(")")
-                + render_block(render_statements(statement.body));
+            if (statement.flow_type == Flow_Control_Type.Else)
+                return start + block;
+
+            return start + new Stroke_Token(" (") + 
+                render_expression(statement.condition) + new Stroke_Token(")")
+                + block;
         }
 
         virtual protected Stroke render_if(If statement)
         {
             var minimal = statement.if_statements.All(e => e.body.Count == 1);
             var block_count = statement.if_statements.Count;
-            if (statement.else_block != null)
-                ++block_count;
+//            if (statement.else_block != null)
+//                ++block_count;
 
             //            throw new Exception("Not implemented");
             var i = 0;
             var strokes = statement.if_statements.Select(e => render_flow_control(e, minimal, ++i < block_count)).ToList();
-            if (statement.else_block != null)
-                strokes.Add(new Stroke_Token("else") + render_block(render_statements(statement.else_block)));
-
+//            if (statement.else_block != null)
+//            {
+//                if (strokes.Last().type == Stroke_Type.newline)
+//                   strokes.RemoveAt(strokes.Count - 1);
+//
+//                strokes.Add(new Stroke_Token("else") + render_block(render_statements(statement.else_block)));
+//            }
             return strokes.Count == 1
                 ? strokes.First()
                 : new Stroke_List(Stroke_Type.statements, strokes);
@@ -696,7 +706,7 @@ namespace imperative.render.artisan
             var most = items.Take(items.Count - 1);
             var last = items.Last();
 
-            var result = new Stroke_List(Stroke_Type.statements, new List<Stroke>
+            var result = new Stroke_List(Stroke_Type.chain, new List<Stroke>
             {
                 new Stroke_Token("{")
             });
@@ -707,18 +717,26 @@ namespace imperative.render.artisan
 
             entries.Add(new Stroke_Token(last.Key + ": ") + render_expression(last.Value));
             result.children.Add(new Stroke_List(Stroke_Type.block, entries));
+            result.children.Add(new Stroke_Newline());
             result.children.Add(new Stroke_Token("}"));
 
             return result;
         }
 
-        protected Stroke render_block(List<Stroke> strokes)
+        protected Stroke render_block(List<Stroke> strokes, bool try_minimal = true, bool is_succeeded = false)
         {
             var block = new Stroke_List(Stroke_Type.block, strokes);
-            if (strokes.Count == 1)
-                return block;
-            
-            return new Stroke_Token(" {") + new Stroke_List(Stroke_Type.block, strokes) + new Stroke_Token("}");
+            if (strokes.Count == 1 && try_minimal)
+            {
+                return is_succeeded
+                ? block
+                : block + new Stroke_Newline { ignore_on_block_end = true };
+            }
+
+            return new Stroke_Token(" {") + new Stroke_List(Stroke_Type.block, strokes)
+                + new Stroke_Newline()
+                + new Stroke_Token("}")
+                ;
         }
     }
 }

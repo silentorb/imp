@@ -5,6 +5,7 @@ namespace imperative.expressions
 {
     public enum Flow_Control_Type
     {
+        Else,
         If,
         While
     }

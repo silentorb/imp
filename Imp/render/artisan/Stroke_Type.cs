@@ -9,6 +9,7 @@ namespace imperative.render.artisan
     {
         block,
         chain,
+        newline,
         statements,
         token
     }

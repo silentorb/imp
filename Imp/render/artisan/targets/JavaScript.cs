@@ -183,7 +183,7 @@ namespace imperative.render.artisan.targets
             }
 
             return new Stroke_Token("function(" + definition.parameters.Select(p => p.symbol.name).join(", ") + ")")
-                + render_block(render_statements(minion.expressions));
+                + render_block(render_statements(minion.expressions), false);
         }
 
         private bool is_instance_start_portal(Portal_Expression portal_expression)
@@ -221,7 +221,7 @@ namespace imperative.render.artisan.targets
                 }));
             }
             return new Stroke_Token("function(" + minion.parameters.Select(p => p.symbol.name).join(", ") + ")")
-                + render_block(render_statements(minion.expressions));
+                + render_block(render_statements(minion.expressions), false);
         }
 
         protected override Stroke render_this()

@@ -642,15 +642,15 @@ namespace imperative.render
         {
             var minimal = statement.if_statements.All(e => e.body.Count == 1);
             var block_count = statement.if_statements.Count;
-            if (statement.else_block != null)
-                ++block_count;
+//            if (statement.else_block != null)
+//                ++block_count;
 
             //            if (statement.else_block != null)
             //                minimal = false;
             var i = 0;
             var result = statement.if_statements.Select(e => render_flow_control(e, minimal, ++i < block_count)).join("");
-            if (statement.else_block != null)
-                result += add("else") + render_scope(statement.else_block, minimal);
+//            if (statement.else_block != null)
+//                result += add("else") + render_scope(statement.else_block, minimal);
 
             return result;
         }

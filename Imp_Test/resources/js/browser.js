@@ -21,7 +21,6 @@ bloom.Garden.start = function() {
       bloom.Garden.goto('garden-login')
     else
       bloom.Garden.goto('garden-hub')
-
   })
 }
 bloom.Garden.goto = function(name) {

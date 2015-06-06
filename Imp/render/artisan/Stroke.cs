@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -87,13 +88,21 @@ namespace imperative.render.artisan
 
             return result;
         }
+
+        public static bool contains_block(Stroke stroke)
+        {
+            return stroke.type == Stroke_Type.block
+                || stroke.type == Stroke_Type.chain
+                && ((Stroke_List)stroke).children.Any(contains_block);
+        }
     }
 
+    [DebuggerDisplay("Token {text}")]
     public class Stroke_Token : Stroke
     {
         public string text;
 
-        public Stroke_Token(string text, Expression expression = null)
+        public Stroke_Token(string text = "", Expression expression = null)
         {
             this.text = text;
             type = Stroke_Type.token;
@@ -108,6 +117,26 @@ namespace imperative.render.artisan
         public override string full_text()
         {
             return text;
+        }
+    }
+
+    public class Stroke_Newline : Stroke
+    {
+        public bool ignore_on_block_end = false;
+
+        public Stroke_Newline()
+        {
+            type = Stroke_Type.newline;
+        }
+
+        public override Stroke copy()
+        {
+            return this;
+        }
+
+        public override string full_text()
+        {
+            return "\n";
         }
     }
 
@@ -131,6 +160,8 @@ namespace imperative.render.artisan
         {
             return children.Select(c => c.full_text()).join("");
         }
+        
     }
+
 
 }
