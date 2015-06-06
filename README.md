@@ -19,12 +19,7 @@ Imp is a humble language, which means:
 * Imp is not fancy or revolutionary.
 
 At the time of this writing Imp has limited support for C++, C#, and JavaScript.  Improved support and additional languages will hopefully come with time.
-	
-Under the hood, Imp is a world populated by dungeons, portals, and minions.  On the surface it looks like any other language.  This is because:
 
-1. One of imp's goals is to be a middle-man between common languages, which means having a common vocabulary.
-2. Imp is intended to make programs that contain dungeons, portals, and minions, so what fun would it be if those were reserved words?
-	
 Imp originated as a lower-level counterpart to the MetaHub programming language.  MetaHub is built ontop of Imp and generates Imp code structures.  
 If you use C#, Imp has a useful API for generating and transforming Imp code structures.  It also sports some nifty templating features.
 
