@@ -15,7 +15,7 @@ namespace imperative.render.artisan
         {
             int x = 1;
             int y = 1;
-
+            
             var result = new StringBuilder();
             foreach (var passage in passages)
             {
@@ -52,7 +52,8 @@ namespace imperative.render.artisan
 
             segments.Add(new Segment
             {
-                gen_column = y - 1,
+                gen_row = y - 1,
+                gen_column = x - 1,
                 sources_index = 0, // Eventually will be indexed to the list of source files
                 source_line = position.y - 1,
                 source_column = position.x - 1,

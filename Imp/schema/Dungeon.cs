@@ -298,8 +298,8 @@ namespace imperative.schema
         void transform_expression(Expression expression, Expression parent)
         {
             expression.parent = parent;
-            if (overlord.target.transmuter != null)
-                overlord.target.transmuter.transform(expression);
+//            if (overlord.target.transmuter != null)
+//                overlord.target.transmuter.transform(expression);
 
             switch (expression.type)
             {
@@ -357,7 +357,7 @@ namespace imperative.schema
 
         void analyze_expression(Expression expression)
         {
-            overlord.target.analyze_expression(expression);
+//            overlord.target.analyze_expression(expression);
 
             switch (expression.type)
             {

@@ -18,7 +18,7 @@ namespace metahub.render
         public Target(Overlord overlord)
         {
             this.overlord = overlord;
-            overlord.target = this;
+//            overlord.target = this;
         }
 
         public virtual void generate_dungeon_code(Dungeon dungeon)

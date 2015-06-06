@@ -6,13 +6,13 @@ using System.Text.RegularExpressions;
 using imperative.schema;
 using imperative.summoner;
 using imperative.expressions;
+using imperative.render.artisan;
+using imperative.render.artisan.targets;
 using imperative.render.targets;
 using library;
 using metahub.jackolantern;
 using metahub.jackolantern.expressions;
-
 using metahub.render;
-using metahub.render.targets;
 using metahub.schema;
 using runic.parser;
 using Literal = imperative.expressions.Literal;
@@ -30,7 +30,7 @@ namespace imperative
     {
         public List<Dungeon> dungeons = new List<Dungeon>();
         public Dungeon root;
-        public Target target;
+        public Common_Target2 target;
         public Dungeon array;
         public Professions library;
 
@@ -50,18 +50,18 @@ namespace imperative
             target = create_target(target_name);
         }
 
-        public Target create_target(string name)
+        public Common_Target2 create_target(string name)
         {
             switch (name)
             {
                 case "js":
                     return new JavaScript(this);
 
-                case "cs":
-                    return new Csharp(this);
-
-                case "cpp":
-                    return new Cpp(this);
+                //                case "cs":
+                //                    return new Csharp(this);
+                //
+                //                case "cpp":
+                //                    return new Cpp(this);
             }
 
             throw new Exception("Invalid imp target: " + name + ".");
@@ -85,10 +85,10 @@ namespace imperative
             }
         }
 
-//        public void summon(string code, string filename, bool is_external = false)
-//        {
-//            summon2(code, filename, is_external);
-//        }
+        //        public void summon(string code, string filename, bool is_external = false)
+        //        {
+        //            summon2(code, filename, is_external);
+        //        }
 
         public void summon(string code, string filename, bool is_external = false)
         {
@@ -116,8 +116,8 @@ namespace imperative
         {
             var summoner = new Summoner2(this);
             throw new Exception("Not implemented.");
-//            summoner.process_dungeon1(template.source, context);
-//            return summoner.process_dungeon2(template.source, context);
+            //            summoner.process_dungeon1(template.source, context);
+            //            return summoner.process_dungeon2(template.source, context);
         }
 
         public Expression summon_snippet(Snippet template, Summoner_Context context)
@@ -150,28 +150,36 @@ namespace imperative
         public static void run(Overlord_Configuration config)
         {
             var overlord = new Overlord(config.target);
-            overlord.summon_input(config.input);
-            overlord.generate(config);
+            var sources = get_source_files(config.input);
+            overlord.summon_input(sources);
+            overlord.generate(config, sources);
         }
 
-        public void summon_input(string input)
+        public static string[] get_source_files(string input)
         {
             if (File.Exists(input))
+                return new[] { input };
+
+            return aggregate_files(input).ToArray();
+        }
+
+        public void summon_input(string[] sources)
+        {
+            if (sources.Length == 1)
             {
                 // Very quick-and-dirty but it works for now.
                 var cwd = Directory.GetCurrentDirectory();
-                Directory.SetCurrentDirectory(Path.GetDirectoryName(input));
-                summon_file(input);
+                Directory.SetCurrentDirectory(Path.GetDirectoryName(sources[0]));
+                summon_file(sources[0]);
                 Directory.SetCurrentDirectory(cwd);
             }
             else
             {
-                var files = aggregate_files(input);
-                summon_many(files.Where(f => Path.GetExtension(f) == ".imp"));
+                summon_many(sources.Where(f => Path.GetExtension(f) == ".imp"));
             }
         }
 
-        public void generate(Overlord_Configuration config)
+        public void generate(Overlord_Configuration config, string[] sources)
         {
             flatten();
             post_analyze();
@@ -185,13 +193,13 @@ namespace imperative
                 if (Directory.Exists(config.output))
                     Generator.clear_folder(config.output);
             }
-            target.run(config);
+            target.run(config, sources);
         }
 
         public static List<string> aggregate_files(string path)
         {
             var result = new List<string>();
-            result.AddRange(Directory.GetFiles(path));
+            result.AddRange(Directory.GetFiles(path, "*.imp"));
             foreach (var directory in Directory.GetDirectories(path))
             {
                 result.AddRange(aggregate_files(directory));

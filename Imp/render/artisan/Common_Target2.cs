@@ -528,8 +528,11 @@ namespace imperative.render.artisan
 
         virtual protected Stroke render_anonymous_function(Anonymous_Function definition)
         {
-            return new Stroke_Token("function(" + definition.parameters.Select(p => p.symbol.name).join(", ") + ")")
+            minion_stack.Push(definition.minion);
+            var result = new Stroke_Token("function(" + definition.parameters.Select(p => p.symbol.name).join(", ") + ")")
             + render_block(render_statements(definition.minion.expressions), false);
+            minion_stack.Pop();
+            return result;
         }
 
         virtual protected Stroke render_minion_scope(Minion_Base minion)
@@ -655,6 +658,7 @@ namespace imperative.render.artisan
 
         virtual protected Stroke render_function_definition(Minion definition)
         {
+            minion_stack.Push(definition);
             if (definition.is_abstract && !config.supports_abstract)
                 return new Stroke_Token("");
 
@@ -668,7 +672,9 @@ namespace imperative.render.artisan
             if (definition.is_abstract)
                 return new Stroke_Token(intro + terminate_statement());
 
-            return new Stroke_Token(intro) + render_block(render_statements(definition.expressions));
+            var result = new Stroke_Token(intro) + render_block(render_statements(definition.expressions));
+            minion_stack.Pop();
+            return result;
         }
 
         virtual protected Stroke render_definition_parameter(Parameter parameter)

@@ -46,11 +46,21 @@ namespace imperative.render.artisan.targets
             // Source map
             var map_file = output_path + ".map";
 
-            var source_map = new Source_Map(Path.GetFileName(output_path), sources, segments);
+            var original = new Uri(output_path.Replace(@"\", "/"));
+            var source_map = new Source_Map(Path.GetFileName(output_path),
+                sources.Select(s => original.MakeRelativeUri(new Uri(s)).ToString()).ToArray(), 
+                segments);
             var source_map_content = source_map.serialize();
 
             Generator.create_file(map_file, source_map_content);
-            
+        }
+
+        public string generate_string()
+        {
+            var strokes = generate_strokes();
+            var passages = Painter.render_root(strokes).ToList();
+            var segments = new List<Segment>();
+            return Scribe.render(passages, segments);
         }
 
         public List<Stroke> generate_strokes()
@@ -174,24 +184,24 @@ namespace imperative.render.artisan.targets
         //            return first;
         //        }
 
-        protected Stroke render_function_definition(Function_Definition definition)
-        {
-            if (definition.is_abstract)
-                return new Stroke_Token("");
-
-            var minion = definition.minion;
-
-            // Search for any case of "this" inside an anonymous function.
-            var minions = definition.find(Expression_Type.anonymous_function);
-            if (minions.Any(m => m.find(e => e.type == Expression_Type.self || e.type == Expression_Type.property_function_call).Any()))
-            {
-                var self = minion.scope.create_symbol("self", current_dungeon.overlord.library.get(current_dungeon));
-                minion.expressions.Insert(0, new Declare_Variable(self, new Self(minion.dungeon)));
-            }
-
-            return new Stroke_Token("function(" + definition.parameters.Select(p => p.symbol.name).join(", ") + ")")
-                + render_block(render_statements(minion.expressions), false);
-        }
+        //        protected Stroke render_function_definition(Function_Definition definition)
+        //        {
+        //            if (definition.is_abstract)
+        //                return new Stroke_Token("");
+        //
+        //            var minion = definition.minion;
+        //
+        //            // Search for any case of "this" inside an anonymous function.
+        //            var minions = definition.find(Expression_Type.anonymous_function);
+        //            if (minions.Any(m => m.find(e => e.type == Expression_Type.self || e.type == Expression_Type.property_function_call).Any()))
+        //            {
+        //                var self = minion.scope.create_symbol("self", current_dungeon.overlord.library.get(current_dungeon));
+        //                minion.expressions.Insert(0, new Declare_Variable(self, new Self(minion.dungeon)));
+        //            }
+        //
+        //            return new Stroke_Token("function(" + definition.parameters.Select(p => p.symbol.name).join(", ") + ")")
+        //                + render_block(render_statements(minion.expressions), false);
+        //        }
 
         private bool is_instance_start_portal(Portal_Expression portal_expression)
         {
@@ -199,10 +209,12 @@ namespace imperative.render.artisan.targets
                    && !portal_expression.portal.has_enchantment(Enchantments.Static);
         }
 
-        protected Stroke render_function_definition(Minion minion)
+        override protected Stroke render_function_definition(Minion minion)
         {
             if (minion.is_abstract)
-                return new Stroke_Token("");
+                return new Stroke_Token();
+
+            minion_stack.Push(minion);
 
             // Search for any case of "this" inside an anonymous function.
             var minions = minion.expression.find(Expression_Type.anonymous_function);
@@ -227,8 +239,11 @@ namespace imperative.render.artisan.targets
                         })
                 }));
             }
-            return new Stroke_Token("function(" + minion.parameters.Select(p => p.symbol.name).join(", ") + ")")
+            var result = new Stroke_Token("function(" + minion.parameters.Select(p => p.symbol.name).join(", ") + ")")
                 + render_block(render_statements(minion.expressions), false);
+
+            minion_stack.Pop();
+            return result;
         }
 
         protected override Stroke render_this()
