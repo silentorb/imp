@@ -501,7 +501,7 @@ namespace imperative.summoner
                         );
 
                 case "declare_variable":
-                    return process_declare_variable(parts, context);
+                    return process_declare_variable(source, context);
 
                 case "snippet_function":
                     {
@@ -553,8 +553,10 @@ namespace imperative.summoner
             throw new Exception("Not supported.");
         }
 
-        private Expression process_declare_variable(List<Legend> parts, Summoner_Context context)
+        private Expression process_declare_variable(Legend legend, Summoner_Context context)
         {
+            var parts = legend.children;
+
             Profession profession;
             var expression_pattern = parts[2].children.Count == 0
                                          ? null
@@ -573,7 +575,7 @@ namespace imperative.summoner
             }
 
             var symbol = context.scope.create_symbol(parts[0].text, profession);
-            return new Declare_Variable(symbol, expression_pattern);
+            return new Declare_Variable(symbol, expression_pattern, legend);
         }
 
         private Expression process_expression_part(Legend source, Summoner_Context context)

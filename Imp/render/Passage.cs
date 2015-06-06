@@ -9,27 +9,19 @@ namespace imperative.render
 {
    public class Passage
    {
-       public Stroke stroke;
+       public Expression expression;
        public string text;
-       public int x;
-       public int y;
-
-       public Passage(Stroke stroke, int x, int y)
-       {
-           this.stroke = stroke;
-           this.x = x;
-           this.y = y;
-       }
 
        public Passage(Stroke stroke)
        {
-           this.stroke = stroke;
+           this.expression = stroke.expression;
            text = stroke.full_text();
        }
 
-       public Passage(string text)
+       public Passage(string text, Expression expression = null)
        {
            this.text = text;
+           this.expression = expression;
        }
    }
 }

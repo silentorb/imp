@@ -50,9 +50,14 @@ namespace imp_test.tests
             var target = new imperative.render.artisan.targets.JavaScript(overlord);
             var strokes = target.generate_strokes();
             var passages = Painter.render_root(strokes).ToList();
-            var output = Scribe.render_source_map(passages);
+            var segments = new List<Segment>();
+            var output = Scribe.render(passages, segments);
             var goal = Utility.load_resource("js.browser.js");
             Utility.diff(goal, output);
+
+            var source_map = new Source_Map("imp.browser.js", new [] {"browser.imp"}, segments);
+            var source_map_content = source_map.serialize();
+            Utility.diff(Utility.load_resource("js.browser.js.map"), source_map_content);
         }
 
         [Test]

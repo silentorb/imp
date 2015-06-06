@@ -1,5 +1,5 @@
 using imperative.schema;
-
+using runic.parser;
 
 
 namespace imperative.expressions
@@ -9,8 +9,8 @@ namespace imperative.expressions
         public Symbol symbol;
         public Expression expression;
 
-        public Declare_Variable(Symbol symbol, Expression expression)
-            : base(Expression_Type.declare_variable)
+        public Declare_Variable(Symbol symbol, Expression expression, Legend legend = null)
+            : base(Expression_Type.declare_variable, legend)
         {
             this.symbol = symbol;
             this.expression = expression;
@@ -18,7 +18,7 @@ namespace imperative.expressions
 
         public override Expression clone()
         {
-            return new Declare_Variable(symbol, expression);
+            return new Declare_Variable(symbol, expression, legend);
         }
 
         public override System.Collections.Generic.IEnumerable<Expression> children

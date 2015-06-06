@@ -28,13 +28,12 @@ namespace imperative.render.artisan.targets
                 };
         }
 
-        override public void run(Overlord_Configuration settings)
+        override public void run(Overlord_Configuration settings, string[] sources)
         {
-            var passages = generate_strokes();
-
-            //            var x = Summoning.Painter.render(1);
-
-            //            var scribe = new Painter(passages);
+            var strokes = generate_strokes();
+            var passages = Painter.render_root(strokes).ToList();
+            var segments = new List<Segment>();
+            var output = Scribe.render(passages, segments);
 
             var output_path = !string.IsNullOrEmpty(settings.output)
                 ? settings.output
@@ -42,8 +41,16 @@ namespace imperative.render.artisan.targets
                 ? settings.output + Path.GetFileNameWithoutExtension(settings.input) + ".js"
                 : settings.output + "/" + "lib.js";
 
-            throw new Exception("Not implemented.");
-            //            Generator.create_file(output_path, output);
+            Generator.create_file(output_path, output);
+
+            // Source map
+            var map_file = output_path + ".map";
+
+            var source_map = new Source_Map(Path.GetFileName(output_path), sources, segments);
+            var source_map_content = source_map.serialize();
+
+            Generator.create_file(map_file, source_map_content);
+            
         }
 
         public List<Stroke> generate_strokes()
@@ -157,15 +164,15 @@ namespace imperative.render.artisan.targets
                 + get_default_value(portal)).ToList();
         }
 
-        override protected Stroke render_variable_declaration(Declare_Variable declaration)
-        {
-            var profession = declaration.symbol.get_profession(overlord);
-            Stroke first = new Stroke_Token("var " + declaration.symbol.name);
-            if (declaration.expression != null)
-                first += new Stroke_Token(" = ") + render_expression(declaration.expression);
-
-            return first;
-        }
+        //        override protected Stroke render_variable_declaration(Declare_Variable declaration)
+        //        {
+        //            var profession = declaration.symbol.get_profession(overlord);
+        //            Stroke first = new Stroke_Token("var " + declaration.symbol.name);
+        //            if (declaration.expression != null)
+        //                first += new Stroke_Token(" = ") + render_expression(declaration.expression);
+        //
+        //            return first;
+        //        }
 
         protected Stroke render_function_definition(Function_Definition definition)
         {

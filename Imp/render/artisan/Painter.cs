@@ -47,17 +47,19 @@ namespace imperative.render.artisan
             }
         }
 
-        public static IEnumerable<Passage> render_tokens(List<Stroke> strokes, string indent, bool is_end)
+        public static IEnumerable<Passage> render_tokens(Stroke_List list, string indent, bool is_end)
         {
             var result = new List<Passage>();
+            if (list.expression != null && list.expression.legend != null)
+            {
+                result.Add(new Passage("", list.expression));
+            }
 
-            foreach (Stroke t in strokes)
+            foreach (Stroke t in list.children)
             {
                 var addition = render_stroke(t, indent, is_end);
                 if (addition != null)
                     result.AddRange(addition);
-
-                //                result.Add(new Passage("%"));
             }
 
             return result;
@@ -100,7 +102,7 @@ namespace imperative.render.artisan
                 if (stroke.type == Stroke_Type.block)
                     return render_block(list.children, indent);
 
-                return render_tokens(list.children, indent, is_end);
+                return render_tokens(list, indent, is_end);
             }
 
             return null;

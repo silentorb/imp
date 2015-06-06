@@ -49,10 +49,7 @@ namespace imperative.render.artisan
             }
         }
 
-        public virtual void run(Overlord_Configuration config1)
-        {
-
-        }
+        public abstract void run(Overlord_Configuration config1, string[] sources);
 
         virtual protected void push_scope()
         {
@@ -110,10 +107,6 @@ namespace imperative.render.artisan
                     result = render_profession(expression.get_profession());
                     break;
 
-                //                case Expression_Type.create_array:
-                //                    result = "[" + render_arguments(((Create_Array)expression).items) + "]";
-                //                    break;
-
                 case Expression_Type.anonymous_function:
                     return render_anonymous_function((Anonymous_Function)expression);
 
@@ -139,10 +132,6 @@ namespace imperative.render.artisan
                     //                    throw new Exception("Not implemented");
                     result = new Stroke_Token(((Insert)expression).code);
                     break;
-
-                //                case Expression_Type.jewel:
-                //                    var jewel = (Jewel)expression;
-                //                    return render_enum_value(jewel.treasury, jewel.value);
 
                 case Expression_Type.create_dictionary:
                     return render_dictionary((Create_Dictionary)expression);
@@ -334,11 +323,14 @@ namespace imperative.render.artisan
 
         virtual protected Stroke render_variable_declaration(Declare_Variable declaration)
         {
-            return new Stroke_Token("var " + declaration.symbol.name)
+            var result = new Stroke_Token("var " + declaration.symbol.name)
                 + (declaration.expression != null
                     ? new Stroke_Token(" = ") + render_expression(declaration.expression)
                     : null)
                 + terminate_statement();
+
+            result.expression = declaration;
+            return result;
         }
 
         virtual protected Stroke render_literal(object value, Profession profession)

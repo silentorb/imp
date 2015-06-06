@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using imperative.schema;
 using imperative.summoner;
+using runic.parser;
 
 namespace imperative.expressions
 {
@@ -48,45 +49,16 @@ namespace imperative.expressions
                 : this;
         }
 
-        //private Expression _parent = null;
-        //public Expression parent
-        //{
-        //    get { return _parent; }
-        //    set
-        //    {
-        //        if (value != null && !value.children.Contains(this))
-        //            value.children.Add(this);
+        public Legend legend;
 
-        //        if (value == _parent)
-        //            return;
-
-        //        if (_parent != null && _parent.children.Contains(this))
-        //            _parent.children.Remove(this);
-
-        //        _parent = value;
-
-        //    }
-        //}
         public abstract IEnumerable<Expression> children { get; }
 
-        protected Expression(Expression_Type type)
+        protected Expression(Expression_Type type, Legend legend = null)
         {
             stack_trace = Environment.StackTrace;
             this.type = type;
+            this.legend = legend;
         }
-
-        //public void add(Expression expression)
-        //{
-        //    expression.parent = this;
-        //}
-
-        //public void add(IEnumerable<Expression> expressions)
-        //{
-        //    foreach (var child in expressions)
-        //    {
-        //        child.parent = this;
-        //    }
-        //}
 
         public virtual Profession get_profession()
         {
@@ -134,15 +106,6 @@ namespace imperative.expressions
         {
             return false;
         }
-
-        //public virtual Expression next
-        //{
-        //    get { return null; }
-        //    set
-        //    {
-        //        throw new Exception("Set next not implemented.");
-        //    }
-        //}
 
         public List<Expression> find(Expression_Type expression_type)
         {
