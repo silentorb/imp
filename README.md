@@ -10,6 +10,8 @@ Welcome to the Underworld!  Imp is an object-oriented programming language that 
 * Some other word I can't remember
 * Imps
 
+"simple is simplified simplified, and imp is simplified simple"
+
 Imp is a humble language, which means:
 
 * Imp exists to serve its target languages (and the Overlord), not the other way around.
@@ -26,4 +28,4 @@ Under the hood, Imp is a world populated by dungeons, portals, and minions.  On 
 Imp originated as a lower-level counterpart to the MetaHub programming language.  MetaHub is built ontop of Imp and generates Imp code structures.  
 If you use C#, Imp has a useful API for generating and transforming Imp code structures.  It also sports some nifty templating features.
 
-Imp is written in C# though may someday bootstrap itself.  Then Hell will be unleashed and Christ will return.
+Imp is written in C# though may someday bootstrap itself.
