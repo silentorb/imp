@@ -37,37 +37,16 @@ namespace imperative.summoner
             this.is_external = is_external;
         }
 
-        public void summon(Legend source)
-        {
-            summon((Group_Legend)source);
-        }
-
-        public void summon(Legend source, Summoner_Context context, Dictionary<string, List<Summoner_Context>> map)
-        {
-            gather_parts(context, source.children, map);
-            throw new Exception("Not implemented.");
-            if (map.ContainsKey(Legend_Types.dungeon_definition))
-            {
-                //                var dungeon_legends = map[Legend_Types.dungeon_definition];
-                //                foreach (var dungeon_context in dungeon_legends)
-                //                {
-                //                    process_dungeon1(dungeon_context);
-                //                }
-                //
-                //                foreach (var dungeon_context in dungeon_legends)
-                //                {
-                //                    process_dungeon2(dungeon_context);
-                //                }
-                //
-                //                foreach (var dungeon_context in dungeon_legends)
-                //                {
-                //                    process_dungeon3(dungeon_context);
-                //                }
-            }
-            //            ack(source, context, 0, process_dungeon1);
-            //            ack(source, context, 1, process_dungeon2);
-            //            ack(source, context, 2, process_dungeon3);
-        }
+//        public void summon(Legend source)
+//        {
+//            summon((Group_Legend)source);
+//        }
+//
+//        public void summon(Legend source, Summoner_Context context, Dictionary<string, List<Summoner_Context>> map)
+//        {
+//            gather_parts(context, source.children, map);
+//            throw new Exception("Not implemented.");
+//        }
 
         public void summon_file(string path, bool is_external = false)
         {
@@ -76,7 +55,7 @@ namespace imperative.summoner
 
             var code = File.ReadAllText(path);
             var legend = overlord.summon_legend(code, path);
-            summon(legend);
+            summon_many(new [] { legend});
 
             this.is_external = was_external;
         }
@@ -467,13 +446,13 @@ namespace imperative.summoner
             switch (source.type)
             {
                 case "assignment":
-                    return process_assignment(parts, context);
+                    return process_assignment(source, context);
 
                 case "expression_part":
                     return process_expression(source, context);
 
                 case "if_chain":
-                    return summon_if_chain(parts, context);
+                    return summon_if_chain(source, context);
 
                 case "import_statement":
                     process_import(parts, context);
@@ -483,13 +462,13 @@ namespace imperative.summoner
                     return new Flow_Control(Flow_Control_Type.If,
                                             process_expression(parts[0], context),
                                             process_block(parts[1], context)
-                        );
+                        ) { legend = source };
 
                 case "while_statement":
                     return new Flow_Control(Flow_Control_Type.While,
                                             process_expression(parts[0], context),
                                             process_block(parts[1], context)
-                        );
+                        ) { legend = source };
 
                 case "for_statement":
                     return process_iterator(parts, context);
@@ -498,7 +477,7 @@ namespace imperative.summoner
                     return new Statement("return", parts[0] == null
                                                        ? null
                                                        : process_expression(parts[0], context)
-                        );
+                        ) { legend = source };
 
                 case "declare_variable":
                     return process_declare_variable(source, context);
@@ -705,58 +684,24 @@ namespace imperative.summoner
             throw new Parser_Exception("Invalid type: " + text + ".", source.position);
         }
 
-        private Expression process_assignment(List<Legend> parts, Summoner_Context context)
+        private Expression process_assignment(Legend legend, Summoner_Context context)
         {
+            var parts = legend.children;
             var reference = process_reference(parts[0], context);
             var expression = process_expression(parts[2], context);
             var op = parts[1].text;
             var last = reference.get_end();
             if (reference != null && reference.type == Expression_Type.operation)
                 throw new Exception("Cannot call function on operation.");
-            /*
-            if (last.type == Expression_Type.portal && op != "@="
-                && (reference.get_profession().dungeon != Professions.List || op != "="))
-            {
-                var portal_expression = (Portal_Expression)last;
-                var portal = portal_expression.portal;
-                if (portal.is_list && op != "=")
-                {
-                    expression = Minion.operation(op[0].ToString(), reference.clone(), expression);
-                }
-                var args = new List<Expression> { expression };
-
-                // The setter absorbs the portal token, so remove it from the reference.
-                if (last == reference)
-                {
-                    reference = null;
-                }
-                else
-                {
-                    //if (last.parent.type == Expression_Type.operation || last.type== Expression_Type.operation)
-                    //    throw new Exception();
-                    //last.parent.child = null;
-                    last.parent.next = null;
-                    last.parent = null;
-                }
-
-                // Check for origin parameter
-                if (portal.setter != null && portal.setter.parameters.Count > 1)
-                {
-                    args.Add(new Self(context.dungeon));
-                }
-
-                return new Property_Function_Call(Property_Function_Type.set, portal, args) { reference = reference };
-            }
-
-            // @= forces direct assignment without setters
-            if (op == "@=")
-                op = "=";
-            */
+        
             return new Assignment(
                 reference,
                 op,
                 expression
-                );
+                )
+            {
+                legend = legend
+            };
         }
 
         public Expression process_iterator(List<Legend> parts, Summoner_Context context)
@@ -772,8 +717,9 @@ namespace imperative.summoner
             );
         }
 
-        public Expression summon_if_chain(List<Legend> parts, Summoner_Context context)
+        public Expression summon_if_chain(Legend legend, Summoner_Context context)
         {
+            var parts = legend.children;
             var ifs = parts[0].children.Select(e => (Flow_Control)summon_statement(e, context)).ToList();
             //            var expressions = summon_statements(parts[0].children, context).ToList();
             var result = new If(ifs);

@@ -497,8 +497,11 @@ namespace imperative.render.artisan
 
         virtual protected Stroke render_assignment(Assignment statement)
         {
-            return render_expression(statement.target) + new Stroke_Token(" " + statement.op + " ") + render_expression(statement.expression)
+            var result = render_expression(statement.target) + new Stroke_Token(" " + statement.op + " ") + render_expression(statement.expression)
                 + terminate_statement();
+
+            result.expression = statement;
+            return result;
         }
 
         virtual protected Stroke render_comment(Comment comment)
@@ -595,9 +598,12 @@ namespace imperative.render.artisan
             if (statement.flow_type == Flow_Control_Type.Else)
                 return start + block;
 
-            return start + new Stroke_Token(" (") + 
+            var result = start + new Stroke_Token(" (") + 
                 render_expression(statement.condition) + new Stroke_Token(")")
                 + block;
+
+            result.expression = statement;
+            return result;
         }
 
         virtual protected Stroke render_if(If statement)

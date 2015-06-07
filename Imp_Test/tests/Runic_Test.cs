@@ -24,7 +24,7 @@ namespace imp_test.tests
             var legend = Summoner2.translate_runes(code, runes);
             var overlord = new Overlord();
             var summoner = new Summoner2(overlord);
-            summoner.summon((Group_Legend)legend);
+            summoner.summon_many(new[] { legend });
         }
 
         [Test]
@@ -42,7 +42,7 @@ namespace imp_test.tests
             var code = Utility.load_resource("imp.if_else.imp");
             var runes = Summoner2.read_runes(code, "imp.if_else.imp");
             var legend = Summoner2.translate_runes(code, runes, "statements");
-//            Assert.AreEqual("else_statement", legend.children[1].type);
+            //            Assert.AreEqual("else_statement", legend.children[1].type);
 
             Imp_Fixture.summon_statements(legend.children);
         }

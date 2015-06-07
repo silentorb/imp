@@ -21,7 +21,8 @@ namespace imperative.render.artisan
         public static IEnumerable<Passage> render_block(List<Stroke> strokes, string indent)
         {
             var result = new List<Passage>();
-            result.Add(new Passage("\n" + indent + spacer));
+            result.Add(new Passage("\n"));
+            result.Add(new Passage(indent + spacer));
             render_statements(result, strokes, indent + spacer, true);
             return result;
         }
@@ -51,9 +52,7 @@ namespace imperative.render.artisan
         {
             var result = new List<Passage>();
             if (list.expression != null && list.expression.legend != null)
-            {
                 result.Add(new Passage("", list.expression));
-            }
 
             foreach (Stroke t in list.children)
             {

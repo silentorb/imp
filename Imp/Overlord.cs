@@ -94,7 +94,7 @@ namespace imperative
         {
             var legend = summon_legend(code, filename);
             var summoner = new Summoner2(this, is_external);
-            summoner.summon(legend);
+            summoner.summon_many(new[] { legend });
         }
 
         public Legend summon_legend(string code, string filename)

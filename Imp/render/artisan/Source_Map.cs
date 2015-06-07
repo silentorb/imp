@@ -32,7 +32,7 @@ namespace imperative.render.artisan
     {
         public int version = 3;
         public string file;
-        public string sourceRoot;
+        public string sourceRoot = "";
         public string[] sources;
         public string[] names = { };
         public string mappings;
@@ -50,7 +50,7 @@ namespace imperative.render.artisan
                 return "";
 
             var result = new StringBuilder();
-            int row = 1;
+            int row = 0;
             var last = segments[0];
 
             if (last.gen_row > row)
@@ -60,32 +60,32 @@ namespace imperative.render.artisan
             }
 
             var sequence =
-                    compress(last.gen_column) +
-                    compress(last.sources_index) +
-                    compress(last.source_line) +
-                    compress(last.source_column) +
-                    compress(last.source_token);
+                compress(last.gen_column) +
+                compress(last.sources_index) +
+                compress(last.source_line) +
+                compress(last.source_column);
+//                    + compress(last.source_token);
 
             result.Append(sequence);
 
             for (var i = 1; i < segments.Count; ++i)
             {
-                if (last.gen_row == row + 1)
+                var segment = segments[i];
+                if (segment.gen_row == row + 1)
                 {
                     ++row;
                     result.Append(";");
                 }
-                else if (last.gen_row > row)
+                else if (segment.gen_row > row)
                 {
-                    catch_up(result, last.gen_row - row);
-                    row = last.gen_row;
+                    catch_up(result, segment.gen_row - row);
+                    row = segment.gen_row;
                 }
                 else
                 {
                     result.Append(",");
                 }
 
-                var segment = segments[i];
 
                 sequence =
                     compress(segment.gen_column - last.gen_column) +
@@ -121,15 +121,15 @@ namespace imperative.render.artisan
 
             if (abs <= 15)
             {
-                return Base_64.lookup[value + is_negative].ToString();
+                return Base_64.lookup[(abs << 1) + is_negative].ToString();
             }
 
             if (abs <= 495)
             {
                 return new string(new[]
                 {
-                    Base_64.lookup[(abs & 15) + 32 + is_negative],
-                    Base_64.lookup[abs & 63 >> 4]
+                    Base_64.lookup[(abs << 1 & 15) + 32 + is_negative],
+                    Base_64.lookup[abs << 1 & 63 >> 4]
                 });
             }
 
@@ -137,9 +137,9 @@ namespace imperative.render.artisan
             {
                 return new string(new[]
                 {
-                    Base_64.lookup[(abs & 15) + 32 + is_negative],
-                    Base_64.lookup[(abs & 63 >> 4) + 32],
-                    Base_64.lookup[abs & 495 >> 5]
+                    Base_64.lookup[(abs << 1 & 15) + 32 + is_negative],
+                    Base_64.lookup[(abs << 1 & 63 >> 4) + 32],
+                    Base_64.lookup[abs << 1 & 495 >> 5]
                 });
             }
 

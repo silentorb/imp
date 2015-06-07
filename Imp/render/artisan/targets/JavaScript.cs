@@ -41,7 +41,6 @@ namespace imperative.render.artisan.targets
                 ? settings.output + Path.GetFileNameWithoutExtension(settings.input) + ".js"
                 : settings.output + "/" + "lib.js";
 
-            Generator.create_file(output_path, output);
 
             // Source map
             var map_file = output_path + ".map";
@@ -52,6 +51,9 @@ namespace imperative.render.artisan.targets
                 segments);
             var source_map_content = source_map.serialize();
 
+            output += "\r\n//# sourceMappingURL=" + Path.GetFileName(map_file);
+
+            Generator.create_file(output_path, output);
             Generator.create_file(map_file, source_map_content);
         }
 

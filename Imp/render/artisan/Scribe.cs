@@ -31,10 +31,13 @@ namespace imperative.render.artisan
                     }
                     else
                     {
+//                        if (text.Contains("\n"))
+//                            throw new Exception("Newlines must be separate.");
+
                         if (segments != null && passage.expression != null)
                             process_segment(passage.expression, x, y, segments);
                         
-                        y += text.Length;
+                        x += text.Length;
                     }
                 }
             }
