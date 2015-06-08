@@ -86,13 +86,12 @@ namespace imperative.render.artisan
                     result.Append(",");
                 }
 
-
                 sequence =
                     compress(segment.gen_column - last.gen_column) +
                     compress(segment.sources_index) +
                     compress(segment.source_line - last.source_line) +
-                    compress(segment.source_column - last.source_column) +
-                    compress(segment.source_token);
+                    compress(segment.source_column - last.source_column);
+//                    compress(segment.source_token);
 
                 result.Append(sequence);
                 last = segment;
