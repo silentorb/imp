@@ -219,9 +219,11 @@ namespace imperative.render.artisan
 
                 case Expression_Type.statement:
                     var state = (Statement)statement;
-                    return new Stroke_Token(state.name) + (state.next != null
+                    var statement_result = new Stroke_Token(state.name) + (state.next != null
                         ? new Stroke_Token(" ") + render_expression(state.next)
                         : terminate_statement());
+                    statement_result.expression = statement;
+                    return statement_result;
 
                 case Expression_Type.insert:
                     return new Stroke_Token(((Insert)statement).code);
@@ -385,8 +387,11 @@ namespace imperative.render.artisan
             //            var it = parameter.scope.create_symbol(parameter.name, parameter.profession);
             var expression = render_iterator(parameter, statement.expression);
 
-            return new Stroke_Token(config.foreach_symbol + " (" + expression + ")")
+            var result = new Stroke_Token(config.foreach_symbol + " (" + expression + ")")
                 + render_block(render_statements(statement.body));
+
+            result.expression = statement;
+            return result;
         }
 
         virtual protected Stroke render_iterator(Symbol parameter, Expression expression)

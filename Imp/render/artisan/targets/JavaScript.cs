@@ -41,14 +41,13 @@ namespace imperative.render.artisan.targets
                 ? settings.output + Path.GetFileNameWithoutExtension(settings.input) + ".js"
                 : settings.output + "/" + "lib.js";
 
-
             // Source map
             var map_file = output_path + ".map";
 
             var original = new Uri(output_path.Replace(@"\", "/"));
             var source_map = new Source_Map(Path.GetFileName(output_path),
-                sources.Select(s => original.MakeRelativeUri(new Uri(s)).ToString()).ToArray(), 
-                segments);
+                sources.Select(s => original.MakeRelativeUri(new Uri(s)).ToString()).ToArray(),
+                segments, Path.GetDirectoryName(output_path));
             var source_map_content = source_map.serialize();
 
             output += "\r\n//# sourceMappingURL=" + Path.GetFileName(map_file);

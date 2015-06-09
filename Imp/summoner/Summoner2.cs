@@ -471,7 +471,7 @@ namespace imperative.summoner
                         ) { legend = source };
 
                 case "for_statement":
-                    return process_iterator(parts, context);
+                    return process_iterator(source, context);
 
                 case "return_statement":
                     return new Statement("return", parts[0] == null
@@ -704,8 +704,9 @@ namespace imperative.summoner
             };
         }
 
-        public Expression process_iterator(List<Legend> parts, Summoner_Context context)
+        public Expression process_iterator(Legend legend, Summoner_Context context)
         {
+            var parts = legend.children;
             var reference = process_expression_part(parts[1], context);
             //            throw new Exception("Not implemented.");
 
@@ -714,7 +715,7 @@ namespace imperative.summoner
             context.scope.add_map(symbol.name, c => new Variable(symbol));
             return new Iterator(symbol,
                 reference, process_block(parts[2], context)
-            );
+            ) { legend = legend };
         }
 
         public Expression summon_if_chain(Legend legend, Summoner_Context context)

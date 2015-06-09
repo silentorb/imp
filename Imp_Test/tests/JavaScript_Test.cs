@@ -55,9 +55,9 @@ namespace imp_test.tests
             var goal = Utility.load_resource("js.browser.js");
             Utility.diff(goal, output);
 
-            var source_map = new Source_Map("imp.browser.js", new [] {"browser.imp"}, segments);
-            var source_map_content = source_map.serialize();
-            Utility.diff(Utility.load_resource("js.browser.js.map"), source_map_content);
+//            var source_map = new Source_Map("imp.browser.js", new [] {"browser.imp"}, segments);
+//            var source_map_content = source_map.serialize();
+//            Utility.diff(Utility.load_resource("js.browser.js.map"), source_map_content);
         }
 
         [Test]

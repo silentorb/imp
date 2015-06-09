@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
@@ -10,7 +11,7 @@ namespace imperative.render.artisan
     {
         public int gen_row;
         public int gen_column;
-        public int sources_index;
+        public string source_file;
         public int source_line;
         public int source_column;
         public int source_token;
@@ -37,17 +38,19 @@ namespace imperative.render.artisan
         public string[] names = { };
         public string mappings;
 
-        public Source_Map(string file, string[] sources, List<Segment> segments)
+        public Source_Map(string file, string[] sources, List<Segment> segments, string root_folder)
         {
             this.file = file;
             this.sources = sources;
-            mappings = generate_map(segments);
+            mappings = generate_map(segments, root_folder);
         }
 
-        string generate_map(List<Segment> segments)
+        string generate_map(List<Segment> segments, string root_folder)
         {
             if (segments.Count == 0)
                 return "";
+
+            var root_uri = new Uri(root_folder + "/");
 
             var result = new StringBuilder();
             int row = 0;
@@ -59,9 +62,10 @@ namespace imperative.render.artisan
                 row = last.gen_row;
             }
 
+            var last_index = get_file_index(root_uri, last.source_file);
             var sequence =
                 compress(last.gen_column) +
-                compress(last.sources_index) +
+                compress(last_index) +
                 compress(last.source_line) +
                 compress(last.source_column);
 //                    + compress(last.source_token);
@@ -78,6 +82,7 @@ namespace imperative.render.artisan
                 }
                 else if (segment.gen_row > row)
                 {
+                    result.Append(";");
                     catch_up(result, segment.gen_row - row);
                     row = segment.gen_row;
                 }
@@ -86,9 +91,10 @@ namespace imperative.render.artisan
                     result.Append(",");
                 }
 
+                var source_index = get_file_index(root_uri, segment.source_file);
                 sequence =
                     compress(segment.gen_column - last.gen_column) +
-                    compress(segment.sources_index) +
+                    compress(source_index - last_index) +
                     compress(segment.source_line - last.source_line) +
                     compress(segment.source_column - last.source_column);
 //                    compress(segment.source_token);
@@ -98,6 +104,15 @@ namespace imperative.render.artisan
             }
 
             return result.ToString();
+        }
+
+        public int get_file_index(Uri root_uri, string path)
+        {
+            var index = Array.IndexOf(sources, root_uri.MakeRelativeUri(new Uri(path)).ToString());
+            if (index == -1)
+                throw new Exception("Invalid source file: " + path);
+
+            return index;
         }
 
         public void catch_up(StringBuilder result, int amount)
