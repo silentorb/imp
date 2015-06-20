@@ -51,7 +51,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="expressions\Create_Dictionary.cs" />
-    <Compile Include="File_Path.cs" />
     <Compile Include="render\artisan\Common_Target2.cs" />
     <Compile Include="render\artisan\targets\JavaScript.cs" />
     <Compile Include="render\artisan\Painter.cs" />

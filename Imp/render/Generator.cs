@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using imperative;
+using imperative.render.artisan;
 using imperative.schema;
 using metahub.render.targets;
 using metahub.render.targets.php;
@@ -23,6 +24,18 @@ namespace metahub.render
 
                 case "php":
                     return new PHP(minion);
+
+                default:
+                    throw new Exception("Unsupported target: " + target_name + ".");
+            }
+        }
+
+        public static Common_Target2 create_target2(Overlord minion, string target_name)
+        {
+            switch (target_name)
+            {
+                case "js":
+                    return new imperative.render.artisan.targets.JavaScript(minion);
 
                 default:
                     throw new Exception("Unsupported target: " + target_name + ".");
