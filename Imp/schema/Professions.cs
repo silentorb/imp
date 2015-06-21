@@ -67,6 +67,9 @@ namespace imperative.schema
             {
                 new Parameter(new Symbol("item", any, null))
             });
+            List.spawn_simple_minion("count", null, null, Professions.Int);
+            List.spawn_simple_minion("last", null, null, Professions.any);
+            List.spawn_simple_minion("pop", null, null, Professions.any);
         }
 
         static Profession create_type(string name, bool is_value = true)

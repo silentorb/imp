@@ -135,7 +135,7 @@ namespace imperative.render.artisan.targets
             result.AddRange(instance_portals.Select(portal =>
             {
                 var assignment = get_default_value(portal) ?? render_null();
-                return render_dungeon_path(dungeon) + new Stroke_Token(".prototype." + portal.name + " = " + assignment);
+                return render_dungeon_path(dungeon) + new Stroke_Token(".prototype." + portal.name + " = ") + assignment;
             })
             .Concat(instance_minions.Select(minion =>
                 render_dungeon_path(dungeon) + new Stroke_Token(".prototype." + minion.name + " = ")

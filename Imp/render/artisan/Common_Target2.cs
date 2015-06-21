@@ -284,8 +284,8 @@ namespace imperative.render.artisan
                 main = "public " + main;
 
             var assignment = portal.other_dungeon == null || !portal.other_dungeon.is_value
-                ? " = " + get_default_value(portal)
-                : "";
+                ? new Stroke_Token(" = ") + get_default_value(portal)
+                : new Stroke_Token("");
 
             return new Stroke_Token(main + assignment + terminate_statement());
         }

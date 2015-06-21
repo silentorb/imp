@@ -23,11 +23,11 @@ namespace imperative.render.artisan
 
         public abstract Stroke copy();
 
-        //        public override string ToString()
-        //        {
-        //            throw new Exception();
-        ////            return text ?? "";
-        //        }
+                public override string ToString()
+                {
+                    throw new Exception();
+        //            return text ?? "";
+                }
 
         public abstract string full_text();
 
