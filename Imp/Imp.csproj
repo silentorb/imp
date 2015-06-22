@@ -148,10 +148,6 @@
       <Project>{C92D913D-6BDD-48B0-AA4D-17B93510414D}</Project>
       <Name>Library</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Summoning\Summoning.fsproj">
-      <Project>{C2A7C031-57E6-4A9B-A335-D803BFB10D42}</Project>
-      <Name>Summoning</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

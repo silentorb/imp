@@ -71,6 +71,7 @@ namespace imperative.schema
             this.name = name;
             this.dungeon = dungeon;
             profession = dungeon.overlord.library.get(other_dungeon);
+            is_value = Professions.is_scalar(profession);
         }
 
         public Portal(string name, Profession profession, Dungeon dungeon = null)
@@ -78,6 +79,7 @@ namespace imperative.schema
             this.name = name;
             this.profession = profession;
             this.dungeon = dungeon;
+            is_value = Professions.is_scalar(profession);
         }
 
         public Portal(Portal original, Dungeon new_dungeon)

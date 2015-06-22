@@ -28,9 +28,9 @@ namespace imperative.summoner
 
             var token = pattern.children[0].text;
 
-//            var insert = context.get_expression_pattern(token);
-//            if (insert != null)
-//                return append(insert, process_anything(summoner, patterns, context, step + 1));
+            var insert = context.get_expression_pattern(token);
+            if (insert != null)
+                return append(insert, process_anything(summoner, patterns, context, step + 1));
 
             if (token == "this")
             {
