@@ -49,7 +49,7 @@ namespace imperative.render.artisan
         {
             if (segments.Count == 0)
                 return "";
-
+            var temp = segments.Select(s => s.source_line + 1).ToList();
             var root_uri = new Uri(root_folder + "/");
 
             var result = new StringBuilder();
@@ -119,7 +119,8 @@ namespace imperative.render.artisan
         {
             for (int i = 0; i < amount; i++)
             {
-                result.Append("AAAA;");
+//                result.Append("AAAA;");
+                result.Append(";");
             }
         }
 
@@ -131,7 +132,8 @@ namespace imperative.render.artisan
         static string compress(int value)
         {
             var abs = Math.Abs(value);
-            var is_negative = value < 0 ? 16 : 0;
+//            var is_negative = value < 0 ? 16 : 0;
+            var is_negative = value < 0 ? 1 : 0;
 
             if (abs <= 15)
             {
@@ -143,7 +145,7 @@ namespace imperative.render.artisan
                 return new string(new[]
                 {
                     Base_64.lookup[(abs << 1 & 15) + 32 + is_negative],
-                    Base_64.lookup[abs << 1 & 63 >> 4]
+                    Base_64.lookup[abs >> 4]
                 });
             }
 
@@ -152,8 +154,8 @@ namespace imperative.render.artisan
                 return new string(new[]
                 {
                     Base_64.lookup[(abs << 1 & 15) + 32 + is_negative],
-                    Base_64.lookup[(abs << 1 & 63 >> 4) + 32],
-                    Base_64.lookup[abs << 1 & 495 >> 5]
+                    Base_64.lookup[(abs >> 4) + 32],
+                    Base_64.lookup[abs >> 9]
                 });
             }
 
