@@ -181,7 +181,7 @@ namespace imperative.render.artisan
                 }
                 else if (!config.implicit_this && portal.dungeon.name != "")
                 {
-                    result = render_this() + new Stroke_Token("." + result);
+                    result = render_this() + new Stroke_Token(".") + result;
                 }
             }
             if (portal_expression.index != null)
@@ -387,7 +387,7 @@ namespace imperative.render.artisan
             //            var it = parameter.scope.create_symbol(parameter.name, parameter.profession);
             var expression = render_iterator(parameter, statement.expression);
 
-            var result = new Stroke_Token(config.foreach_symbol + " (" + expression + ")")
+            var result = new Stroke_Token(config.foreach_symbol + " (") + expression + new Stroke_Token(")")
                 + render_block(render_statements(statement.body));
 
             result.expression = statement;
@@ -397,7 +397,7 @@ namespace imperative.render.artisan
         virtual protected Stroke render_iterator(Symbol parameter, Expression expression)
         {
             var path_string = render_expression(expression);
-            return new Stroke_Token("var " + parameter.name + " in " + path_string);
+            return new Stroke_Token("var " + parameter.name + " in ") + path_string;
         }
 
         virtual protected Stroke render_operation(Operation operation)
@@ -522,7 +522,8 @@ namespace imperative.render.artisan
                 return render_list(expression.profession, expression.args);
 
             var args = expression.args.Select(a => render_expression(a)).join(", ");
-            return new Stroke_Token("new " + render_profession(expression.profession) + "(" + args + ")");
+            return new Stroke_Token("new ") + render_profession(expression.profession) 
+                + new Stroke_Token("(" + args + ")");
         }
 
         //        protected abstract Stroke render_function_definition(Function_Definition definition);

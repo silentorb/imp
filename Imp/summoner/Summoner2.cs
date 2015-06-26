@@ -1,9 +1,11 @@
 ﻿using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Security.Policy;
 using System.Text;
 using imperative.wizard;
 using imperative.Properties;
@@ -383,7 +385,7 @@ namespace imperative.summoner
                     ? parse_type2(parts[2], context)
                     : Professions.unknown;
 
-                var portal = new Portal(portal_name, type_info);
+                var portal = new Portal(portal_name, type_info, context.dungeon);
                 if (parts[0] != null)
                 {
                     foreach (var enchantment in parts[0].children)
@@ -515,21 +517,83 @@ namespace imperative.summoner
             throw new Exception("Unsupported statement type: " + source.type + ".");
         }
 
+        private static string[][] operator_precedence =
+        {
+            new [] {"/", "*"},
+            new [] {"+", "-"},
+            new [] {"!=", "==", "<", "<=", ">", ">="},
+            new [] {"&&"},
+            new [] {"||"}
+        };
+
         public Expression process_expression(Legend legend, Summoner_Context context)
         {
             var group = (Group_Legend)legend;
             var children = group.children;
+            var dividers = group.dividers;
 
             if (children.Count == 1)
                 return process_expression_part(children[0], context);
 
-            if (children.Count == 2 || group.dividers.Skip(1).All(d => d.text == group.dividers[0].text))
+            if (children.Count == 2 || same_text(dividers))
             {
-                var op = context.get_string_pattern(group.dividers[0].text) ?? group.dividers[0].text;
+                var op = context.get_string_pattern(group.dividers[0].text) ?? dividers[0].text;
                 return new Operation(op, children.Select(p => process_expression_part(p, context)));
             }
 
-            throw new Exception("Not supported.");
+            var last_count = dividers.Count;
+
+            while (dividers.Count > 1)
+            {
+                foreach (var op in operator_precedence)
+                {
+                    group_operators(op, children, dividers);
+                    if (dividers.Count == 1 || same_text(dividers))
+                        break;
+                }
+
+                if (last_count == dividers.Count)
+                    throw new Exception("Dividers not fully supported.");
+
+                last_count = dividers.Count;
+            }
+
+            {
+                var op = context.get_string_pattern(group.dividers[0].text) ?? dividers[0].text;
+                return new Operation(op, children.Select(p => process_expression_part(p, context)));
+            }
+        }
+
+        public static bool same_text(List<Legend> dividers)
+        {
+            return dividers.Skip(1).All(d => d.text == dividers[0].text);
+        }
+
+        public static void group_operators(string[] operators, List<Legend> patterns, List<Legend> dividers)
+        {
+            var i = 0;
+            for (var d = 0; d < dividers.Count; ++d)
+            {
+                var divider = dividers[d];
+                if (operators.Contains(divider.text))
+                {
+                    patterns[i] = new Group_Legend(patterns[i].rhyme, 
+                        new List<Legend>
+                        {
+                            patterns[i],
+                            patterns[i + 1]
+                        }, patterns[i].position, 
+                        new List<Legend> { divider });
+                
+                    patterns.RemoveAt(i + 1);
+                    dividers.RemoveAt(d);
+                    --d;
+                }
+                else
+                {
+                    ++i;
+                }
+            }
         }
 
         private Expression process_declare_variable(Legend legend, Summoner_Context context)

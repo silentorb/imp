@@ -46,9 +46,9 @@ namespace imperative.schema
 //            set { profession.type = value; }
 //        }
 
-        public IDungeon other_dungeon
+        public Dungeon other_dungeon
         {
-            get { return profession.dungeon; }
+            get { return (Dungeon)profession.dungeon; }
             set { profession.dungeon = value; }
         }
 
@@ -72,14 +72,16 @@ namespace imperative.schema
             this.dungeon = dungeon;
             profession = dungeon.overlord.library.get(other_dungeon);
             is_value = Professions.is_scalar(profession);
+            initialize_other_portal();
         }
 
-        public Portal(string name, Profession profession, Dungeon dungeon = null)
+        public Portal(string name, Profession profession, Dungeon dungeon)
         {
             this.name = name;
             this.profession = profession;
             this.dungeon = dungeon;
             is_value = Professions.is_scalar(profession);
+            initialize_other_portal();
         }
 
         public Portal(Portal original, Dungeon new_dungeon)
@@ -145,6 +147,38 @@ namespace imperative.schema
         public void enchant(Enchantment enchantment)
         {
             enchantments.Add(enchantment);
+        }
+
+        public Dungeon target_dungeon
+        {
+            get
+            {
+                if (other_dungeon == Professions.List)
+                    return (Dungeon)profession.children[0].dungeon;
+
+                return other_dungeon;
+            }
+        }
+
+        Portal find_other_portal()
+        {
+            if (other_dungeon == null)
+                return null;
+
+            var portals = other_dungeon.all_portals.Values.Where(p => p.target_dungeon == dungeon).ToList();
+            if (portals.Count > 1)
+                throw new Exception("Multiple ambiguous other portals for " + fullname + ".");
+
+            return portals.FirstOrDefault();
+        }
+
+        public void initialize_other_portal()
+        {
+            other_portal = find_other_portal();
+            if (other_portal == null)
+                return;
+
+            other_portal.other_portal = this;
         }
     }
 }

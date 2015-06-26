@@ -151,7 +151,7 @@ namespace imperative.render.artisan.targets
         {
             return !dungeon.minions.ContainsKey("constructor")
                 ? new Stroke_Token("function() {") + (dungeon.parent != null
-                    ? render_dungeon_path(dungeon.parent) + new Stroke_Token(".apply(this)")
+                    ? render_dungeon_path(dungeon.parent) + new Stroke_Token(".apply(this)") + new Stroke_Token("}")
                     : new Stroke_Token("}"))
                 : render_function_definition(dungeon.minions["constructor"]);
         }

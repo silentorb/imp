@@ -104,9 +104,10 @@ namespace imperative.summoner
             List<Legend> patterns, Summoner_Context context, int step)
         {
             var pattern = patterns[step];
-            List<Expression> args = pattern.children[1] == null
+            var arg_source = pattern.children[1].children[0].children[0].children;
+            List<Expression> args = arg_source.Count == 0
                 ? null
-                : pattern.children[1].children
+                : arg_source
                     .Select(p => summoner.process_expression(p, context))
                     .ToList();
 
