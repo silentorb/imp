@@ -11,7 +11,7 @@ namespace imperative.summoner
 {
     static class Tunneler
     {
-        public static Expression process_anything(Summoner2 summoner, List<Legend> patterns,
+        public static Expression process_anything(Summoner summoner, List<Legend> patterns,
             Summoner_Context context, int step = 0)
         {
             if (step >= patterns.Count)
@@ -71,7 +71,7 @@ namespace imperative.summoner
             throw new Parser_Exception("Unknown symbol: " + token, pattern.position);
         }
 
-        static Expression process_idungeon(IDungeon idungeon, Summoner2 summoner, List<Legend> patterns,
+        static Expression process_idungeon(IDungeon idungeon, Summoner summoner, List<Legend> patterns,
             Summoner_Context context, int step)
         {
             if (idungeon == null || step >= patterns.Count)
@@ -83,7 +83,7 @@ namespace imperative.summoner
 //                return process_treasury((Treasury)idungeon, summoner, patterns, context, step);
         }
 
-        private static Expression process_dungeon(Dungeon dungeon, Summoner2 summoner,
+        private static Expression process_dungeon(Dungeon dungeon, Summoner summoner,
             List<Legend> patterns, Summoner_Context context, int step)
         {
             var pattern = patterns[step];
@@ -100,7 +100,7 @@ namespace imperative.summoner
             return null;
         }
 
-        static Expression process_minion(Minion minion, Summoner2 summoner,
+        static Expression process_minion(Minion minion, Summoner summoner,
             List<Legend> patterns, Summoner_Context context, int step)
         {
             var pattern = patterns[step];
@@ -112,6 +112,7 @@ namespace imperative.summoner
                     .ToList();
 
             var result = new Method_Call(minion, null, args);
+            result.legend = pattern;
             if (step == patterns.Count - 1)
                 return result;
 
@@ -135,7 +136,7 @@ namespace imperative.summoner
             return append(result, child);  
         }
 
-        static Expression process_portal(Portal portal, Summoner2 summoner,
+        static Expression process_portal(Portal portal, Summoner summoner,
             List<Legend> patterns, Summoner_Context context, int step)
         {
             var pattern = patterns[step];
@@ -159,7 +160,7 @@ namespace imperative.summoner
             return append(result, child);
         }
 
-        static Expression process_symbol(Symbol symbol, Summoner2 summoner,
+        static Expression process_symbol(Symbol symbol, Summoner summoner,
             List<Legend> patterns, Summoner_Context context, int step)
         {
             var result = new Variable(symbol);
@@ -181,7 +182,7 @@ namespace imperative.summoner
             return append(result, child);
         }
 
-        static Expression process_profession(Dungeon dungeon, Summoner2 summoner,
+        static Expression process_profession(Dungeon dungeon, Summoner summoner,
             List<Legend> patterns, Summoner_Context context, int step)
         {
             if (step == patterns.Count - 1)
@@ -209,7 +210,7 @@ namespace imperative.summoner
             return first;
         }
 
-//        private static Expression process_treasury(Treasury treasury, Summoner2 summoner,
+//        private static Expression process_treasury(Treasury treasury, Summoner summoner,
 //            List<Legend> patterns, Summoner_Context context, int step)
 //        {
 //            var pattern = patterns[step];

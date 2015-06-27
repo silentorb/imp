@@ -15,6 +15,7 @@ namespace imperative.render.artisan
         public int source_line;
         public int source_column;
         public int source_token;
+        public string debug_text;
     }
 
     public static class Base_64
@@ -49,11 +50,13 @@ namespace imperative.render.artisan
         {
             if (segments.Count == 0)
                 return "";
+//            segments = segments.Skip(4).ToList();
+//            segments = segments.Take(11).Skip(5).ToList();
             var temp = segments.Select(s => s.source_line + 1).ToList();
             var root_uri = new Uri(root_folder + "/");
 
             var result = new StringBuilder();
-            int row = 0;
+            int row = 0, last_gen_column = 0;
             var last = segments[0];
 
             if (last.gen_row > row)
@@ -64,7 +67,7 @@ namespace imperative.render.artisan
 
             var last_index = get_file_index(root_uri, last.source_file);
             var sequence =
-                compress(last.gen_column) +
+                compress(last_gen_column) +
                 compress(last_index) +
                 compress(last.source_line) +
                 compress(last.source_column);
@@ -78,12 +81,14 @@ namespace imperative.render.artisan
                 if (segment.gen_row == row + 1)
                 {
                     ++row;
+                    last_gen_column = 0;
                     result.Append(";");
                 }
                 else if (segment.gen_row > row)
                 {
                     result.Append(";");
                     catch_up(result, segment.gen_row - row);
+                    last_gen_column = 0;
                     row = segment.gen_row;
                 }
                 else
@@ -93,12 +98,14 @@ namespace imperative.render.artisan
 
                 var source_index = get_file_index(root_uri, segment.source_file);
                 sequence =
-                    compress(segment.gen_column - last.gen_column) +
+                    compress(segment.gen_column - last_gen_column) +
                     compress(source_index - last_index) +
                     compress(segment.source_line - last.source_line) +
                     compress(segment.source_column - last.source_column);
 //                    compress(segment.source_token);
 
+                last_index = source_index;
+                last_gen_column = segment.gen_column;
                 result.Append(sequence);
                 last = segment;
             }
@@ -144,19 +151,20 @@ namespace imperative.render.artisan
             {
                 return new string(new[]
                 {
-                    Base_64.lookup[(abs << 1 & 15) + 32 + is_negative],
+                    Base_64.lookup[((abs & 15) << 1) + 32 + is_negative],
                     Base_64.lookup[abs >> 4]
                 });
             }
 
             if (abs <= 15872)
             {
-                return new string(new[]
-                {
-                    Base_64.lookup[(abs << 1 & 15) + 32 + is_negative],
-                    Base_64.lookup[(abs >> 4) + 32],
-                    Base_64.lookup[abs >> 9]
-                });
+                throw new Exception("Not implemented.");
+//                return new string(new[]
+//                {
+//                    Base_64.lookup[(abs << 1 & 15) + 32 + is_negative],
+//                    Base_64.lookup[(abs >> 4) + 32],
+//                    Base_64.lookup[abs >> 9]
+//                });
             }
 
             throw new Exception("Not yet implemented.  Converting numbers as large as " + value + ".");

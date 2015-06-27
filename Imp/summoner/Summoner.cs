@@ -26,14 +26,14 @@ namespace imperative.summoner
         public const string dungeon_definition = "dungeon_definition";
     }
 
-    public class Summoner2
+    public class Summoner
     {
         public Overlord overlord;
         private static Lexer lexer;
         private static Parser parser;
         private bool is_external;
 
-        public Summoner2(Overlord overlord, bool is_external = false)
+        public Summoner(Overlord overlord, bool is_external = false)
         {
             this.overlord = overlord;
             this.is_external = is_external;

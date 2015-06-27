@@ -491,8 +491,11 @@ namespace imperative.render.artisan
                 : second;
 
 
-            return ref_full + render_arguments(expression.args)
+            var result = ref_full + render_arguments(expression.args)
                  + new Stroke_Token(")");
+
+            result.expression = expression;
+            return result;
         }
 
         private Stroke render_arguments(List<Expression> args)

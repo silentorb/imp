@@ -21,7 +21,7 @@ namespace imp_test.fixtures
         public static Overlord create_overlord(string target_name, string[] script_names)
         {
             var overlord = new Overlord(target_name);
-            var summoner = new Summoner2(overlord);
+            var summoner = new Summoner(overlord);
             summoner.summon_many(script_names.Select(s =>
                 overlord.summon_legend(Utility.load_resource(s), s)
             ));
@@ -49,7 +49,7 @@ namespace imp_test.fixtures
         public static Expression summon_statement(Legend legend)
         {
             var overlord = new Overlord();
-            var summoner = new Summoner2(overlord);
+            var summoner = new Summoner(overlord);
             var context = new Summoner_Context();
             context.scope = new Scope();
             return summoner.summon_statement(legend, context);
@@ -58,7 +58,7 @@ namespace imp_test.fixtures
         public static List<Expression> summon_statements(List<Legend> legend)
         {
             var overlord = new Overlord();
-            var summoner = new Summoner2(overlord);
+            var summoner = new Summoner(overlord);
             var context = new Summoner_Context();
             context.scope = new Scope();
             return summoner.summon_statements(legend, context);

@@ -93,14 +93,14 @@ namespace imperative
         public void summon(string code, string filename, bool is_external = false)
         {
             var legend = summon_legend(code, filename);
-            var summoner = new Summoner2(this, is_external);
+            var summoner = new Summoner(this, is_external);
             summoner.summon_many(new [] {legend});
         }
 
         public Legend summon_legend(string code, string filename)
         {
-            var runes = Summoner2.read_runes(code, filename);
-            return Summoner2.translate_runes(code, runes);
+            var runes = Summoner.read_runes(code, filename);
+            return Summoner.translate_runes(code, runes);
         }
 
         public void summon_many(IEnumerable<string> files)
@@ -108,13 +108,13 @@ namespace imperative
             var pre_summoners = files.Select(file =>
                 summon_legend(File.ReadAllText(file), file)
             );
-            var summoner = new Summoner2(this);
+            var summoner = new Summoner(this);
             summoner.summon_many(pre_summoners);
         }
 
         public Dungeon summon_dungeon(Snippet template, Summoner_Context context)
         {
-            var summoner = new Summoner2(this);
+            var summoner = new Summoner(this);
             throw new Exception("Not implemented.");
             //            summoner.process_dungeon1(template.source, context);
             //            return summoner.process_dungeon2(template.source, context);
@@ -122,16 +122,16 @@ namespace imperative
 
         public Expression summon_snippet(Snippet template, Summoner_Context context)
         {
-            var summoner = new Summoner2(this);
+            var summoner = new Summoner(this);
             return summoner.summon_statement(template.source, context);
         }
 
         public Dictionary<string, Snippet> summon_snippets(string code, string filename)
         {
             var templates = new Dictionary<string, Snippet>();
-            var runes = Summoner2.read_runes(code, filename);
-            var legend = Summoner2.translate_runes(code, runes, "snippets");
-            var summoner = new Summoner2(this);
+            var runes = Summoner.read_runes(code, filename);
+            var legend = Summoner.translate_runes(code, runes, "snippets");
+            var summoner = new Summoner(this);
 
             var context = new Summoner_Context();
             var statements = (Block)summoner.summon_statement(legend, context);

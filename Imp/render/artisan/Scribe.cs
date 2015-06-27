@@ -17,8 +17,9 @@ namespace imperative.render.artisan
             int y = 1;
             
             var result = new StringBuilder();
-            foreach (var passage in passages)
+            for (var i = 0; i < passages.Count; ++i)
             {
+                var passage = passages[i];
                 var text = passage.text;
                 if (text != null)
                 {
@@ -35,7 +36,8 @@ namespace imperative.render.artisan
 //                            throw new Exception("Newlines must be separate.");
 
                         if (segments != null && passage.expression != null)
-                            process_segment(passage.expression, x, y, segments);
+                            process_segment(passage.expression, x, y, segments, 
+                                passage.text == "" ? passages[i + 1].text : passage.text);
                         
                         x += text.Length;
                     }
@@ -45,7 +47,7 @@ namespace imperative.render.artisan
             return result.ToString();
         }
 
-        static void process_segment(Expression expression, int x, int y, List<Segment> segments)
+        static void process_segment(Expression expression, int x, int y, List<Segment> segments, string text)
         {
             if (expression.legend == null) 
                 return;
@@ -60,7 +62,8 @@ namespace imperative.render.artisan
                 source_file = position.meadow.filename, // Eventually will be indexed to the list of source files
                 source_line = position.y - 1,
                 source_column = position.x - 1,
-                source_token = 0 // May only be needed for when symbols are renamed.
+                source_token = 0, // May only be needed for when symbols are renamed.
+                debug_text = text
             });
         }
     }

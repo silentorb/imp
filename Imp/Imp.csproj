@@ -106,7 +106,7 @@
     <Compile Include="schema\Treasury.cs" />
     <Compile Include="schema\Used_Function.cs" />
     <Compile Include="summoner\Context.cs" />
-    <Compile Include="summoner\Summoner2.cs" />
+    <Compile Include="summoner\Summoner.cs" />
     <Compile Include="summoner\expressions\Snippet.cs" />
     <Compile Include="expressions\Block.cs" />
     <Compile Include="summoner\Template.cs" />
