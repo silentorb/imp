@@ -52,12 +52,16 @@ namespace imperative.render.artisan
                 return "";
 //            segments = segments.Skip(4).ToList();
 //            segments = segments.Take(11).Skip(5).ToList();
-            var temp = segments.Select(s => s.source_line + 1).ToList();
+            var source_lines = segments.Select(s => s.source_line).ToList();
+            var gen_columns = segments.Select(s => s.gen_column).ToList();
+            var gen_rows = segments.Select(s => s.gen_row).ToList();
+            var source_rows = segments.Select(s => s.source_line).ToList();
+            var column_rows = segments.Select(s => s.source_column).ToList();
             var root_uri = new Uri(root_folder + "/");
 
             var result = new StringBuilder();
-            int row = 0, last_gen_column = 0;
             var last = segments[0];
+            int row = 0, last_gen_column = last.gen_column;
 
             if (last.gen_row > row)
             {
@@ -67,7 +71,7 @@ namespace imperative.render.artisan
 
             var last_index = get_file_index(root_uri, last.source_file);
             var sequence =
-                compress(last_gen_column) +
+                compress(last.gen_column) +
                 compress(last_index) +
                 compress(last.source_line) +
                 compress(last.source_column);
