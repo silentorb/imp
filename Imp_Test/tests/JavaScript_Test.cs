@@ -69,5 +69,16 @@ namespace imp_test.tests
             var goal = Utility.load_resource("js.part1-2.js");
             Utility.diff(goal, output);
         }
+
+        [Test]
+        public void comment_test()
+        {
+            var overlord = Imp_Fixture.create_overlord("js", "imp.comment.imp");
+            var target = (JavaScript)overlord.target;
+            var output = target.generate_string();
+            var goal = Utility.load_resource("js.comment.js");
+            Utility.diff(goal, output);
+        }
+
     }
 }

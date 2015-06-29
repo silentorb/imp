@@ -8,7 +8,6 @@ using imperative.summoner;
 using imperative.expressions;
 using imperative.render.artisan;
 using imperative.render.artisan.targets;
-using imperative.render.targets;
 using library;
 using metahub.jackolantern;
 using metahub.jackolantern.expressions;
@@ -57,8 +56,8 @@ namespace imperative
                 case "js":
                     return new JavaScript(this);
 
-                //                case "cs":
-                //                    return new Csharp(this);
+                                case "cs":
+                                    return new Csharp(this);
                 //
                 //                case "cpp":
                 //                    return new Cpp(this);

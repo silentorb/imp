@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using imperative.render.artisan;
 using NUnit.Framework;
 using imp_test.fixtures;
-using imperative.render.targets;
+using imperative.render.artisan.targets;
 using imperative.schema;
-using metahub.render.targets;
 
 namespace imp_test.tests
 {
@@ -17,15 +17,16 @@ namespace imp_test.tests
         public void pizza_test()
         {
             var overlord = Imp_Fixture.create_overlord("cs", "imp.pizza.imp");
-            throw new Exception("Broke it.");
+//            throw new Exception("Broke it.");
 
-//            var target = (Csharp) overlord.target;
-//            var dungeon = (Dungeon)overlord.root.get_dungeon_from_path("test.Pizza");
-//            {
-//                var output = target.generate_dungeon_file_contents(dungeon);
-//                var goal = Utility.load_resource("cs.pizza.cs");
-//                Utility.diff(goal, output);
-//            }
+            var target = (Csharp) overlord.target;
+            var dungeon = (Dungeon)overlord.root.get_dungeon_from_path("test.Pizza");
+            {
+                var strokes = target.generate_dungeon_file_contents(dungeon);
+                var output = Common_Target2.render_strokes(strokes);
+                var goal = Utility.load_resource("cs.pizza.cs");
+                Utility.diff(goal, output);
+            }
 
         }
 

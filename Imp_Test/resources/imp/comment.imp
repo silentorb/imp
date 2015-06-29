@@ -1,0 +1,11 @@
+﻿comments {
+
+	first() {
+
+	}
+
+	second() {
+		// This is a comment.
+	}
+
+}

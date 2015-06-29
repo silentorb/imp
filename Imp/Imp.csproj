@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="expressions\Create_Dictionary.cs" />
     <Compile Include="render\artisan\Common_Target2.cs" />
+    <Compile Include="render\artisan\targets\Csharp.cs" />
     <Compile Include="render\artisan\targets\JavaScript.cs" />
     <Compile Include="render\artisan\Painter.cs" />
     <Compile Include="render\artisan\Source_Map.cs" />

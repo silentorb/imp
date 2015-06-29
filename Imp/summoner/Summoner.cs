@@ -479,7 +479,10 @@ namespace imperative.summoner
                     return new Statement("return", parts[0] == null
                                                        ? null
                                                        : process_expression(parts[0], context)
-                        ) { legend = source };
+                        , source);
+
+                case "throw_statement":
+                    return new Statement("throw", process_expression(parts[0], context), source);
 
                 case "declare_variable":
                     return process_declare_variable(source, context);

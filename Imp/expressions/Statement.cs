@@ -1,6 +1,7 @@
 
 
 using System.Collections.Generic;
+using runic.parser;
 
 namespace imperative.expressions
 {
@@ -8,11 +9,12 @@ namespace imperative.expressions
     {
         public string name;
 
-        public Statement(string name, Expression child = null)
+        public Statement(string name, Expression child = null, Legend legend = null)
             : base(Expression_Type.statement)
         {
             this.name = name;
             next = child;
+            this.legend = legend;
         }
 
         public override IEnumerable<Expression> children

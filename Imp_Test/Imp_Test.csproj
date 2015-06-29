@@ -72,6 +72,8 @@
     <EmbeddedResource Include="resources\imp\browser.imp" />
     <EmbeddedResource Include="resources\imp\part1.imp" />
     <EmbeddedResource Include="resources\imp\part2.imp" />
+    <EmbeddedResource Include="resources\imp\comment.imp" />
+    <EmbeddedResource Include="resources\js\comment.js" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="resources\js\pizza.js" />

@@ -19,6 +19,7 @@ namespace imperative.schema
         public static Profession Function;
         public static Dungeon List;
         public static Dungeon Dictionary;
+        public static Dungeon exception;
 
         public Dictionary<string, List<Profession>> professions = new Dictionary<string, List<Profession>>();
 
@@ -52,6 +53,7 @@ namespace imperative.schema
             Function = create_type("function", false);
 
             initialize_list();
+            initialize_exception();
 
             Dictionary = new Dungeon("Dictionary", null, null);
         }
@@ -70,6 +72,11 @@ namespace imperative.schema
             List.spawn_simple_minion("count", null, null, Professions.Int);
             List.spawn_simple_minion("last", null, null, Professions.any);
             List.spawn_simple_minion("pop", null, null, Professions.any);
+        }
+
+        private static void initialize_exception()
+        {
+            exception = new Dungeon("Exception", null, null);
         }
 
         static Profession create_type(string name, bool is_value = true)

@@ -51,6 +51,13 @@ namespace imperative.render.artisan
 
         public abstract void run(Overlord_Configuration config1, string[] sources);
 
+        public static string render_strokes(List<Stroke> strokes )
+        {
+            var passages = Painter.render_root(strokes).ToList();
+            var segments = new List<Segment>();
+            return Scribe.render(passages, segments);
+        }
+
         virtual protected void push_scope()
         {
             current_scope = new Dictionary<Stroke, Profession>();
@@ -120,8 +127,10 @@ namespace imperative.render.artisan
 
                     result = new Stroke_Token(variable_expression.symbol.name, variable_expression);
                     if (variable_expression.index != null)
-                        result = result.chain(new Stroke_Token("[" + render_expression(variable_expression.index).full_text() + "]"));
-
+                    {
+                        result = result + new Stroke_Token("[")
+                                 + render_expression(variable_expression.index) + new Stroke_Token("]");
+                    }
                     break;
 
                 case Expression_Type.parent_class:
@@ -254,8 +263,10 @@ namespace imperative.render.artisan
                 ? "abstract "
                 : "";
 
-            var intro = "public " + abstract_keyword + "class " + render_dungeon_path(dungeon);
-            var result = new Stroke_Token(intro) + render_block(render_properties(dungeon), false);
+            var intro = new Stroke_Token( "public " + abstract_keyword + "class ") 
+                + render_dungeon_path(dungeon);
+
+            var result = intro + render_block(render_properties(dungeon), false);
             //                + render_statements(statements, newline())
             //            );
 
@@ -271,23 +282,23 @@ namespace imperative.render.artisan
 
         virtual protected Stroke render_property(Portal portal)
         {
-            var main = portal.name;
+            Stroke main = new Stroke_Token(portal.name);
             if (config.type_mode == Type_Mode.required_prefix)
-                main = render_profession(portal.profession) + " " + main;
+                main = render_profession(portal.profession) + new Stroke_Token(" ") + main;
             else if (config.type_mode == Type_Mode.optional_suffix)
-                main += ":" + render_profession(portal.profession);
+                main += new Stroke_Token( ":" )+ render_profession(portal.profession);
 
             if (portal.has_enchantment("static"))
-                main = "static " + main;
+                main = new Stroke_Token( "static ") + main;
 
             if (config.explicit_public_members)
-                main = "public " + main;
+                main = new Stroke_Token( "public ") + main;
 
             var assignment = portal.other_dungeon == null || !portal.other_dungeon.is_value
                 ? new Stroke_Token(" = ") + get_default_value(portal)
                 : new Stroke_Token("");
 
-            return new Stroke_Token(main + assignment + terminate_statement());
+            return main + assignment + terminate_statement();
         }
 
         virtual protected Stroke get_default_value(Portal portal)
@@ -560,8 +571,8 @@ namespace imperative.render.artisan
         virtual protected Stroke render_realm(Dungeon realm, Stroke_List_Delegate action)
         {
             current_realm = realm;
-            var result = new Stroke_Token(config.namespace_keyword + " "
-                + render_realm_path(realm, config.namespace_separator))
+            var result = new Stroke_Token(config.namespace_keyword + " ")
+                + render_realm_path(realm, config.namespace_separator)
                 + render_block(action());
 
             current_realm = null;

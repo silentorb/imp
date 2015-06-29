@@ -14,26 +14,18 @@ namespace imperative.render.artisan
         public Expression expression;
         public Stroke_Type type;
 
-        //
-        //        public Stroke(string text)
-        //        {
-        //            type = Stroke_Type.chain;
-        //            this.text = text;
-        //        }
-
         public abstract Stroke copy();
 
-                public override string ToString()
-                {
-                    throw new Exception();
-        //            return text ?? "";
-                }
+        public override string ToString()
+        {
+            throw new Exception();
+        }
 
         public abstract string full_text();
 
         public static Stroke operator +(Stroke a, Stroke b)
         {
-            return a.chain(b);
+            return Stroke.chain(a, b);
         }
 
         public static Stroke operator +(Stroke a, List<Stroke> b)
@@ -54,21 +46,24 @@ namespace imperative.render.artisan
             }.Concat(b).ToList());
         }
 
-        public Stroke chain(Stroke next)
+        public static Stroke chain(Stroke a, Stroke b)
         {
-            if (next == null)
-                return this;
+            if (a == null)
+                return b;
 
-            if (type == Stroke_Type.chain)
+            if (b == null)
+                return a;
+
+            if (a.type == Stroke_Type.chain)
             {
-                var result = (Stroke_List)copy();
-                result.children.Add(next);
+                var result = (Stroke_List)a.copy();
+                result.children.Add(b);
                 return result;
             }
 
             return new Stroke_List(Stroke_Type.chain, new List<Stroke>
             {
-                copy(), next.copy()
+                a.copy(), b.copy()
             });
         }
 
@@ -160,8 +155,6 @@ namespace imperative.render.artisan
         {
             return children.Select(c => c.full_text()).join("");
         }
-        
     }
-
 
 }
