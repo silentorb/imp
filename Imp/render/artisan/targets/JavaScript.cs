@@ -43,17 +43,16 @@ namespace imperative.render.artisan.targets
 
             // Source map
             var map_file = output_path + ".map";
-
-            var original = new Uri(output_path.Replace(@"\", "/"));
-            var source_map = new Source_Map(Path.GetFileName(output_path),
-                sources.Select(s => original.MakeRelativeUri(new Uri(s)).ToString()).ToArray(),
-                segments, Path.GetDirectoryName(output_path));
-            var source_map_content = source_map.serialize();
-
-            output += "\r\n//# sourceMappingURL=" + Path.GetFileName(map_file);
+            var original = new Uri(output_path.Replace(@"\", "/"), UriKind.Relative);
+//            var source_map = new Source_Map(Path.GetFileName(output_path),
+//                sources.Select(s => original.MakeRelativeUri(new Uri(s)).ToString()).ToArray(),
+//                segments, Path.GetDirectoryName(output_path));
+//            var source_map_content = source_map.serialize();
+//
+//            output += "\r\n//# sourceMappingURL=" + Path.GetFileName(map_file);
 
             Generator.create_file(output_path, output);
-            Generator.create_file(map_file, source_map_content);
+//            Generator.create_file(map_file, source_map_content);
         }
 
         public string generate_string()
