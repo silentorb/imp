@@ -1,6 +1,6 @@
 ﻿start = @(dungeon_statements, newlines, 1, 0)
 
-dungeon_definition = @(member_attribute, 0, 0) id @(optional_parent_classes, 0, 1) block_start @(dungeon_statements, newlines, 0, 0) block_end
+dungeon_definition = @(member_attribute, 0, 0) @(id, path_separator, 1, 0) @(optional_parent_classes, 0, 1) block_start @(dungeon_statements, newlines, 0, 0) block_end
 
 dungeon_statements = 
 	  import_statement

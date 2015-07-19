@@ -12,7 +12,7 @@ using imperative.Properties;
 using imperative.schema;
 using imperative.expressions;
 using metahub.jackolantern.expressions;
-
+using metahub.render;
 using metahub.schema;
 using runic.lexer;
 using runic.parser;
@@ -72,7 +72,7 @@ namespace imperative.summoner
 
                 if (child.type == Legend_Types.dungeon_definition)
                 {
-                    var name = child.children[1].text;
+                    var name = child.children[1].children.Select(c=>c.text).join(".");
                     var child_context = parent.children.ContainsKey(name)
                         ? parent.children[name]
                         : parent.children[name] = new Summoner_Context(child, parent);
@@ -207,14 +207,39 @@ namespace imperative.summoner
                 return context.dungeon;
 
             var parts = legend.children;
-            var name = parts[1].text;
-            var replacement_name = context.get_string_pattern(name);
-            if (replacement_name != null)
-                name = replacement_name;
 
-            if (!context.parent.dungeon.dungeons.ContainsKey(name))
+            var parent_dungeon = context.parent.dungeon;
+
+            string name;
+            var tokens = parts[1].children;
+            if (tokens.Count == 1)
             {
-                var dungeon = context.dungeon = context.parent.dungeon.create_dungeon(name);
+                name = tokens[0].text;
+                var replacement_name = context.get_string_pattern(name);
+                if (replacement_name != null)
+                    name = replacement_name;
+            }
+            else
+            {
+                for (var i = 0; i < tokens.Count - 1; ++i)
+                {
+                    var token = tokens[i].text;
+                    if (!parent_dungeon.dungeons.ContainsKey(token))
+                    {
+                        parent_dungeon = parent_dungeon.create_dungeon(token);
+                    }
+                    else
+                    {
+                        parent_dungeon = parent_dungeon.dungeons[token];
+                    }
+                }
+
+                name = tokens[tokens.Count - 1].text;
+            }
+
+            if (!parent_dungeon.dungeons.ContainsKey(name))
+            {
+                var dungeon = context.dungeon = parent_dungeon.create_dungeon(name);
                 //                if (parts[1].text == "struct")
                 //                    dungeon.is_value = true;
 
