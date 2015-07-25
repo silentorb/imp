@@ -20,11 +20,9 @@ namespace imperative.schema
         public string name { get; set; }
         public Dungeon realm { get; set; }
         public Dictionary<string, Dungeon> dungeons = new Dictionary<string, Dungeon>();
-//        public Dictionary<string, Treasury> treasuries = new Dictionary<string, Treasury>();
         public Dungeon parent;
         public List<Dungeon> children = new List<Dungeon>(); 
-        public List<Expression> code;
-        public Dictionary<string, string[]> inserts;
+//        public List<Expression> code;
         Dictionary<string, Accordian> blocks = new Dictionary<string, Accordian>();
         public Overlord overlord;
         public Dictionary<string, Minion> minions = new Dictionary<string, Minion>();
@@ -42,7 +40,6 @@ namespace imperative.schema
         public List<Dungeon> interfaces = new List<Dungeon>();
         public string class_export = "";
         public event Dungeon_Minion_Event on_add_minion;
-        private bool initial_generation_is_done = false;
         public string external_name;
         public Dictionary<string, Dungeon_Additional> trellis_additional = new Dictionary<string, Dungeon_Additional>();
 
@@ -84,7 +81,6 @@ namespace imperative.schema
             }
 
             _is_value = is_value;
-            code = new List<Expression>();
           
             if (parent != null)
             {
@@ -284,22 +280,15 @@ namespace imperative.schema
                 }
             }
 
-            if (code == null)
-                return;
-
-            transform_expressions(code, null);
             foreach (var minion in minions.Values)
             {
                 analyze_expressions(minion.expressions);
             }
-//            analyze_expressions(code);
         }
 
         void transform_expression(Expression expression, Expression parent)
         {
             expression.parent = parent;
-//            if (overlord.target.transmuter != null)
-//                overlord.target.transmuter.transform(expression);
 
             switch (expression.type)
             {

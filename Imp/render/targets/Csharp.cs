@@ -39,20 +39,21 @@ namespace imperative.render.targets
                     || (dungeon.is_abstract && dungeon.is_external))
                     continue;
 
-                var contents = generate_dungeon_file_contents(dungeon);
+                throw new Exception("Not implemented.");
+//                var contents = generate_dungeon_file_contents(dungeon);
                 var path = config1 + "/" + render_realm_path(dungeon.realm, "/");
                 if (!Directory.Exists(path))
                     Directory.CreateDirectory(path);
 
-                Generator.create_file(path + "/" + dungeon.name + ".cs", contents);
+//                Generator.create_file(path + "/" + dungeon.name + ".cs", contents);
             }
         }
 
-        public string generate_dungeon_file_contents(Dungeon dungeon)
-        {
-            return render_dependencies(dungeon) + newline()
-                   + render_statements(dungeon.code);
-        }
+//        public string generate_dungeon_file_contents(Dungeon dungeon)
+//        {
+//            return render_dependencies(dungeon) + newline()
+//                   + render_statements(dungeon.code);
+//        }
 
 //        public string generate_enum_file_contents(Treasury treasury)
 //        {

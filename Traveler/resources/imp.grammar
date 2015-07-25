@@ -1,0 +1,147 @@
+﻿start = @(dungeon_statements, newlines, 1, 0)
+
+dungeon_definition = @(member_attribute, 0, 0) @(id, path_separator, 1, 0) @(optional_parent_classes, 0, 1) block_start @(dungeon_statements, newlines, 0, 0) block_end
+
+dungeon_statements = 
+	  import_statement
+	| include_statement
+	| function_definition 
+	| dungeon_definition
+	| property_declaration 
+
+snippets = @(snippet_function, semicolon_or_newline, 1, 0)
+
+id = id_token | insert
+
+meta_list = meta_list_start @(id, comma_or_newline, 1, 0) array_end
+
+external_var = external var id @(type_info, 0, 1)
+
+operator = operator_token | insert
+
+comma_or_newline = comma | newlines
+
+value_type = string | bool | int | float | id
+
+value = string_value | bool_value | int_value | float_value
+ 
+arguments = group_start @(expression, comma_or_newline, 0, 0) group_end
+
+reference_token = id @(arguments, 0, 1)
+
+index = array_start expression array_end
+
+index_or_function_call = arguments | index
+
+id_with_optional_index = id @(index_or_function_call, 0, 0)
+
+reference = @(id_with_optional_index, path_separator, 1, 0) 
+
+declare_symbol = id @(type_info, 0, 1) @(optional_assignment, 0, 1)
+
+type_info = colon signature
+
+signature = @(const, 0, 1) @(value_type, path_separator, 1, 0) @(generic_info, 0, 1) @(empty_array, 0, 1)
+
+generic_info = < @(signature, comma, 1, 0) >
+
+empty_array = array_start array_end
+
+instantiate_array = array_start @(expression, comma_or_newline, 0, 0) array_end
+
+statement =
+	declare_variable
+	| if_chain
+	| while_statement
+	| return_statement
+	| for_statement
+	| preprocessor
+	| throw_statement
+	| assignment
+	| expression
+
+expression_part =
+	  instantiate
+	| value
+	| lambda
+	| reference	
+	| closed_expression
+	| null
+	| instantiate_array
+	| dictionary
+
+closed_expression = group_start expression group_end
+
+expression = @(expression_part, operator, 1, 0)
+
+import_statement = import @(id, path_separator, 1, 0)
+
+include_statement = include @(external, 0, 1) string_value
+
+class_or_enum = dungeon_definition | enum_definition
+
+function_definition = @(member_attribute, 0, 0) id group_start @(declare_symbol, comma, 0, 0) group_end @(type_info, 0, 1) @(long_block, 0, 1)
+
+member_attribute = abstract | external | public | private | static
+
+snippet_function = @(function_attribute, 0, 1) id group_start @(declare_symbol, comma, 0, 0) group_end @(type_info, 0, 1) long_block_any
+
+function_attribute = private
+
+class_or_struct = class | struct
+
+property_declaration = @(member_attribute, 0, 0) id @(type_info, 0, 1) @(optional_assignment, 0, 1)
+
+optional_parent_classes = colon @(id, comma_or_newline, 1, 0)
+
+block = long_block | @(statement, 1, 1)
+
+long_block = block_start @(statement, semicolon_or_newline, 0, 0) block_end
+
+long_block_any = block_start any_statement block_end
+
+any_statement = dungeon_definition | statements
+
+statements = @(statement, semicolon_or_newline, 0, 0)
+
+if_chain = @(if_statement, else, 1, 0) @(else_statement, 0, 1)
+
+if_statement = if group_start expression group_end block 
+
+else_statement = else block
+
+while_statement = while group_start expression group_end block
+
+return_statement = return @(optional_statement, 0, 1)
+
+optional_statement = ws expression
+
+optional_assignment = equals expression
+
+declare_variable = var id @(type_info, 0, 1) @(optional_assignment, 0, 1)
+
+assignment = reference set_operator expression
+
+for_statement = for group_start var id in reference group_end long_block
+
+instantiate = new signature arguments
+
+lambda = group_start @(declare_symbol, comma, 0, 0) group_end arrow block
+
+enum_definition = enum id block_start @(enum_entry, comma_or_newline, 1, 0) block_end
+
+enum_entry = id @(optional_enum_assignment, 0, 1)
+
+optional_enum_assignment = equals int_value
+
+optional_group = group_start expression group_end
+
+preprocessor = preprocessor_start @(optional_group, 0, 1) block
+
+dictionary = block_start @(key_value, comma_or_newline, 0, 0) block_end
+
+key_value = string_or_id colon expression
+
+string_or_id = string_value | id
+
+throw_statement = throw expression

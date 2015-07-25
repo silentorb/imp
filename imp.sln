@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Library", "Library\Library.
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Summoning", "Summoning\Summoning.fsproj", "{C2A7C031-57E6-4A9B-A335-D803BFB10D42}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Traveller", "Traveller\Traveller.csproj", "{0FA8DD8D-1125-4370-9F30-1CBF0B99F258}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,6 +101,16 @@ Global
 		{C2A7C031-57E6-4A9B-A335-D803BFB10D42}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{C2A7C031-57E6-4A9B-A335-D803BFB10D42}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{C2A7C031-57E6-4A9B-A335-D803BFB10D42}.Release|x86.ActiveCfg = Release|Any CPU
+		{0FA8DD8D-1125-4370-9F30-1CBF0B99F258}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FA8DD8D-1125-4370-9F30-1CBF0B99F258}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FA8DD8D-1125-4370-9F30-1CBF0B99F258}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{0FA8DD8D-1125-4370-9F30-1CBF0B99F258}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{0FA8DD8D-1125-4370-9F30-1CBF0B99F258}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0FA8DD8D-1125-4370-9F30-1CBF0B99F258}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FA8DD8D-1125-4370-9F30-1CBF0B99F258}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FA8DD8D-1125-4370-9F30-1CBF0B99F258}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{0FA8DD8D-1125-4370-9F30-1CBF0B99F258}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{0FA8DD8D-1125-4370-9F30-1CBF0B99F258}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

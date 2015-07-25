@@ -1,0 +1,46 @@
+﻿traveler.core {
+    Output<T> {
+        get_value():T
+        targets:Input<T>[]
+    }
+
+    Input<T> {
+        set_value(value:T)
+        source:Output<T>
+    }
+
+    changed<T>(output:Output<T>, value:T) {
+        if (output.targets == null)
+            return
+
+        for (var target in output.targets) {
+            target.set_value(value)
+        }
+    }
+
+    connect<T>(output:Output<T>, input:Input<T>) {
+        if (input.source == output)
+            return
+
+        if (output.targets == null)
+            output.targets = []
+
+        input.source = output
+        output.targets.push(input)
+
+        input.set_value(output.get_value())
+    }
+
+    sequence(list) {
+        for (var i = 0; i < list.length - 1; i += 1) {
+            Traveler.connect(list[i], list[i + 1])
+        }
+    }
+
+    input_function<I>(func):Input<I> {
+        return {
+               set_value: func,
+               source: null
+               }
+    }
+}
