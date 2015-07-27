@@ -22,9 +22,9 @@ namespace imperative.summoner
             if (patterns.Count == 1 && pattern.text == "null")
                 return new Null_Value();
 
-//            Expression array_access = pattern.children[1] != null
-//                     ? summoner.process_expression(pattern.children[1], context)
-//                     : null;
+            //            Expression array_access = pattern.children[1] != null
+            //                     ? summoner.process_expression(pattern.children[1], context)
+            //                     : null;
 
             var token = pattern.children[0].text;
 
@@ -48,14 +48,14 @@ namespace imperative.summoner
                 //                if (path_context.index == patterns.Count - 1 && symbol.profession.type == Kind.function)
                 //                    return new Dynamic_Function_Call(symbol.name, null, args);
 
-//                var next = new Variable(symbol);
-//                var profession = next.get_profession();
-//                var dungeon = profession != null
-//                              ? profession.dungeon
-//                              : next.get_profession().dungeon;
-//
-//                return append(next, process_idungeon(dungeon, summoner, patterns,
-//                        context, step + 1));
+                //                var next = new Variable(symbol);
+                //                var profession = next.get_profession();
+                //                var dungeon = profession != null
+                //                              ? profession.dungeon
+                //                              : next.get_profession().dungeon;
+                //
+                //                return append(next, process_idungeon(dungeon, summoner, patterns,
+                //                        context, step + 1));
             }
 
             var current_dungeon = context.dungeon;
@@ -67,7 +67,7 @@ namespace imperative.summoner
 
                 current_dungeon = current_dungeon.realm;
             }
-           
+
             throw new Parser_Exception("Unknown symbol: " + token, pattern.position);
         }
 
@@ -77,10 +77,10 @@ namespace imperative.summoner
             if (idungeon == null || step >= patterns.Count)
                 return null;
 
-//            if (idungeon.GetType() == typeof (Dungeon))
-                return process_dungeon((Dungeon)idungeon, summoner, patterns, context, step);
-//            else
-//                return process_treasury((Treasury)idungeon, summoner, patterns, context, step);
+            //            if (idungeon.GetType() == typeof (Dungeon))
+            return process_dungeon((Dungeon)idungeon, summoner, patterns, context, step);
+            //            else
+            //                return process_treasury((Treasury)idungeon, summoner, patterns, context, step);
         }
 
         private static Expression process_dungeon(Dungeon dungeon, Summoner summoner,
@@ -104,12 +104,14 @@ namespace imperative.summoner
             List<Legend> patterns, Summoner_Context context, int step)
         {
             var pattern = patterns[step];
-            var arg_source = pattern.children[1].children[0].children[0].children;
-            List<Expression> args = arg_source.Count == 0
-                ? null
-                : arg_source
+            List<Expression> args = null;
+            if (pattern.children[1].children.Count > 0
+                && pattern.children[1].children[0].children[0].children.Count > 0)
+            {
+                args = pattern.children[1].children[0].children[0].children
                     .Select(p => summoner.process_expression(p, context))
                     .ToList();
+            }
 
             var result = new Method_Call(minion, null, args);
             result.legend = pattern;
@@ -119,7 +121,7 @@ namespace imperative.summoner
             if (minion.return_type.dungeon == null)
             {
                 if (minion.return_type == Professions.none)
-                    throw new Exception("Spell " + minion.name 
+                    throw new Exception("Spell " + minion.name
                         + " does not return anything.");
 
                 throw new Parser_Exception(minion.return_type
@@ -133,7 +135,7 @@ namespace imperative.summoner
                 throw new Parser_Exception("Dungeon " + minion.return_type.dungeon.name
                     + " does not have a member named " + patterns[step + 1].children[0].text + ".", pattern.position);
 
-            return append(result, child);  
+            return append(result, child);
         }
 
         static Expression process_portal(Portal portal, Summoner summoner,
@@ -210,21 +212,21 @@ namespace imperative.summoner
             return first;
         }
 
-//        private static Expression process_treasury(Treasury treasury, Summoner summoner,
-//            List<Legend> patterns, Summoner_Context context, int step)
-//        {
-//            var pattern = patterns[step];
-//            var token = pattern.children[0].text;
-//            if (step >= patterns.Count - 1)
-//                throw new Exception("Enum " + token + " is missing a member value.");
-//
-//            var jewel_name = patterns.Last().children[0].text;
-//            if (!treasury.jewels.Contains(jewel_name))
-//                throw new Exception("Enum " + treasury.name
-//                    + " does not contain member: " + jewel_name + ".");
-//
-//            return new Jewel(treasury, treasury.jewels.IndexOf(jewel_name));
-//        }
+        //        private static Expression process_treasury(Treasury treasury, Summoner summoner,
+        //            List<Legend> patterns, Summoner_Context context, int step)
+        //        {
+        //            var pattern = patterns[step];
+        //            var token = pattern.children[0].text;
+        //            if (step >= patterns.Count - 1)
+        //                throw new Exception("Enum " + token + " is missing a member value.");
+        //
+        //            var jewel_name = patterns.Last().children[0].text;
+        //            if (!treasury.jewels.Contains(jewel_name))
+        //                throw new Exception("Enum " + treasury.name
+        //                    + " does not contain member: " + jewel_name + ".");
+        //
+        //            return new Jewel(treasury, treasury.jewels.IndexOf(jewel_name));
+        //        }
 
         private static Expression process_function_call(Expression expression, Expression previous,
             string token, Dungeon dungeon, List<Expression> args)

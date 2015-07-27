@@ -1,41 +1,48 @@
-﻿traveler.core {
-    Output<T> {
-        get_value():T
-        targets:Input<T>[]
-    }
+﻿traveler
+{
+    planets {
 
-    Input<T> {
-        set_value(value:T)
-        source:Output<T>
-    }
+        Output<T> {
+            get_value():T
+            targets:Input<T>[]
+        }
 
-    changed<T>(output:Output<T>, value:T) {
-        if (output.targets == null)
-            return
-
-        for (var target in output.targets) {
-            target.set_value(value)
+        Input<T> {
+            set_value(value:T)
+            source:Output<T>
         }
     }
 
-    connect<T>(output:Output<T>, input:Input<T>) {
-        if (input.source == output)
-            return
+    travel {
 
-        if (output.targets == null)
-            output.targets = []
+        static changed<T>(output:planets.Output<T>, value:T) {
+            if (output.targets == null)
+                return
 
-        input.source = output
-        output.targets.push(input)
+            for (var target in output.targets) {
+                target.set_value(value)
+            }
+        }
 
-        input.set_value(output.get_value())
-    }
+        static connect<T>(output:planets.Output<T>, input:planets.Input<T>) {
+            if (input.source == output)
+                return
 
-    sequence(list) {
-        var i = 0
-        while (i < list.length - 1) {
-            Traveler.connect(list[i], list[i + 1])
-            i += 1
+            if (output.targets == null)
+                output.targets = []
+
+            input.source = output
+            output.targets.push(input)
+
+            input.set_value(output.get_value())
+        }
+
+        static sequence(list:any[]) {
+            var i = 0
+            while (i < list.count - 1) {
+                travel.connect(list[i], list[i + 1])
+                i += 1
+            }
         }
     }
 }

@@ -300,6 +300,36 @@ namespace imperative.render.artisan.targets
         //            return result;
         //        }
 
+        protected override Stroke render_function_call2(Abstract_Function_Call expression, Stroke ref_string, Minion minion)
+        {
+            if (minion == null)
+                return base.render_function_call2(expression, ref_string, minion);
+
+            if (minion.dungeon == Professions.List)
+            {
+//                if (minion == Professions.List.all_portals["count"])
+//                {
+//                    return ref_string + new Stroke_Token("length");
+//                }
+            }
+
+            return base.render_function_call2(expression, ref_string, minion);
+        }
+
+        protected override Stroke render_portal(Portal_Expression portal_expression)
+        {
+            var portal = portal_expression.portal;
+            if (portal.dungeon == Professions.List)
+            {
+                if (portal == Professions.List.all_portals["count"])
+                {
+                    return new Stroke_Token("count");
+                }
+            }
+
+            return base.render_portal(portal_expression);
+        }
+
         override protected Stroke render_platform_function_call(Platform_Function expression, Expression parent)
         {
             var ref_string = expression.reference != null

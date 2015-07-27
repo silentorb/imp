@@ -65,11 +65,11 @@ namespace imperative.schema
             {
                 new Parameter(new Symbol("index", Int, null))
             });
-            List.spawn_simple_minion("add", new List<Parameter>
+            List.spawn_simple_minion("push", new List<Parameter>
             {
                 new Parameter(new Symbol("item", any, null))
             });
-            List.spawn_simple_minion("count", null, null, Professions.Int);
+            List.add_portal(new Portal("count", Professions.Int, List));
             List.spawn_simple_minion("last", null, null, Professions.any);
             List.spawn_simple_minion("pop", null, null, Professions.any);
         }

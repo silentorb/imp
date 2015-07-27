@@ -16,6 +16,7 @@ using metahub.render;
 using metahub.schema;
 using runic.lexer;
 using runic.parser;
+using runic.parser.rhymes;
 using Expression = imperative.expressions.Expression;
 using Parser = runic.parser.Parser;
 
@@ -258,6 +259,15 @@ namespace imperative.summoner
                     parent.children.Add(dungeon);
                 }
 
+                if (parts[2] != null)
+                {
+                    foreach (var type_name in parts[2].children)
+                    {
+                        var generic_dungeon= new Dungeon(type_name.text, null, null);
+                        context.set_pattern(type_name.text, new Profession(generic_dungeon));
+                    }
+                }
+
                 //                dungeon.generate_code();
                 context.dungeon = dungeon;
                 return dungeon;
@@ -355,10 +365,22 @@ namespace imperative.summoner
             }
         }
 
-        private void process_function_definition(Legend source, Summoner_Context context, bool as_stub = false, bool simple = false)
+        private void process_function_definition(Legend source, Summoner_Context original_context, bool as_stub = false, bool simple = false)
         {
             var parts = source.children;
             var name = parts[1].text;
+            var context = original_context;
+
+            if (parts[2] != null)
+            {
+                context = new Summoner_Context(source, context) {dungeon = original_context.dungeon};
+                foreach (var type_name in parts[2].children)
+                {
+                    var generic_dungeon = new Dungeon(type_name.text, null, null);
+                    context.set_pattern(type_name.text, new Profession(generic_dungeon));
+                }
+            }
+
             var minion = context.dungeon.has_minion(name)
                 ? context.dungeon.summon_minion(name)
                 : simple
@@ -497,7 +519,7 @@ namespace imperative.summoner
                                             process_block(parts[1], context)
                         ) { legend = source };
 
-                case "for_statement":
+                case "foreach_statement":
                     return process_iterator(source, context);
 
                 case "return_statement":
@@ -605,7 +627,8 @@ namespace imperative.summoner
                 var divider = dividers[d];
                 if (operators.Contains(divider.text))
                 {
-                    patterns[i] = new Group_Legend(patterns[i].rhyme, 
+                    var rhyme = new Repetition_Rhyme("expression");
+                    patterns[i] = new Group_Legend(rhyme, 
                         new List<Legend>
                         {
                             patterns[i],
@@ -737,7 +760,8 @@ namespace imperative.summoner
 
             if (source.children[2] != null)
             {
-                result.children = source.children[2].children.Select(c => parse_type2(c, context)).ToList();
+                
+                result.get_deepest_child().children = source.children[2].children.Select(c => parse_type2(c, context)).ToList();
             }
             if (result.is_array(overlord) && result.children.Count == 0)
                 throw new Parser_Exception("Missing generic parameters.", source.position);

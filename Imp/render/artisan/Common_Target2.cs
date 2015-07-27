@@ -467,9 +467,10 @@ namespace imperative.render.artisan
             var method_call = expression as Method_Call;
             Stroke this_string = null;
 
+            Minion minion = null;
             if (method_call != null)
             {
-                var minion = method_call.minion;
+                minion = method_call.minion;
                 if (minion == Professions.List.minions["get"])
                     return render_list(parent.get_profession(), expression.args);
 
@@ -492,21 +493,21 @@ namespace imperative.render.artisan
                ? this_string + render_expression(expression.reference)
                : this_string;
 
-            //            var ref_full = ref_string.Length > 0
-            //                ? ref_string + "."
-            //                : "";
+            var result = render_function_call2(expression, ref_string, minion);
 
+            result.expression = expression;
+            return result;
+        }
+
+        protected virtual Stroke render_function_call2(Abstract_Function_Call expression, Stroke ref_string, Minion minion)
+        {
             var second = new Stroke_Token(expression.get_name() + "(");
             var ref_full = ref_string != null
                 ? ref_string + second
                 : second;
 
-
-            var result = ref_full + render_arguments(expression.args)
+            return ref_full + render_arguments(expression.args)
                  + new Stroke_Token(")");
-
-            result.expression = expression;
-            return result;
         }
 
         private Stroke render_arguments(List<Expression> args)

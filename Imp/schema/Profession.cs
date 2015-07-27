@@ -28,5 +28,12 @@ namespace imperative.schema
         {
             return new Profession(dungeon, children);
         }
+
+        public Profession get_deepest_child()
+        {
+            return children != null && children.Count > 0
+                ? children[0].get_deepest_child()
+                : this;
+        }
     }
 }
