@@ -78,7 +78,7 @@ namespace imperative.summoner
                         : parent.children[name] = new Summoner_Context(child, parent);
 
                     list.Add(child_context);
-                    gather_parts(child_context, child.children[3].children, map);
+                    gather_parts(child_context, child.children[4].children, map);
                 }
                 else
                 {
@@ -251,9 +251,9 @@ namespace imperative.summoner
                     //                    dungeon.is_value = attributes.Any(p => p.text == "value");
                 }
 
-                if (parts[2] != null)
+                if (parts[3] != null)
                 {
-                    var parent = (Dungeon)get_dungeon(context.dungeon, parts[2].children);
+                    var parent = (Dungeon)get_dungeon(context.dungeon, parts[3].children);
                     dungeon.parent = parent;
                     parent.children.Add(dungeon);
                 }
@@ -272,7 +272,7 @@ namespace imperative.summoner
             var dungeon = context.dungeon;
             var statements = dungeon.name == ""
                 ? source.children
-                : source.children[3].children;
+                : source.children[4].children;
 
             foreach (var statement in statements)
             {
@@ -288,7 +288,7 @@ namespace imperative.summoner
             var dungeon = context.dungeon;
             var statements = dungeon.name == ""
                 ? source.children
-                : source.children[3].children;
+                : source.children[4].children;
 
             foreach (var statement in statements)
             {
@@ -363,9 +363,9 @@ namespace imperative.summoner
                 ? context.dungeon.summon_minion(name)
                 : simple
                 ? context.dungeon.spawn_simple_minion(name,
-                    parts[2].children.Select(p => process_parameter(p, context)).ToList())
+                    parts[3].children.Select(p => process_parameter(p, context)).ToList())
                     : context.dungeon.spawn_minion(name,
-                    parts[2].children.Select(p => process_parameter(p, context)).ToList());
+                    parts[3].children.Select(p => process_parameter(p, context)).ToList());
 
             var new_context = new Summoner_Context(context) { scope = minion.scope };
 
@@ -377,7 +377,7 @@ namespace imperative.summoner
                 }
             }
 
-            var return_type = parts[3];
+            var return_type = parts[4];
             if (return_type != null)
                 minion.return_type = parse_type2(return_type, context);
 
@@ -387,12 +387,12 @@ namespace imperative.summoner
             }
             else
             {
-                if (parts[4] == null)
+                if (parts[5] == null)
                 {
                     minion.add_enchantment(new Enchantment("abstract"));
                 }
                 else
-                    minion.add_to_block(process_block(parts[4], new_context));
+                    minion.add_to_block(process_block(parts[5], new_context));
             }
         }
 

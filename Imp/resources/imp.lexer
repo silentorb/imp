@@ -2,7 +2,8 @@
 newlines(optional) = /(\s*\n)+\s*/
 comma = ","
 comma_or_newline = newlines | comma
-semicolon_or_newline = newlines | ";"
+semicolon = ";"
+semicolon_or_newline = newlines | semicolon
 line_comment(ignore) = /\/\/[^\r\n]*/
 string_value = /"([^"]*)"|\G'([^']*)'/
 bool_value = "true" | "false"

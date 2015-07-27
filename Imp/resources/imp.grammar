@@ -54,6 +54,7 @@ statement =
 	| if_chain
 	| while_statement
 	| return_statement
+	| foreach_statement
 	| for_statement
 	| preprocessor
 	| throw_statement
@@ -122,7 +123,9 @@ declare_variable = var id @(type_info, 0, 1) @(optional_assignment, 0, 1)
 
 assignment = reference set_operator expression
 
-for_statement = for group_start var id in reference group_end long_block
+foreach_statement = for group_start var id in reference group_end long_block
+
+for_statement = for group_start var id equals expression semicolon expression semicolon assignment group_end long_block
 
 instantiate = new signature arguments
 
