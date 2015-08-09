@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Newtonsoft.Json;
 
 namespace imperative.schema
 {
@@ -11,7 +10,7 @@ namespace imperative.schema
     {
         public bool? is_external;
 
-        [JsonProperty("namespace")]
+//        [JsonProperty("namespace")]
         public string space;
         public string class_export;
         public Dictionary<string, Dungeon_Additional> trellises;
