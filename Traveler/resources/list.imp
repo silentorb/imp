@@ -1,0 +1,25 @@
+Traveler {
+
+    List {
+
+        Map<I, O> : Input<I>, Output<O> {
+            mapper:void=>void
+            source
+            targets
+
+            constructor(mapper) {
+                this.mapper = mapper
+            }
+
+            set_value(value) {
+                Traveler.changed(this, mapper(value))
+            }
+
+            get_value() {
+                var value = this.source != null ? this.source.get_value() : null
+                return mapper(value)
+            }
+
+        }
+    }
+}

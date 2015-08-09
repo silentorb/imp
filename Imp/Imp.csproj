@@ -64,6 +64,8 @@
     <Compile Include="schema\Dungeon_Types.cs" />
     <Compile Include="schema\Professions.cs" />
     <Compile Include="summoner\Tunneler.cs" />
+    <Compile Include="wizard\Conjurer.cs" />
+    <Compile Include="wizard\Meta_Entity.cs" />
     <Compile Include="wizard\Wizard.cs" />
     <Compile Include="expressions\If.cs" />
     <Compile Include="expressions\Dynamic_Function_Call.cs" />

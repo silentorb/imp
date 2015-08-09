@@ -21,8 +21,8 @@ namespace imperative.schema
         public Dungeon realm { get; set; }
         public Dictionary<string, Dungeon> dungeons = new Dictionary<string, Dungeon>();
         public Dungeon parent;
-        public List<Dungeon> children = new List<Dungeon>(); 
-//        public List<Expression> code;
+        public List<Dungeon> children = new List<Dungeon>();
+        //        public List<Expression> code;
         Dictionary<string, Accordian> blocks = new Dictionary<string, Accordian>();
         public Overlord overlord;
         public Dictionary<string, Minion> minions = new Dictionary<string, Minion>();
@@ -44,6 +44,25 @@ namespace imperative.schema
         public Dictionary<string, Dungeon_Additional> trellis_additional = new Dictionary<string, Dungeon_Additional>();
 
         public object default_value { get; set; }
+
+        private Portal[] _portals;
+        public Portal[] portals
+        {
+            get
+            {
+                if (_portals == null)
+                {
+                    _portals = new Portal[all_portals.Count];
+                    var i = 0;
+                    foreach (var portal in all_portals.Values)
+                    {
+                        _portals[++i] = portal;
+                    }
+                }
+
+                return _portals;
+            }
+        }
 
         bool _is_value = false;
         public bool is_value
@@ -81,7 +100,7 @@ namespace imperative.schema
             }
 
             _is_value = is_value;
-          
+
             if (parent != null)
             {
                 this.parent = parent;
@@ -167,28 +186,28 @@ namespace imperative.schema
             return dependencies[dungeon.name];
         }
 
-//        public void generate_code()
-//        {
-//            if (initial_generation_is_done)
-//                return;
-//
-//            initial_generation_is_done = true;
-//            var root_scope = new Scope();
-//            code = new List<Expression>();
-//            var root = create_block("root", root_scope, code);
-//            root.divide("pre");
-//
-//            var class_expressions = new List<Expression>();
-//            create_block("class_definition", root_scope, class_expressions);
-//
-//            root.divide(null, new List<Expression> {
-//			    new Namespace(realm, new List<Expression> { 
-//                    new Class_Definition(this, class_expressions)
-//                })
-//            });
-//
-//            root.divide("post");
-//        }
+        //        public void generate_code()
+        //        {
+        //            if (initial_generation_is_done)
+        //                return;
+        //
+        //            initial_generation_is_done = true;
+        //            var root_scope = new Scope();
+        //            code = new List<Expression>();
+        //            var root = create_block("root", root_scope, code);
+        //            root.divide("pre");
+        //
+        //            var class_expressions = new List<Expression>();
+        //            create_block("class_definition", root_scope, class_expressions);
+        //
+        //            root.divide(null, new List<Expression> {
+        //			    new Namespace(realm, new List<Expression> { 
+        //                    new Class_Definition(this, class_expressions)
+        //                })
+        //            });
+        //
+        //            root.divide("post");
+        //        }
 
         public Accordian create_block(string path, Scope scope, List<Expression> expressions = null)
         {
@@ -227,7 +246,7 @@ namespace imperative.schema
             foreach (var child in children)
             {
                 child.add_inherited_portal(portal);
-            }          
+            }
         }
 
         public bool has_portal(string portal_name)
@@ -346,7 +365,7 @@ namespace imperative.schema
 
         void analyze_expression(Expression expression)
         {
-//            overlord.target.analyze_expression(expression);
+            //            overlord.target.analyze_expression(expression);
 
             switch (expression.type)
             {
@@ -420,9 +439,9 @@ namespace imperative.schema
                     analyze_expression(iterator.expression);
                     analyze_expressions(iterator.body);
                     break;
-                    
+
                 case Expression_Type.instantiate:
-                    var instantiation = (Instantiate) expression;
+                    var instantiation = (Instantiate)expression;
                     analyze_profession(instantiation.profession);
                     analyze_expressions(instantiation.args);
                     break;
@@ -485,8 +504,8 @@ namespace imperative.schema
 
             var definition = new Function_Definition(minion);
 
-//            var block = get_block("class_definition");
-//            block.add(definition);
+            //            var block = get_block("class_definition");
+            //            block.add(definition);
             definition.scope = minion.scope = new Scope();
             minion.scope.minion = minion;
 
@@ -538,8 +557,8 @@ namespace imperative.schema
 
         public Dungeon get_dungeon(string child_name)
         {
-            return dungeons.ContainsKey(child_name) 
-                ? dungeons[child_name] 
+            return dungeons.ContainsKey(child_name)
+                ? dungeons[child_name]
                 : null;
         }
 
@@ -558,26 +577,26 @@ namespace imperative.schema
             if (result != null)
                 return result;
 
-//            if (realm == null && !throw_error)
-//                return null;
+            //            if (realm == null && !throw_error)
+            //                return null;
 
-//            if (path.Length == 1)
-//                return realm.get_dungeon_descending(path.Last());
+            //            if (path.Length == 1)
+            //                return realm.get_dungeon_descending(path.Last());
 
             if (realm != null)
             {
                 return realm.get_dungeon(original_path, throw_error);
             }
-           
+
             throw new Exception("Invalid path: " + original_path.join("."));
         }
 
-//        public Dungeon get_dungeon_descending(string path)
-//        {
-//            return get_dungeon(path) ?? (realm != null
-//                ? realm.get_dungeon_descending(path)
-//                : null);
-//        }
+        //        public Dungeon get_dungeon_descending(string path)
+        //        {
+        //            return get_dungeon(path) ?? (realm != null
+        //                ? realm.get_dungeon_descending(path)
+        //                : null);
+        //        }
 
         public Dungeon get_child_realm(string token, bool throw_error = true)
         {
@@ -649,16 +668,16 @@ namespace imperative.schema
             return Dungeon_Types.Class;
         }
 
-//        public Treasury create_treasury(string treasury_name, List<string> jewels)
-//        {
-//            if (get_dungeon(treasury_name) != null)
-//                throw new Exception("Realm " + name + " already contains a type named " + treasury_name + ".");
-//
-//            var treasury = new Treasury(treasury_name, jewels, this);
-//            treasuries[treasury_name] = treasury;
-//
-//            return treasury;
-//        }
+        //        public Treasury create_treasury(string treasury_name, List<string> jewels)
+        //        {
+        //            if (get_dungeon(treasury_name) != null)
+        //                throw new Exception("Realm " + name + " already contains a type named " + treasury_name + ".");
+        //
+        //            var treasury = new Treasury(treasury_name, jewels, this);
+        //            treasuries[treasury_name] = treasury;
+        //
+        //            return treasury;
+        //        }
 
     }
 }

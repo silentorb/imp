@@ -1,6 +1,6 @@
-﻿traveler
-{
-    planets {
+﻿Traveler {
+
+    Planets {
 
         Output<T> {
             get_value():T
@@ -13,9 +13,9 @@
         }
     }
 
-    travel {
+    Pathways {
 
-        static changed<T>(output:planets.Output<T>, value:T) {
+        static changed<T>(output:Planets.Output<T>, value:T) {
             if (output.targets == null)
                 return
 
@@ -24,7 +24,7 @@
             }
         }
 
-        static connect<T>(output:planets.Output<T>, input:planets.Input<T>) {
+        static connect<T>(output:Planets.Output<T>, input:Planets.Input<T>) {
             if (input.source == output)
                 return
 
