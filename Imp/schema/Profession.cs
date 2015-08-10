@@ -13,7 +13,7 @@ namespace imperative.schema
         public IDungeon dungeon;
         public List<Profession> children;
 
-        internal Profession(IDungeon dungeon, List<Profession> children = null)
+        public Profession(IDungeon dungeon, List<Profession> children = null)
         {
             this.dungeon = dungeon;
             this.children = children;

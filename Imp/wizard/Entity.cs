@@ -6,13 +6,13 @@ using imperative.schema;
 
 namespace imperative.wizard
 {
-   public class Meta_Entity
+   public class Entity
     {
        public object[] values;
        public Dungeon dungeon;
        public Guid guid { get; set; }
 
-       public Meta_Entity(Dungeon dungeon, Guid guid, Conjurer conjure)
+       public Entity(Dungeon dungeon, Guid guid, Conjure conjure)
        {
            this.guid = guid;
            this.dungeon = dungeon;
@@ -20,7 +20,7 @@ namespace imperative.wizard
            values = new object[portals.Length];
            for (var i = 0; i < portals.Length; ++i)
            {
-               values[++i] = conjure(portals[i].profession);
+               values[i] = conjure(portals[i].profession);
            }
        }
     }

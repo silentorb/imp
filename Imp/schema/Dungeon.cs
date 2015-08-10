@@ -56,7 +56,7 @@ namespace imperative.schema
                     var i = 0;
                     foreach (var portal in all_portals.Values)
                     {
-                        _portals[++i] = portal;
+                        _portals[i++] = portal;
                     }
                 }
 
