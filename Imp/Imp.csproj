@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="expressions\Create_Dictionary.cs" />
     <Compile Include="render\artisan\Common_Target2.cs" />
+    <Compile Include="render\artisan\targets\Cpp.cs" />
     <Compile Include="render\artisan\targets\Csharp.cs" />
     <Compile Include="render\artisan\targets\JavaScript.cs" />
     <Compile Include="render\artisan\Painter.cs" />
@@ -82,7 +83,7 @@
     <Compile Include="render\Generator.cs" />
     <Compile Include="render\Renderer.cs" />
     <Compile Include="render\Target.cs" />
-    <Compile Include="render\targets\Cpp.cs" />
+    <Compile Include="render\targets\Cpp_Old.cs" />
     <Compile Include="render\targets\Csharp.cs" />
     <Compile Include="render\targets\Java.cs" />
     <Compile Include="render\targets\JavaScript.cs" />
@@ -154,7 +155,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="resources\imp.grammar" />
     <None Include="resources\imp.lexer" />
   </ItemGroup>

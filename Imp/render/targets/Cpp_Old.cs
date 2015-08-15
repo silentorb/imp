@@ -17,6 +17,7 @@ namespace metahub.render.targets
         public External_Header(string name, bool is_standard = false)
         {
             this.name = name;
+            this.name = name;
             this.is_standard = is_standard;
         }
     }

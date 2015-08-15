@@ -30,8 +30,8 @@ namespace imperative.summoner
     public class Summoner
     {
         public Overlord overlord;
-        private static Lexer lexer;
-        private static Parser parser;
+        public static Lexer lexer;
+        public static Parser parser;
         private bool is_external;
 
         public Summoner(Overlord overlord, bool is_external = false)

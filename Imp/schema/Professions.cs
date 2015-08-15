@@ -56,6 +56,7 @@ namespace imperative.schema
             initialize_exception();
 
             Dictionary = new Dungeon("Dictionary", null, null);
+
         }
 
         private static void initialize_list()

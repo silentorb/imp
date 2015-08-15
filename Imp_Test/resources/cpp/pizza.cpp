@@ -1,16 +1,20 @@
-﻿#include "stdafx.h"
-#include "test/Crust.h"
+﻿#include "test/Crust.h"
 #include "test/Pizza.h"
 
 namespace test {
+  void Pizza::add(std::string topping) {
+    var x = 0;
+    if (topping == null)
+      return;
+    else
+      x = 1.5f;
 
-	void Pizza::add(std::string topping) {
-		var x = 0;
-		if (topping == null)
-			return;
-		else
-			x = 1;
+    toppings.push_back(topping);
+    crust = Crust::burnt;
+  }
 
-		toppings.push_back(topping);
-	}
+  std::vector<std::string> Pizza::get_eaten() {
+    return toppings;
+  }
+
 }

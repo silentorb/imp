@@ -33,5 +33,7 @@ namespace imperative.render
         public string statement_terminator = "";        // In most cases this will be "" or ";"
         public Type_Mode type_mode = Type_Mode.optional_suffix;
         public bool uses_var = true;                    // Whether the language requires/supports "var" for variable declarations.
+        public string list_start = "[";                 // Only used in initializing a list, not indexing.
+        public string list_end = "]";                 // Only used in initializing a list, not indexing.
     }
 }

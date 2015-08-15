@@ -35,6 +35,7 @@ namespace imperative.render.artisan
         protected Dungeon current_realm;
         protected Dungeon current_dungeon;
 
+        protected Dictionary<Minion, string> minion_names = new Dictionary<Minion, string>();
         protected List<Dictionary<Stroke, Profession>> scopes = new List<Dictionary<Stroke, Profession>>();
         protected Dictionary<Stroke, Profession> current_scope;
         protected Stack<Minion_Base> minion_stack = new Stack<Minion_Base>();
@@ -51,7 +52,7 @@ namespace imperative.render.artisan
 
         public abstract void run(Overlord_Configuration config1, string[] sources);
 
-        public static string render_strokes(List<Stroke> strokes )
+        public static string render_strokes(List<Stroke> strokes)
         {
             var passages = Painter.render_root(strokes).ToList();
             var segments = new List<Segment>();
@@ -122,8 +123,6 @@ namespace imperative.render.artisan
 
                 case Expression_Type.variable:
                     var variable_expression = (Variable)expression;
-                    //if (find_variable(variable_expression.symbol.name) == null)
-                    //    throw new Exception("Could not find variable: " + variable_expression.symbol.name + ".");
 
                     result = new Stroke_Token(variable_expression.symbol.name, variable_expression);
                     if (variable_expression.index != null)
@@ -177,6 +176,15 @@ namespace imperative.render.artisan
                 || portal_expression.parent.next != portal_expression;
         }
 
+        protected Stroke get_delimiter(Portal portal)
+        {
+            var delimiter = portal.has_enchantment(Enchantments.Static)
+                ? config.namespace_separator
+                : config.path_separator;
+
+            return new Stroke_Token(delimiter);
+        }
+
         virtual protected Stroke render_portal(Portal_Expression portal_expression)
         {
             var portal = portal_expression.portal;
@@ -186,7 +194,7 @@ namespace imperative.render.artisan
                 if (portal.has_enchantment(Enchantments.Static))
                 {
                     if (portal.dungeon.name != "")
-                        result = render_dungeon_path(portal.dungeon) + new Stroke_Token(".") + result;
+                        result = render_dungeon_path(portal.dungeon) + get_delimiter(portal) + result;
                 }
                 else if (!config.implicit_this && portal.dungeon.name != "")
                 {
@@ -194,7 +202,7 @@ namespace imperative.render.artisan
                 }
             }
             if (portal_expression.index != null)
-                result += new Stroke_Token("[" + render_expression(portal_expression.index) + "]");
+                result += new Stroke_Token("[") + render_expression(portal_expression.index) + new Stroke_Token("]");
 
             return result;
         }
@@ -228,11 +236,12 @@ namespace imperative.render.artisan
 
                 case Expression_Type.statement:
                     var state = (Statement)statement;
-                    var statement_result = new Stroke_Token(state.name) + (state.next != null
-                        ? new Stroke_Token(" ") + render_expression(state.next)
-                        : terminate_statement());
+                    var statement_result = (Stroke)new Stroke_Token(state.name);
+                    if (state.next != null)
+                        statement_result += new Stroke_Token(" ") + render_expression(state.next);
+
                     statement_result.expression = statement;
-                    return statement_result;
+                    return statement_result + terminate_statement();
 
                 case Expression_Type.insert:
                     return new Stroke_Token(((Insert)statement).code);
@@ -263,7 +272,7 @@ namespace imperative.render.artisan
                 ? "abstract "
                 : "";
 
-            var intro = new Stroke_Token( "public " + abstract_keyword + "class ") 
+            var intro = new Stroke_Token("public " + abstract_keyword + "class ")
                 + render_dungeon_path(dungeon);
 
             var result = intro + render_block(render_properties(dungeon), false);
@@ -286,13 +295,13 @@ namespace imperative.render.artisan
             if (config.type_mode == Type_Mode.required_prefix)
                 main = render_profession(portal.profession) + new Stroke_Token(" ") + main;
             else if (config.type_mode == Type_Mode.optional_suffix)
-                main += new Stroke_Token( ":" )+ render_profession(portal.profession);
+                main += new Stroke_Token(":") + render_profession(portal.profession);
 
             if (portal.has_enchantment("static"))
-                main = new Stroke_Token( "static ") + main;
+                main = new Stroke_Token("static ") + main;
 
             if (config.explicit_public_members)
-                main = new Stroke_Token( "public ") + main;
+                main = new Stroke_Token("public ") + main;
 
             var assignment = portal.other_dungeon == null || !portal.other_dungeon.is_value
                 ? new Stroke_Token(" = ") + get_default_value(portal)
@@ -320,18 +329,18 @@ namespace imperative.render.artisan
         protected virtual Stroke render_list(Profession profession, List<Expression> args)
         {
             if (args == null)
-                return new Stroke_Token("[]");
+                return new Stroke_Token(config.list_start + config.list_end);
 
             var arg_string = Stroke.join(args.Select(a => render_expression(a)).ToList(), ", ");
 
             if (arg_string.Any(Stroke.contains_block))
             {
-                return new Stroke_Token("[")
+                return new Stroke_Token(config.list_start)
                     + new Stroke_List(Stroke_Type.block, arg_string)
-                    + new Stroke_Newline() + new Stroke_Token("]");
+                    + new Stroke_Newline() + new Stroke_Token(config.list_end);
             }
 
-            return new Stroke_Token("[") + arg_string + new Stroke_Token("]");
+            return new Stroke_Token(config.list_start) + arg_string + new Stroke_Token(config.list_end);
         }
 
         virtual protected Stroke render_variable_declaration(Declare_Variable declaration)
@@ -389,7 +398,6 @@ namespace imperative.render.artisan
             }
 
             return null;
-            //            throw new Exception("Invalid literal " + value + " type " + profession.dungeon.name + ".");
         }
 
         virtual protected Stroke render_iterator_block(Iterator statement)
@@ -478,7 +486,7 @@ namespace imperative.render.artisan
                 {
                     if (minion != null && minion.has_enchantment(Enchantments.Static))
                     {
-                        this_string = render_dungeon_path(minion.dungeon) + new Stroke_Token(".");
+                        this_string = render_dungeon_path(minion.dungeon) + new Stroke_Token(config.namespace_separator);
                     }
                     else if (!config.implicit_this
                              && minion != null
@@ -499,9 +507,22 @@ namespace imperative.render.artisan
             return result;
         }
 
+        private string get_minion_name(Abstract_Function_Call call)
+        {
+            var method_call = call as Method_Call;
+            if (method_call != null)
+            {
+                var minion = method_call.minion;
+                if (minion_names.ContainsKey(minion))
+                    return minion_names[minion];
+            }
+
+            return call.get_name();
+        }
+
         protected virtual Stroke render_function_call2(Abstract_Function_Call expression, Stroke ref_string, Minion minion)
         {
-            var second = new Stroke_Token(expression.get_name() + "(");
+            var second = new Stroke_Token(get_minion_name(expression) + "(");
             var ref_full = ref_string != null
                 ? ref_string + second
                 : second;
@@ -536,8 +557,8 @@ namespace imperative.render.artisan
             if (expression.profession.dungeon == Professions.List)
                 return render_list(expression.profession, expression.args);
 
-            var args = expression.args.Select(a => render_expression(a)).join(", ");
-            return new Stroke_Token("new ") + render_profession(expression.profession) 
+            var args = expression.args.Select(a => render_expression(a).full_text()).join(", ");
+            return new Stroke_Token("new ") + render_profession(expression.profession)
                 + new Stroke_Token("(" + args + ")");
         }
 
@@ -619,7 +640,7 @@ namespace imperative.render.artisan
             if (statement.flow_type == Flow_Control_Type.Else)
                 return start + block;
 
-            var result = start + new Stroke_Token(" (") + 
+            var result = start + new Stroke_Token(" (") +
                 render_expression(statement.condition) + new Stroke_Token(")")
                 + block;
 
@@ -631,19 +652,19 @@ namespace imperative.render.artisan
         {
             var minimal = statement.if_statements.All(e => e.body.Count == 1);
             var block_count = statement.if_statements.Count;
-//            if (statement.else_block != null)
-//                ++block_count;
+            //            if (statement.else_block != null)
+            //                ++block_count;
 
             //            throw new Exception("Not implemented");
             var i = 0;
             var strokes = statement.if_statements.Select(e => render_flow_control(e, minimal, ++i < block_count)).ToList();
-//            if (statement.else_block != null)
-//            {
-//                if (strokes.Last().type == Stroke_Type.newline)
-//                   strokes.RemoveAt(strokes.Count - 1);
-//
-//                strokes.Add(new Stroke_Token("else") + render_block(render_statements(statement.else_block)));
-//            }
+            //            if (statement.else_block != null)
+            //            {
+            //                if (strokes.Last().type == Stroke_Type.newline)
+            //                   strokes.RemoveAt(strokes.Count - 1);
+            //
+            //                strokes.Add(new Stroke_Token("else") + render_block(render_statements(statement.else_block)));
+            //            }
             return strokes.Count == 1
                 ? strokes.First()
                 : new Stroke_List(Stroke_Type.statements, strokes);
@@ -667,20 +688,20 @@ namespace imperative.render.artisan
 
         virtual protected Stroke render_profession(Profession signature, bool is_parameter = false)
         {
+            if (signature.dungeon == Professions.List)
+                return listify(render_profession(signature.children[0]), signature);
             //            throw new Exception("Not implemented.");
             var lower_name = signature.dungeon.name.ToLower();
             var name = types.ContainsKey(lower_name)
-                ? new Stroke_Token(lower_name)
+                ? new Stroke_Token(types[lower_name])
                 : render_dungeon_path(signature.dungeon);
 
-            return signature.dungeon == Professions.List
-                ? listify(name, signature)
-                : name;
+            return name;
         }
 
         virtual protected Stroke listify(Stroke type, Profession signature)
         {
-            return new Stroke_Token(type + "[]");
+            return type + new Stroke_Token("[]");
         }
 
         virtual protected Stroke render_function_definition(Minion definition)
@@ -706,7 +727,7 @@ namespace imperative.render.artisan
 
         virtual protected Stroke render_definition_parameter(Parameter parameter)
         {
-            return new Stroke_Token(render_profession(parameter.symbol, true) + " " + parameter.symbol.name);
+            return render_profession(parameter.symbol, true) + new Stroke_Token(" " + parameter.symbol.name);
         }
 
         virtual protected string get_connector(Expression expression)

@@ -41,6 +41,8 @@ namespace imperative
             library = new Professions();
 
             root = new Dungeon("", this, null);
+
+            root.dungeons["Dictionary"] = Professions.Dictionary;
         }
 
         public Overlord(string target_name)
@@ -58,9 +60,9 @@ namespace imperative
 
                                 case "cs":
                                     return new Csharp(this);
-                //
-                //                case "cpp":
-                //                    return new Cpp(this);
+                
+                                case "cpp":
+                                    return new Cpp(this);
             }
 
             throw new Exception("Invalid imp target: " + name + ".");

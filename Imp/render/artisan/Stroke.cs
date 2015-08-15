@@ -13,6 +13,8 @@ namespace imperative.render.artisan
     {
         public Expression expression;
         public Stroke_Type type;
+        public int margin_top;
+        public int margin_bottom;
 
         public abstract Stroke copy();
 

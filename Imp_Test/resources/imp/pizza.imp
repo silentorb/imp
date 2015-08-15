@@ -25,9 +25,8 @@ test {
 				return
 			else
 				x = 1.5
-				
 
-			toppings.add(topping)
+			toppings.push(topping)
 			crust = Crust.burnt
 		}
 

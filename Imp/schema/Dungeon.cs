@@ -115,13 +115,17 @@ namespace imperative.schema
             {
                 this.realm = realm;
                 realm.dungeons[name] = this;
+                var realm_prefix = realm.name.Length > 0
+                    ? realm.name + "/"
+                    : "";
+
                 if (!is_external && source_file == null)
-                    source_file = realm.name + "/" + name;
+                    source_file = realm_prefix + name;
 
                 is_external = realm.is_external;
                 class_export = realm.class_export;
                 if (!is_external && source_file == null)
-                    source_file = realm.name + "/" + name;
+                    source_file = realm_prefix + name;
             }
         }
 
