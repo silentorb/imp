@@ -23,7 +23,7 @@ namespace imperative.render.artisan.targets
                 space_tabs = true,
                 indent = 4,
                 block_brace_same_line = false,
-                explicit_public_members = true,
+                explicit_public_members = false,
                 type_mode = Type_Mode.required_prefix,
                 namespace_separator = "::",
                 list_start = "{",
@@ -52,6 +52,11 @@ namespace imperative.render.artisan.targets
             }
 
             return output;
+        }
+
+        public Stroke generate_header_file(Dungeon dungeon)
+        {
+            return new Stroke_Token();
         }
 
         public Stroke generate_class_file(Dungeon dungeon)
@@ -101,7 +106,7 @@ namespace imperative.render.artisan.targets
             return new List<Stroke> { render_constructor(dungeon) }
                 .Concat(dungeon.minions.Values
                 .Where(m => m.name != "constructor")
-                .Select(render_function_definition)).ToList();
+                .Select(f=>render_function_definition(f, f.name))).ToList();
         }
 
         override protected Stroke listify(Stroke type, Profession signature)
@@ -225,6 +230,9 @@ namespace imperative.render.artisan.targets
                     constructor.expressions.Insert(0, assignment);
                 }
             }
+
+            if (constructor.expressions.Count == 0)
+                return new Stroke_Token();
 
             return render_function_definition(constructor, dungeon.name);
         }

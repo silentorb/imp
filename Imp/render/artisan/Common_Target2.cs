@@ -710,17 +710,20 @@ namespace imperative.render.artisan
             if (definition.is_abstract && !config.supports_abstract)
                 return new Stroke_Token("");
 
-            var intro = (config.explicit_public_members ? "public " : "")
+            var intro = new Stroke_Token((config.explicit_public_members ? "public " : "")
                 + (definition.is_abstract ? "abstract " : "")
-                + (definition.is_static ? "static " : "")
-                + (definition.return_type != null ? render_profession(definition.return_type) + " " : "")
-                + definition.name
-                + "(" + definition.parameters.Select(render_definition_parameter).join(", ") + ")";
+                + (definition.is_static ? "static " : ""))
+                + (definition.return_type != null 
+                    ? render_profession(definition.return_type) + new Stroke_Token(" ")
+                    : new Stroke_Token())
+                + new Stroke_Token(definition.name
+                + "(") + Stroke.join(definition.parameters
+                    .Select(render_definition_parameter).ToList(), ", ") + new Stroke_Token(")");
 
             if (definition.is_abstract)
-                return new Stroke_Token(intro + terminate_statement());
+                return intro + terminate_statement();
 
-            var result = new Stroke_Token(intro) + render_block(render_statements(definition.expressions));
+            var result = intro + render_block(render_statements(definition.expressions));
             minion_stack.Pop();
             return result;
         }

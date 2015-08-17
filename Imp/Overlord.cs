@@ -221,5 +221,12 @@ namespace imperative
 
             return root.dungeons["imp"];
         }
+
+        public static string strokes_to_string(List<Stroke> strokes)
+        {
+            var passages = Painter.render_root(strokes).ToList();
+            var segments = new List<Segment>();
+            return Scribe.render(passages, segments);
+        }
     }
 }
