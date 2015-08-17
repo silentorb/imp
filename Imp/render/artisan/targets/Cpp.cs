@@ -56,7 +56,106 @@ namespace imperative.render.artisan.targets
 
         public Stroke generate_header_file(Dungeon dungeon)
         {
-            return new Stroke_Token();
+            List<External_Header> headers = new List<External_Header> { new External_Header("stdafx") }.Concat(
+            dungeon.dependencies.Values.Where(d => !d.allow_partial)
+                   .OrderBy(d => d.dungeon.source_file)
+                   .Select(d => new External_Header(d.dungeon.source_file))
+            ).ToList();
+
+            var result = new Stroke_Token("#pragma once") + new Stroke_Newline()
+                + render_includes(headers) + new Stroke_Newline()
+                + render_outer_dependencies(dungeon)
+                + render_realm(dungeon.realm, () => 
+                    render_inner_dependencies(dungeon).Concat(new [] { class_declaration(dungeon) }).ToList());
+
+            return result;
+        }
+
+        static List<Dungeon> get_dungeon_parents(Dungeon dungeon)
+        {
+            var parents = new List<Dungeon>();
+            if (dungeon.parent != null)
+                parents.Add(dungeon.parent);
+
+            return parents.Concat(dungeon.interfaces).ToList();
+        }
+
+        Stroke class_declaration(Dungeon dungeon)
+        {
+            current_dungeon = dungeon;
+            Stroke first = new Stroke_Token("class ");
+            if (dungeon.class_export.Length > 0)
+                first += new Stroke_Token(dungeon.class_export + " ");
+
+            first += new Stroke_Token(dungeon.name);
+            var parents = get_dungeon_parents(dungeon);
+
+            if (parents.Count > 0)
+            {
+                first += new Stroke_Token(" : ") + Stroke.join(
+                    parents.Select(p => new Stroke_Token("public ") + render_dungeon_path(p)).ToList(), ", ");
+            }
+
+            var lines = new List<Stroke>
+            {
+                new Stroke_Token("public:")
+            };
+
+            foreach (var portal in dungeon.core_portals.Values)
+            {
+                lines.Add(property_declaration(portal));
+            }
+
+            foreach (var portal in dungeon.all_portals.Values.Except(dungeon.core_portals.Values))
+            {
+                if (portal.dungeon.is_abstract)
+                    lines.Add(property_declaration(portal));
+            }
+
+            lines.AddRange(render_function_declarations(dungeon));
+
+            return first + render_block(lines, false);
+        }
+
+        Stroke property_declaration(Portal portal)
+        {
+            return render_profession(portal.get_profession()) + new Stroke_Token(" " + portal.name + ";");
+        }
+
+        List<Stroke> render_function_declarations(Dungeon dungeon)
+        {
+//            var declarations = dungeon.stubs.Select(line).ToList();
+            var declarations = new List<Stroke>();
+//
+//            if (dungeon.hooks.ContainsKey("initialize_post"))
+//            {
+//                declarations.Add(line("void initialize_post(); // Externally defined."));
+//            }
+
+            declarations.AddRange(dungeon.minions.Values.Select(render_function_declaration));
+
+            return declarations;
+        }
+
+        Stroke render_function_declaration(Minion definition)
+        {
+            return new Stroke_Token(definition.return_type != null ? "virtual " : "")
+                        + (definition.return_type != null ? render_profession(definition.return_type) 
+                        + new Stroke_Token(" ") : new Stroke_Token(""))
+                        + new Stroke_Token(definition.name)
+                        + new Stroke_Token("(") 
+                        + Stroke.join(definition.parameters.Select(render_declaration_parameter), ", ") 
+                        + new Stroke_Token(")")
+                        + new Stroke_Token(definition.is_abstract ? " = 0;" : ";");
+        }
+
+        Stroke render_declaration_parameter(Parameter parameter)
+        {
+            return render_profession(parameter.symbol, true) + new Stroke_Token(" " + parameter.symbol.name)
+                   + (parameter.default_value != null
+                          ? new Stroke_Token(" = ") + render_expression(parameter.default_value)
+                          : new Stroke_Token()
+                     );
         }
 
         public Stroke generate_class_file(Dungeon dungeon)
@@ -178,24 +277,24 @@ namespace imperative.render.artisan.targets
             return result;
         }
 
-        string render_inner_dependencies(Dungeon dungeon)
+        List<Stroke> render_inner_dependencies(Dungeon dungeon)
         {
             bool lines = false;
-            var result = "";
+            var result = new List<Stroke>();
             foreach (var d in dungeon.dependencies.Values)
             {
                 var dependency = d.dungeon;
                 if (d.allow_partial && dependency.realm == dungeon.realm)
                 {
-                    result += new Stroke_Token("class ")
-                        + render_dungeon_path(dependency) + new Stroke_Token(";");
+                    result.Add(new Stroke_Token("class ")
+                        + render_dungeon_path(dependency) + new Stroke_Token(";"));
 
                     lines = true;
                 }
             }
 
-            if (result.Length > 0)
-                result += new Stroke_Newline();
+//            if (result.Length > 0)
+//                result += new Stroke_Newline();
 
             return result;
         }

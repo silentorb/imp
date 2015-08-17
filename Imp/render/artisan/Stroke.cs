@@ -69,6 +69,11 @@ namespace imperative.render.artisan
             });
         }
 
+        public static List<Stroke> join(IEnumerable<Stroke> list, string separator)
+        {
+            return Stroke.join(list.ToList(), separator);
+        }
+
         public static List<Stroke> join(List<Stroke> list, string separator)
         {
             if (list.Count < 2)
