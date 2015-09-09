@@ -58,11 +58,11 @@ namespace imperative
                 case "js":
                     return new JavaScript(this);
 
-                                case "cs":
-                                    return new Csharp(this);
-                
-                                case "cpp":
-                                    return new Cpp(this);
+                case "cs":
+                    return new Csharp(this);
+
+                case "cpp":
+                    return new Cpp(this);
             }
 
             throw new Exception("Invalid imp target: " + name + ".");
@@ -95,7 +95,7 @@ namespace imperative
         {
             var legend = summon_legend(code, filename);
             var summoner = new Summoner(this, is_external);
-            summoner.summon_many(new [] {legend});
+            summoner.summon_many(new[] { legend });
         }
 
         public Legend summon_legend(string code, string filename)
@@ -227,6 +227,11 @@ namespace imperative
             var passages = Painter.render_root(strokes).ToList();
             var segments = new List<Segment>();
             return Scribe.render(passages, segments);
+        }
+
+        public static string stroke_to_string(Stroke strokes)
+        {
+            return strokes_to_string(new List<Stroke> {strokes});
         }
     }
 }

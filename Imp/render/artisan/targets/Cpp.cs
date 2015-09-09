@@ -36,7 +36,37 @@ namespace imperative.render.artisan.targets
 
         public override void run(Overlord_Configuration config1, string[] sources)
         {
+            foreach (var dungeon in overlord.root.dungeons.Values)
+            {
+                if (dungeon.is_external || (dungeon.is_abstract && dungeon.is_external))
+                    continue;
 
+                render_full_dungeon(dungeon, config1);
+                //Console.WriteLine(dungeon.realm.name + "." + dungeon.name);
+            }
+        }
+
+        public void render_full_dungeon(Dungeon dungeon, Overlord_Configuration config1)
+        {
+            if (dungeon.portals.Length > 0 || dungeon.minions.Count > 0)
+            {
+                var space = Generator.get_namespace_path(dungeon.realm);
+                var dir = config1.output + "/" + space.join("/");
+                Generator.create_folder(dir);
+
+                var name = dir + "/" + dungeon.name;
+
+                Generator.create_file(name + ".h",
+                    Overlord.stroke_to_string(generate_header_file(dungeon)));
+
+                Generator.create_file(name + ".cpp",
+                    Overlord.stroke_to_string(generate_class_file(dungeon)));
+            }
+
+            foreach (var child in dungeon.dungeons.Values)
+            {
+                render_full_dungeon(child, config1);
+            }
         }
 
         public List<Stroke> generate_source_strokes()
@@ -56,14 +86,21 @@ namespace imperative.render.artisan.targets
 
         public Stroke generate_header_file(Dungeon dungeon)
         {
-            List<External_Header> headers = new List<External_Header> { new External_Header("stdafx") }.Concat(
+            List<External_Header> headers = new List<External_Header>
+            {
+                new External_Header("string", true),
+                new External_Header("vector", true),
+                new External_Header("map", true),
+                new External_Header("memory", true) 
+            }.Concat(
             dungeon.dependencies.Values.Where(d => !d.allow_partial)
                    .OrderBy(d => d.dungeon.source_file)
                    .Select(d => new External_Header(d.dungeon.source_file))
-            ).ToList();
+            )
+            .ToList();
 
             var result = new Stroke_Token("#pragma once") + new Stroke_Newline()
-                + render_includes(headers) + new Stroke_Newline()
+                + render_includes(headers) + new Stroke_Newline() + new Stroke_Newline()
                 + render_outer_dependencies(dungeon)
                 + render_realm(dungeon.realm, () => 
                     render_inner_dependencies(dungeon).Concat(new [] { class_declaration(dungeon) }).ToList());
@@ -114,7 +151,7 @@ namespace imperative.render.artisan.targets
 
             lines.AddRange(render_function_declarations(dungeon));
 
-            return first + render_block(lines, false);
+            return first + render_block(lines, false) + new Stroke_Token(";");
         }
 
         Stroke property_declaration(Portal portal)
@@ -158,6 +195,21 @@ namespace imperative.render.artisan.targets
                      );
         }
 
+        override protected Stroke render_profession(Profession signature, bool is_parameter = false)
+        {
+            if (signature.dungeon == Professions.List)
+                return listify(render_profession(signature.children[0]), signature);
+            //            throw new Exception("Not implemented.");
+            var lower_name = signature.dungeon.name.ToLower();
+            var name = types.ContainsKey(lower_name)
+                ? new Stroke_Token(types[lower_name])
+                : render_dungeon_path(signature.dungeon);
+
+            if (!signature.dungeon.is_value)
+                name = new Stroke_Token("std::shared_ptr<") + name + new Stroke_Token(">");
+
+            return name;
+        }
         public Stroke generate_class_file(Dungeon dungeon)
         {
             //            var headers = new List<External_Header> { new External_Header("stdafx") }.Concat(
@@ -303,9 +355,21 @@ namespace imperative.render.artisan.targets
         {
             return new Stroke_List(Stroke_Type.statements, headers
                 .Select(h => (Stroke)new Stroke_Token(h.is_standard
-                    ? "#include <" + h.name + ".h>"
+                    ? "#include <" + h.name + ">"
                     : "#include \"" + h.name + ".h\""
-                    )).ToList());
+                    )).ToList()) { margin_bottom = 1 };
+        }
+
+        override protected Stroke render_variable_declaration(Declare_Variable declaration)
+        {
+            var result = new Stroke_Token("auto " + declaration.symbol.name)
+                + (declaration.expression != null
+                    ? new Stroke_Token(" = ") + render_expression(declaration.expression)
+                    : null)
+                + terminate_statement();
+
+            result.expression = declaration;
+            return result;
         }
 
         Stroke render_constructor(Dungeon dungeon)

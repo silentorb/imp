@@ -592,10 +592,13 @@ namespace imperative.render.artisan
 
         virtual protected Stroke render_realm(Dungeon realm, Stroke_List_Delegate action)
         {
+            if (realm == null || realm.name == "")
+                return new Stroke_Token() + action();
+
             current_realm = realm;
             var result = new Stroke_Token(config.namespace_keyword + " ")
                 + render_realm_path(realm, config.namespace_separator)
-                + render_block(action());
+                + render_block(action(), false);
 
             current_realm = null;
             return result;

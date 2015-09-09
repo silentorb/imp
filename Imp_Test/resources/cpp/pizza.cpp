@@ -4,7 +4,7 @@
 namespace test {
 
   void Pizza::add(std::string topping) {
-    var x = 0;
+    auto x = 0;
     if (topping == null)
       return;
     else
