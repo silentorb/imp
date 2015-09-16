@@ -74,6 +74,7 @@
     <EmbeddedResource Include="resources\imp\part2.imp" />
     <EmbeddedResource Include="resources\imp\comment.imp" />
     <EmbeddedResource Include="resources\js\comment.js" />
+    <EmbeddedResource Include="resources\imp\dynamic.imp" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="resources\js\pizza.js" />
@@ -103,6 +104,10 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="resources\js\browser.js.map" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="resources\cpp\Bag.h" />
+    <EmbeddedResource Include="resources\cpp\Bag.cpp" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

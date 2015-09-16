@@ -28,7 +28,7 @@ namespace imperative.render.artisan.targets
                 };
         }
 
-        override public void run(Overlord_Configuration settings, string[] sources)
+        override public void run(Build_Orders settings, string[] sources)
         {
             var strokes = generate_strokes();
             var passages = Painter.render_root(strokes).ToList();
@@ -37,8 +37,8 @@ namespace imperative.render.artisan.targets
 
             var output_path = !string.IsNullOrEmpty(settings.output)
                 ? settings.output
-                : File.Exists(settings.input)
-                ? settings.output + Path.GetFileNameWithoutExtension(settings.input) + ".js"
+                : File.Exists(settings.inputs[0])
+                ? settings.output + Path.GetFileNameWithoutExtension(settings.inputs[0]) + ".js"
                 : settings.output + "/" + "lib.js";
 
             // Source map

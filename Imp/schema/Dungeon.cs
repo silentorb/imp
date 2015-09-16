@@ -34,6 +34,7 @@ namespace imperative.schema
         public bool is_external = false;
         public bool is_abstract = false;
         public bool is_virtual = false;
+        public bool is_dynamic = false;
         public string source_file { get; set; }
         public List<string> stubs = new List<string>();
         public Dictionary<string, object> hooks = new Dictionary<string, object>();
@@ -423,7 +424,9 @@ namespace imperative.schema
                 case Expression_Type.declare_variable:
                     var declare_variable = (Declare_Variable)expression;
                     analyze_profession(declare_variable.symbol.profession);
-                    analyze_expression(declare_variable.expression);
+                    if (declare_variable.expression != null)
+                        analyze_expression(declare_variable.expression);
+
                     break;
 
                 case Expression_Type.portal:

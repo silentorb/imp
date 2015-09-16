@@ -167,20 +167,26 @@ namespace imperative.summoner
         {
             var result = new Variable(symbol);
             var profession = result.get_profession();
-            var dungeon = profession != null
+            var dungeon = (Dungeon)(profession != null
                           ? profession.dungeon
-                          : result.get_profession().dungeon;
+                          : result.get_profession().dungeon);
 
             if (step == patterns.Count - 1)
                 return result;
 
-            var child = process_dungeon((Dungeon)dungeon, summoner, patterns,
+            var child = process_dungeon(dungeon, summoner, patterns,
                     context, step + 1);
 
             if (child == null)
-                throw new Parser_Exception("Dungeon " + symbol.profession.dungeon.name
-                    + " does not have a member named " + patterns[step + 1].children[0].text + ".", patterns[step + 1].position);
+            {
+                if (!dungeon.is_dynamic)
+                    throw new Parser_Exception("Dungeon " + symbol.profession.dungeon.name
+                                               + " does not have a member named " + patterns[step + 1].children[0].text +
+                                               ".", patterns[step + 1].position);
 
+                var minion = dungeon.spawn_minion(patterns[step + 1].children[0].text);
+                child = new Method_Call(minion, null);
+            }
             return append(result, child);
         }
 

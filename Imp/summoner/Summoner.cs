@@ -249,6 +249,7 @@ namespace imperative.summoner
                     var attributes = parts[0].children;
                     dungeon.is_external = is_external || attributes.Any(p => p.text == "external");
                     dungeon.is_abstract = attributes.Any(p => p.text == "abstract");
+                    dungeon.is_dynamic = attributes.Any(p => p.text == "dynamic");
                     //                    dungeon.is_value = attributes.Any(p => p.text == "value");
                 }
 
@@ -652,7 +653,7 @@ namespace imperative.summoner
             var parts = legend.children;
 
             Profession profession;
-            var expression_pattern = parts[2].children.Count == 0
+            var expression_pattern = parts[2] == null
                                          ? null
                                          : process_expression(parts[2], context);
 

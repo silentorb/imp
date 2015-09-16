@@ -31,7 +31,7 @@ namespace imperative.render.artisan.targets
             types["reference"] = "object";
         }
 
-        override public void run(Overlord_Configuration config1, string[] sources)
+        override public void run(Build_Orders config1, string[] sources)
         {
             foreach (var dungeon in overlord.dungeons)
             {

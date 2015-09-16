@@ -34,8 +34,12 @@ namespace imperative.render.artisan.targets
             minion_names[Professions.List.minions["push"]] = "push_back";
         }
 
-        public override void run(Overlord_Configuration config1, string[] sources)
+        public override void run(Build_Orders config1, string[] sources)
         {
+            if (config1.name != "")
+            {
+                create_cmake_file(config1);
+            }
             foreach (var dungeon in overlord.root.dungeons.Values)
             {
                 if (dungeon.is_external || (dungeon.is_abstract && dungeon.is_external))
@@ -46,7 +50,48 @@ namespace imperative.render.artisan.targets
             }
         }
 
-        public void render_full_dungeon(Dungeon dungeon, Overlord_Configuration config1)
+        void create_cmake_file(Build_Orders config1)
+        {
+            var dir = config1.output + "/";
+            var sources = new List<String>();
+
+            gather_source_paths(overlord.root, sources);
+            string output =
+                "set(" + config1.name + "_includes\r\n"
+                + "  ${CMAKE_CURRENT_LIST_DIR}\r\n"
+                + ")\r\n"
+                + "\r\n"
+                + "set(" + config1.name + "_sources\r\n"
+                + sources.join("\r\n")
+                + "\r\n"
+                + ")\r\n";
+
+            Generator.create_file(dir + config1.name + "-config.cmake", output);
+
+            Generator.create_file(dir + "CMakeLists.txt", "project(" + config1.name + ")");
+        }
+
+        void gather_source_paths(Dungeon dungeon, List<String> sources)
+        {
+            if (dungeon.portals.Length > 0 || dungeon.minions.Count > 0)
+            {
+                var space = Generator.get_namespace_path(dungeon.realm).join("/") + "/";
+                if (space == "/")
+                    space = "";
+
+                sources.Add("\t" + space+ dungeon.name + ".cpp");
+            }
+
+            foreach (var child in dungeon.dungeons.Values)
+            {
+                if (child.is_external || (child.is_abstract && child.is_external))
+                    continue;
+
+                gather_source_paths(child, sources);
+            }
+        }
+
+        public void render_full_dungeon(Dungeon dungeon, Build_Orders config1)
         {
             if (dungeon.portals.Length > 0 || dungeon.minions.Count > 0)
             {
@@ -102,8 +147,8 @@ namespace imperative.render.artisan.targets
             var result = new Stroke_Token("#pragma once") + new Stroke_Newline()
                 + render_includes(headers) + new Stroke_Newline() + new Stroke_Newline()
                 + render_outer_dependencies(dungeon)
-                + render_realm(dungeon.realm, () => 
-                    render_inner_dependencies(dungeon).Concat(new [] { class_declaration(dungeon) }).ToList());
+                + render_realm(dungeon.realm, () =>
+                    render_inner_dependencies(dungeon).Concat(new[] { class_declaration(dungeon) }).ToList());
 
             return result;
         }
@@ -161,13 +206,13 @@ namespace imperative.render.artisan.targets
 
         List<Stroke> render_function_declarations(Dungeon dungeon)
         {
-//            var declarations = dungeon.stubs.Select(line).ToList();
+            //            var declarations = dungeon.stubs.Select(line).ToList();
             var declarations = new List<Stroke>();
-//
-//            if (dungeon.hooks.ContainsKey("initialize_post"))
-//            {
-//                declarations.Add(line("void initialize_post(); // Externally defined."));
-//            }
+            //
+            //            if (dungeon.hooks.ContainsKey("initialize_post"))
+            //            {
+            //                declarations.Add(line("void initialize_post(); // Externally defined."));
+            //            }
 
             declarations.AddRange(dungeon.minions.Values.Select(render_function_declaration));
 
@@ -177,11 +222,11 @@ namespace imperative.render.artisan.targets
         Stroke render_function_declaration(Minion definition)
         {
             return new Stroke_Token(definition.return_type != null ? "virtual " : "")
-                        + (definition.return_type != null ? render_profession(definition.return_type) 
+                        + (definition.return_type != null ? render_profession(definition.return_type)
                         + new Stroke_Token(" ") : new Stroke_Token(""))
                         + new Stroke_Token(definition.name)
-                        + new Stroke_Token("(") 
-                        + Stroke.join(definition.parameters.Select(render_declaration_parameter), ", ") 
+                        + new Stroke_Token("(")
+                        + Stroke.join(definition.parameters.Select(render_declaration_parameter), ", ")
                         + new Stroke_Token(")")
                         + new Stroke_Token(definition.is_abstract ? " = 0;" : ";");
         }
@@ -231,7 +276,7 @@ namespace imperative.render.artisan.targets
 
             return
                 render_includes(headers) + new Stroke_Newline() + new Stroke_Newline()
-                + render_outer_dependencies(dungeon)
+//                + render_outer_dependencies(dungeon)
                 + render_dungeon(dungeon);
         }
 
@@ -257,7 +302,7 @@ namespace imperative.render.artisan.targets
             return new List<Stroke> { render_constructor(dungeon) }
                 .Concat(dungeon.minions.Values
                 .Where(m => m.name != "constructor")
-                .Select(f=>render_function_definition(f, f.name))).ToList();
+                .Select(f => render_function_definition(f, f.name))).ToList();
         }
 
         override protected Stroke listify(Stroke type, Profession signature)
@@ -345,8 +390,8 @@ namespace imperative.render.artisan.targets
                 }
             }
 
-//            if (result.Length > 0)
-//                result += new Stroke_Newline();
+            //            if (result.Length > 0)
+            //                result += new Stroke_Newline();
 
             return result;
         }

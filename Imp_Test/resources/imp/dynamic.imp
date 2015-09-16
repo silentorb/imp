@@ -1,0 +1,12 @@
+﻿
+dynamic Bag {
+
+}
+
+Wall {
+	build() {
+		var bag:Bag
+		bag.open()
+		bag.anything = "Hello World!"
+	}
+}

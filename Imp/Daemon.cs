@@ -10,7 +10,7 @@ using runic.parser;
 
 namespace imperative
 {
-    public delegate void Daemon_Action(Overlord_Configuration config);
+    public delegate void Daemon_Action(Build_Orders config);
 
     public class Daemon
     {
@@ -57,16 +57,24 @@ namespace imperative
                     var arg = args[i];
                     switch (arg)
                     {
+                        case "-p":
+                            run_project_file(args[++i]);
+                            return;
+
                         case "-i":
-                            config.input = args[i + 1];
+                            config.inputs.Add(args[++i]);
                             break;
 
                         case "-o":
-                            config.output = args[i + 1];
+                            config.output = args[++i];
                             break;
 
                         case "-t":
-                            config.target = args[i + 1];
+                            config.target = args[++i];
+                            break;
+
+                        case "--cmake":
+                            config.name = args[++i];
                             break;
 
                         case "-d":
@@ -75,7 +83,7 @@ namespace imperative
                     }
                 }
 
-                if (config.input == null)
+                if (config.inputs == null)
                     throw new Exception("Missing input file/folder argument (-i)");
 
                 if (config.output == null)
@@ -174,6 +182,11 @@ namespace imperative
             }
 
             client.Close();
+        }
+
+        void run_project_file(string project_file)
+        {
+            
         }
     }
 }

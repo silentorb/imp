@@ -9,20 +9,34 @@ using imperative.expressions;
 using imperative.render.artisan;
 using imperative.render.artisan.targets;
 using library;
-using metahub.jackolantern;
 using metahub.jackolantern.expressions;
 using metahub.render;
-using metahub.schema;
 using runic.parser;
-using Literal = imperative.expressions.Literal;
 
 namespace imperative
 {
-    public class Overlord_Configuration
+    public interface Build_Orders
     {
-        public string input = "";
-        public string output = "";
-        public string target = "";
+        List<string> inputs { get; }
+        string output { get; }
+        string target { get; }
+        string name { get; }
+    }
+
+    public class Overlord_Configuration : Build_Orders
+    {
+        public List<string> inputs { get; set; }
+        public string output { get; set; }
+        public string target { get; set; }
+        public string name { get; set; }
+
+        public Overlord_Configuration()
+        {
+            inputs = new List<string>();
+            output = "";
+            target = "";
+            name = "";
+        }
     }
 
     public class Overlord
@@ -148,12 +162,15 @@ namespace imperative
             summon(File.ReadAllText(path), path, is_external);
         }
 
-        public static void run(Overlord_Configuration config)
+        public static void run(Build_Orders config)
         {
             var overlord = new Overlord(config.target);
-            var sources = get_source_files(config.input);
-            overlord.summon_input(sources);
-            overlord.generate(config, sources);
+            foreach (var input in config.inputs)
+            {
+                var sources = get_source_files(input);
+                overlord.summon_input(sources);
+                overlord.generate(config, sources);
+            }
         }
 
         public static string[] get_source_files(string input)
@@ -180,20 +197,14 @@ namespace imperative
             }
         }
 
-        public void generate(Overlord_Configuration config, string[] sources)
+        public void generate(Build_Orders config, string[] sources)
         {
             flatten();
             post_analyze();
 
-            if (config.output == "")
-            {
-                config.output = Path.GetDirectoryName(config.input);
-            }
-            else
-            {
-                if (Directory.Exists(config.output))
-                    Generator.clear_folder(config.output);
-            }
+            if (Directory.Exists(config.output))
+                Generator.clear_folder(config.output);
+
             target.run(config, sources);
         }
 
@@ -231,7 +242,7 @@ namespace imperative
 
         public static string stroke_to_string(Stroke strokes)
         {
-            return strokes_to_string(new List<Stroke> {strokes});
+            return strokes_to_string(new List<Stroke> { strokes });
         }
     }
 }

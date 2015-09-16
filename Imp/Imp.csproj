@@ -51,6 +51,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="legion\Mobilize.cs" />
+    <Compile Include="legion\Project.cs" />
     <Compile Include="expressions\Create_Dictionary.cs" />
     <Compile Include="render\artisan\Common_Target2.cs" />
     <Compile Include="render\artisan\targets\Cpp.cs" />

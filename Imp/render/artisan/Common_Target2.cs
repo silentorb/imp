@@ -50,7 +50,7 @@ namespace imperative.render.artisan
             }
         }
 
-        public abstract void run(Overlord_Configuration config1, string[] sources);
+        public abstract void run(Build_Orders config1, string[] sources);
 
         public static string render_strokes(List<Stroke> strokes)
         {
