@@ -9,6 +9,7 @@ using imperative.expressions;
 using imperative.legion;
 using imperative.render.artisan;
 using imperative.render.artisan.targets;
+using imperative.render.artisan.targets.cpp;
 using library;
 using metahub.jackolantern.expressions;
 using metahub.render;

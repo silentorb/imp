@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using imperative;
 using imperative.render.artisan;
+using imperative.render.artisan.targets.cpp;
 using imperative.schema;
 using NUnit.Framework;
 using imp_test.fixtures;
-using metahub.render.targets;
 
 namespace imp_test.tests
 {
@@ -18,7 +18,7 @@ namespace imp_test.tests
         public void test_pizza()
         {
             var overlord = Imp_Fixture.create_overlord("cpp", "imp.pizza.imp");
-            var target = new imperative.render.artisan.targets.Cpp(overlord);
+            var target = new Cpp(overlord);
             var pizza = overlord.root.dungeons["test"].dungeons["Pizza"];
 
             // Source file
@@ -28,7 +28,7 @@ namespace imp_test.tests
             Utility.diff(goal, output);
 
             // Header file
-            strokes = new List<Stroke> { target.generate_header_file(pizza) };
+            strokes = new List<Stroke> { Header_File.generate_header_file(target, pizza) };
             output = Overlord.strokes_to_string(strokes);
             goal = Utility.load_resource("cpp.pizza.h");
             Utility.diff(goal, output);
@@ -38,14 +38,14 @@ namespace imp_test.tests
         public void test_dynamic()
         {
             var overlord = Imp_Fixture.create_overlord("cpp", "imp.dynamic.imp");
-            var target = new imperative.render.artisan.targets.Cpp(overlord);
+            var target = new Cpp(overlord);
             var dynamic = overlord.root.dungeons["Bag"];
 
             string goal, output;
             List<Stroke> strokes;
 
             // Header file
-            strokes = new List<Stroke> { target.generate_header_file(dynamic) };
+            strokes = new List<Stroke> { Header_File.generate_header_file(target, dynamic) };
             output = Overlord.strokes_to_string(strokes);
             goal = Utility.load_resource("cpp.Bag.h");
             Utility.diff(goal, output);

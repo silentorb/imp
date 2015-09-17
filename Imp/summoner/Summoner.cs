@@ -1,11 +1,8 @@
 ﻿using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Security.Policy;
 using System.Text;
 using imperative.wizard;
 using imperative.Properties;

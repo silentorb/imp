@@ -209,7 +209,7 @@ namespace imperative.render.artisan.targets
                    && !portal_expression.portal.has_enchantment(Enchantments.Static);
         }
 
-        override protected Stroke render_function_definition(Minion minion)
+        override public Stroke render_function_definition(Minion minion)
         {
             if (minion.is_abstract)
                 return new Stroke_Token();

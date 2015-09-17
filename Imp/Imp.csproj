@@ -55,7 +55,10 @@
     <Compile Include="legion\Project.cs" />
     <Compile Include="expressions\Create_Dictionary.cs" />
     <Compile Include="render\artisan\Common_Target2.cs" />
-    <Compile Include="render\artisan\targets\Cpp.cs" />
+    <Compile Include="render\artisan\targets\cpp\CMake.cs" />
+    <Compile Include="render\artisan\targets\cpp\Cpp.cs" />
+    <Compile Include="render\artisan\targets\cpp\Header_File.cs" />
+    <Compile Include="render\artisan\targets\cpp\Source_File.cs" />
     <Compile Include="render\artisan\targets\Csharp.cs" />
     <Compile Include="render\artisan\targets\JavaScript.cs" />
     <Compile Include="render\artisan\Painter.cs" />

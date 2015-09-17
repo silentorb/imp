@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
-using System.Reflection.Emit;
 using System.Text;
 using imperative.expressions;
 using imperative.schema;
@@ -33,7 +31,7 @@ namespace imperative.render.artisan
         }
 
         protected Dungeon current_realm;
-        protected Dungeon current_dungeon;
+        public Dungeon current_dungeon;
 
         protected Dictionary<Minion, string> minion_names = new Dictionary<Minion, string>();
         protected List<Dictionary<Stroke, Profession>> scopes = new List<Dictionary<Stroke, Profession>>();
@@ -73,7 +71,7 @@ namespace imperative.render.artisan
                 : null;
         }
 
-        virtual protected Stroke render_expression(Expression expression, Expression parent = null)
+        virtual public Stroke render_expression(Expression expression, Expression parent = null)
         {
             Stroke result;
             switch (expression.type)
@@ -590,7 +588,7 @@ namespace imperative.render.artisan
             return result;
         }
 
-        virtual protected Stroke render_realm(Dungeon realm, Stroke_List_Delegate action)
+        virtual public Stroke render_realm(Dungeon realm, Stroke_List_Delegate action)
         {
             if (realm == null || realm.name == "")
                 return new Stroke_Token() + action();
@@ -673,7 +671,7 @@ namespace imperative.render.artisan
                 : new Stroke_List(Stroke_Type.statements, strokes);
         }
 
-        virtual protected Stroke render_dungeon_path(IDungeon dungeon)
+        virtual public Stroke render_dungeon_path(IDungeon dungeon)
         {
             return dungeon.realm != null && dungeon.realm.name != ""
                 && (dungeon.realm != current_realm || !config.supports_namespaces)
@@ -681,7 +679,7 @@ namespace imperative.render.artisan
                 : new Stroke_Token(dungeon.name);
         }
 
-        virtual protected Stroke render_profession(Symbol symbol, bool is_parameter = false)
+        virtual public Stroke render_profession(Symbol symbol, bool is_parameter = false)
         {
             if (symbol.profession != null)
                 return render_profession(symbol.profession, is_parameter);
@@ -689,7 +687,7 @@ namespace imperative.render.artisan
             return render_profession(symbol.profession, is_parameter);
         }
 
-        virtual protected Stroke render_profession(Profession signature, bool is_parameter = false)
+        virtual public Stroke render_profession(Profession signature, bool is_parameter = false)
         {
             if (signature.dungeon == Professions.List)
                 return listify(render_profession(signature.children[0]), signature);
@@ -702,12 +700,12 @@ namespace imperative.render.artisan
             return name;
         }
 
-        virtual protected Stroke listify(Stroke type, Profession signature)
+        virtual public Stroke listify(Stroke type, Profession signature)
         {
             return type + new Stroke_Token("[]");
         }
 
-        virtual protected Stroke render_function_definition(Minion definition)
+        virtual public Stroke render_function_definition(Minion definition)
         {
             minion_stack.Push(definition);
             if (definition.is_abstract && !config.supports_abstract)
@@ -775,7 +773,7 @@ namespace imperative.render.artisan
             return result;
         }
 
-        protected Stroke render_block(List<Stroke> strokes, bool try_minimal = true, bool is_succeeded = false)
+        public Stroke render_block(List<Stroke> strokes, bool try_minimal = true, bool is_succeeded = false)
         {
             var block = new Stroke_List(Stroke_Type.block, strokes);
             if (strokes.Count == 1 && try_minimal)

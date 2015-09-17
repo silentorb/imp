@@ -137,7 +137,7 @@ namespace imperative.render.artisan.targets
             }
         }
 
-        protected override Stroke listify(Stroke type, Profession signature)
+        public override Stroke listify(Stroke type, Profession signature)
         {
             return signature.is_array(overlord)
                 ? render_profession(signature.children[0]) + new Stroke_Token("[]")

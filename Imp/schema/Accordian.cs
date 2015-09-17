@@ -72,6 +72,9 @@ namespace imperative.schema
 
         public void flatten()
         {
+            if (divisions == null)
+                return;
+
             foreach (var division in divisions)
             {
                 output.AddRange(division.expressions);
