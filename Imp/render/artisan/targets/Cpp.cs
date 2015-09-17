@@ -40,7 +40,7 @@ namespace imperative.render.artisan.targets
             {
                 create_cmake_file(config1);
             }
-            foreach (var dungeon in overlord.root.dungeons.Values)
+            foreach (var dungeon in config1.dungeons.Values)
             {
                 if (dungeon.is_external || (dungeon.is_abstract && dungeon.is_external))
                     continue;
@@ -108,10 +108,10 @@ namespace imperative.render.artisan.targets
                     Overlord.stroke_to_string(generate_class_file(dungeon)));
             }
 
-            foreach (var child in dungeon.dungeons.Values)
-            {
-                render_full_dungeon(child, config1);
-            }
+//            foreach (var child in dungeon.dungeons.Values)
+//            {
+//                render_full_dungeon(child, config1);
+//            }
         }
 
         public List<Stroke> generate_source_strokes()
@@ -201,7 +201,12 @@ namespace imperative.render.artisan.targets
 
         Stroke property_declaration(Portal portal)
         {
-            return render_profession(portal.get_profession()) + new Stroke_Token(" " + portal.name + ";");
+            var prefix = "";
+            if (portal.has_enchantment(Enchantments.Static))
+            {
+                prefix += "static ";
+            }
+            return new Stroke_Token(prefix) + render_profession(portal.get_profession()) + new Stroke_Token(" " + portal.name + ";");
         }
 
         List<Stroke> render_function_declarations(Dungeon dungeon)

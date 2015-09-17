@@ -40,7 +40,7 @@ namespace imp_test.fixtures
         public static Overlord create_overlord_with_path(string target_name, string script_path)
         {
             var overlord = new Overlord(target_name);
-            overlord.summon_input(new[] { script_path });
+            overlord.summon_input(new[] { script_path }, null);
             overlord.flatten();
             overlord.post_analyze();
             return overlord;

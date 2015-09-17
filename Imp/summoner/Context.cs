@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using imperative.schema;
 using imperative.expressions;
+using imperative.legion;
 using runic.parser;
 
 namespace imperative.summoner
@@ -14,12 +15,13 @@ namespace imperative.summoner
         public Dungeon dungeon;
         public Scope scope;
         public Summoner_Context parent;
-        public Dictionary<string, Summoner_Context> children = new Dictionary<string, Summoner_Context>(); 
+        public Dictionary<string, Summoner_Context> children = new Dictionary<string, Summoner_Context>();
         public List<Legend> legends = new List<Legend>();
         protected Dictionary<string, string> string_inserts = new Dictionary<string, string>();
         protected Dictionary<string, Profession> profession_inserts = new Dictionary<string, Profession>();
         protected Dictionary<string, Expression_Generator> expression_lambda_inserts = new Dictionary<string, Expression_Generator>();
         protected Dictionary<string, Expression> expression_inserts = new Dictionary<string, Expression>();
+        public Project project;
 
         public Summoner_Context()
         {
@@ -31,21 +33,24 @@ namespace imperative.summoner
                 legends.Add(legend);
 
             this.parent = parent;
+            project = parent.project;
         }
 
-        public Summoner_Context(Legend legend, Dungeon dungeon = null)
+        public Summoner_Context(Legend legend, Project project, Dungeon dungeon = null)
         {
             if (legend != null)
                 legends.Add(legend);
 
             this.dungeon = dungeon;
+            this.project = project;
         }
 
 
-        public Summoner_Context(Minion minion)
+        public Summoner_Context(Minion minion, Project project)
         {
             dungeon = minion.dungeon;
             scope = new Scope(minion.scope);
+            this.project = project;
         }
 
         public Summoner_Context(Summoner_Context parent)
@@ -54,6 +59,7 @@ namespace imperative.summoner
             dungeon = parent.dungeon;
             scope = parent.scope;
             this.imported_realms = parent.imported_realms;
+            project = parent.project;
         }
 
         public Profession set_pattern(string name, Profession profession)
@@ -127,7 +133,7 @@ namespace imperative.summoner
             {
                 result = dungeon.realm.get_dungeon(path, false);
                 if (result != null)
-                    return result;      
+                    return result;
             }
 
             foreach (var imported_realm in imported_realms)
@@ -138,6 +144,14 @@ namespace imperative.summoner
             }
 
             return dungeon.overlord.root.get_dungeon(path);
+        }
+
+        public void add_dungeon_to_project(Dungeon dungeon)
+        {
+            if (project != null && !dungeon.is_external)
+            {
+                project.dungeons[dungeon.name] = dungeon;
+            }
         }
     }
 }

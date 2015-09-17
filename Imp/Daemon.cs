@@ -5,6 +5,7 @@ using System.IO.Pipes;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using imperative.legion;
 using metahub.render;
 using runic.parser;
 
@@ -29,7 +30,7 @@ namespace imperative
 
         private const string pipe_name = "Imp-CLI";
         public event Daemon_Action on_run;
-        
+
         public void start(string[] args)
         {
             if (!mutex.WaitOne(TimeSpan.Zero, true))
@@ -186,7 +187,10 @@ namespace imperative
 
         void run_project_file(string project_file)
         {
-            
+            var project = Mobilize.load_project(project_file);
+            var overlord = new Overlord(project.target);
+
+            Mobilize.build_all(project, overlord);
         }
     }
 }

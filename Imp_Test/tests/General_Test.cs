@@ -19,7 +19,7 @@ namespace imp_test.tests
             var overlord = new Overlord();
             var code = Utility.load_resource("imp.class_attributes.imp");
             overlord.summon(code, "imp.class_attributes.imp");
-            var dungeon = (Dungeon)overlord.root.get_dungeon_from_path("magic.lore.Vector3");
+            var dungeon = overlord.root.get_dungeon_from_path("magic.lore.Vector3");
             Assert.True(dungeon.is_external);
             Assert.True(dungeon.is_value);
         }

@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using imperative.schema;
 using imperative.summoner;
 using imperative.expressions;
+using imperative.legion;
 using imperative.render.artisan;
 using imperative.render.artisan.targets;
 using library;
@@ -21,6 +22,8 @@ namespace imperative
         string output { get; }
         string target { get; }
         string name { get; }
+        string path { get; set; }
+        Dictionary<string, Dungeon> dungeons { get; set; }
     }
 
     public class Overlord_Configuration : Build_Orders
@@ -29,6 +32,8 @@ namespace imperative
         public string output { get; set; }
         public string target { get; set; }
         public string name { get; set; }
+        public string path { get; set; }
+        public Dictionary<string, Dungeon> dungeons { get; set; }
 
         public Overlord_Configuration()
         {
@@ -105,11 +110,11 @@ namespace imperative
         //            summon2(code, filename, is_external);
         //        }
 
-        public void summon(string code, string filename, bool is_external = false)
+        public void summon(string code, string filename,Project project = null, bool is_external = false)
         {
             var legend = summon_legend(code, filename);
             var summoner = new Summoner(this, is_external);
-            summoner.summon_many(new[] { legend });
+            summoner.summon_many(new[] { legend }, project);
         }
 
         public Legend summon_legend(string code, string filename)
@@ -118,13 +123,13 @@ namespace imperative
             return Summoner.translate_runes(code, runes);
         }
 
-        public void summon_many(IEnumerable<string> files)
+        public void summon_many(IEnumerable<string> files, Project project)
         {
             var pre_summoners = files.Select(file =>
                 summon_legend(File.ReadAllText(file), file)
             );
             var summoner = new Summoner(this);
-            summoner.summon_many(pre_summoners);
+            summoner.summon_many(pre_summoners, project);
         }
 
         public Dungeon summon_dungeon(Snippet template, Summoner_Context context)
@@ -157,9 +162,9 @@ namespace imperative
             return templates;
         }
 
-        public void summon_file(string path, bool is_external = false)
+        public void summon_file(string path, Project project, bool is_external = false)
         {
-            summon(File.ReadAllText(path), path, is_external);
+            summon(File.ReadAllText(path), path,project, is_external);
         }
 
         public static void run(Build_Orders config)
@@ -168,7 +173,7 @@ namespace imperative
             foreach (var input in config.inputs)
             {
                 var sources = get_source_files(input);
-                overlord.summon_input(sources);
+                overlord.summon_input(sources, null);
                 overlord.generate(config, sources);
             }
         }
@@ -181,19 +186,19 @@ namespace imperative
             return aggregate_files(input).ToArray();
         }
 
-        public void summon_input(string[] sources)
+        public void summon_input(string[] sources, Project project)
         {
             if (sources.Length == 1)
             {
                 // Very quick-and-dirty but it works for now.
                 var cwd = Directory.GetCurrentDirectory();
                 Directory.SetCurrentDirectory(Path.GetDirectoryName(sources[0]));
-                summon_file(sources[0]);
+                summon_file(sources[0], project);
                 Directory.SetCurrentDirectory(cwd);
             }
             else
             {
-                summon_many(sources.Where(f => Path.GetExtension(f) == ".imp"));
+                summon_many(sources.Where(f => Path.GetExtension(f) == ".imp"), project);
             }
         }
 
@@ -225,7 +230,7 @@ namespace imperative
             if (!root.dungeons.ContainsKey("imp"))
             {
                 var code = Library.load_resource("imp.collections.Array.imp");
-                summon(code, "Standard Library");
+                summon(code, "Standard Library", null);
                 root.dungeons["imp"].dungeons["collections"].is_virtual = true;
                 array = root.dungeons["imp"].dungeons["collections"].dungeons["Array"];
             }

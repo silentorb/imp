@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using imperative.expressions;
+using imperative.legion;
 using metahub.render;
 using metahub.schema;
 using Expression = imperative.expressions.Expression;

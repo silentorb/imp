@@ -11,6 +11,7 @@ using imperative.wizard;
 using imperative.Properties;
 using imperative.schema;
 using imperative.expressions;
+using imperative.legion;
 using metahub.jackolantern.expressions;
 using metahub.render;
 using metahub.schema;
@@ -40,25 +41,14 @@ namespace imperative.summoner
             this.is_external = is_external;
         }
 
-//        public void summon(Legend source)
-//        {
-//            summon((Group_Legend)source);
-//        }
-//
-//        public void summon(Legend source, Summoner_Context context, Dictionary<string, List<Summoner_Context>> map)
-//        {
-//            gather_parts(context, source.children, map);
-//            throw new Exception("Not implemented.");
-//        }
-
-        public void summon_file(string path, bool is_external = false)
+        public void summon_file(string path, Project project, bool is_external = false)
         {
             var was_external = this.is_external;
             this.is_external = is_external;
 
             var code = File.ReadAllText(path);
             var legend = overlord.summon_legend(code, path);
-            summon_many(new [] { legend});
+            summon_many(new[] { legend }, project);
 
             this.is_external = was_external;
         }
@@ -73,7 +63,7 @@ namespace imperative.summoner
 
                 if (child.type == Legend_Types.dungeon_definition)
                 {
-                    var name = child.children[1].children.Select(c=>c.text).join(".");
+                    var name = child.children[1].children.Select(c => c.text).join(".");
                     var child_context = parent.children.ContainsKey(name)
                         ? parent.children[name]
                         : parent.children[name] = new Summoner_Context(child, parent);
@@ -88,9 +78,9 @@ namespace imperative.summoner
             }
         }
 
-        public void summon_many(IEnumerable<Legend> sources)
+        public void summon_many(IEnumerable<Legend> sources, Project project = null)
         {
-            var context = new Summoner_Context(null, overlord.root);
+            var context = new Summoner_Context(null, project, overlord.root);
             var map = new Dictionary<string, List<Summoner_Context>>();
             //            var contexts = new Summoner_Context[sources.Count()];
             map[Legend_Types.dungeon_definition] = new List<Summoner_Context>
@@ -163,7 +153,7 @@ namespace imperative.summoner
                         if (step != 0)
                             break;
 
-                        summon_file(pattern.children[1].text, pattern.children[0] != null);
+                        summon_file(pattern.children[1].text, context.project, pattern.children[0] != null);
                         break;
                     //
                     //                    case "namespace_statement":
@@ -228,10 +218,11 @@ namespace imperative.summoner
                     if (!parent_dungeon.dungeons.ContainsKey(token))
                     {
                         parent_dungeon = parent_dungeon.create_dungeon(token);
+                        context.add_dungeon_to_project(parent_dungeon);
                     }
                     else
                     {
-                        parent_dungeon = parent_dungeon.dungeons[token];
+                        parent_dungeon =  parent_dungeon.dungeons[token];
                     }
                 }
 
@@ -241,6 +232,7 @@ namespace imperative.summoner
             if (!parent_dungeon.dungeons.ContainsKey(name))
             {
                 var dungeon = context.dungeon = parent_dungeon.create_dungeon(name);
+                context.add_dungeon_to_project(dungeon);
                 //                if (parts[1].text == "struct")
                 //                    dungeon.is_value = true;
 
@@ -264,7 +256,7 @@ namespace imperative.summoner
                 {
                     foreach (var type_name in parts[2].children)
                     {
-                        var generic_dungeon= new Dungeon(type_name.text, null, null);
+                        var generic_dungeon = new Dungeon(type_name.text, null, null);
                         context.set_pattern(type_name.text, new Profession(generic_dungeon));
                     }
                 }
@@ -374,7 +366,7 @@ namespace imperative.summoner
 
             if (parts[2] != null)
             {
-                context = new Summoner_Context(source, context) {dungeon = original_context.dungeon};
+                context = new Summoner_Context(source, context) { dungeon = original_context.dungeon };
                 foreach (var type_name in parts[2].children)
                 {
                     var generic_dungeon = new Dungeon(type_name.text, null, null);
@@ -629,14 +621,14 @@ namespace imperative.summoner
                 if (operators.Contains(divider.text))
                 {
                     var rhyme = new Repetition_Rhyme("expression");
-                    patterns[i] = new Group_Legend(rhyme, 
+                    patterns[i] = new Group_Legend(rhyme,
                         new List<Legend>
                         {
                             patterns[i],
                             patterns[i + 1]
-                        }, patterns[i].position, 
+                        }, patterns[i].position,
                         new List<Legend> { divider });
-                
+
                     patterns.RemoveAt(i + 1);
                     dividers.RemoveAt(d);
                     --d;
@@ -761,7 +753,7 @@ namespace imperative.summoner
 
             if (source.children[2] != null)
             {
-                
+
                 result.get_deepest_child().children = source.children[2].children.Select(c => parse_type2(c, context)).ToList();
             }
             if (result.is_array(overlord) && result.children.Count == 0)
@@ -810,7 +802,7 @@ namespace imperative.summoner
             var last = reference.get_end();
             if (reference != null && reference.type == Expression_Type.operation)
                 throw new Exception("Cannot call function on operation.");
-        
+
             return new Assignment(
                 reference,
                 op,
