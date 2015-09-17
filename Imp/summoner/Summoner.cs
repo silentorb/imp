@@ -245,13 +245,6 @@ namespace imperative.summoner
                     //                    dungeon.is_value = attributes.Any(p => p.text == "value");
                 }
 
-                if (parts[3] != null)
-                {
-                    var parent = (Dungeon)get_dungeon(context.dungeon, parts[3].children);
-                    dungeon.parent = parent;
-                    parent.children.Add(dungeon);
-                }
-
                 if (parts[2] != null)
                 {
                     foreach (var type_name in parts[2].children)
@@ -276,6 +269,14 @@ namespace imperative.summoner
             var statements = dungeon.name == ""
                 ? source.children
                 : source.children[4].children;
+
+
+            if (source.children.Count > 3 && source.children[3] != null)
+            {
+                var parent = (Dungeon)get_dungeon(context.dungeon, source.children[3].children);
+                dungeon.parent = parent;
+                parent.children.Add(dungeon);
+            }
 
             foreach (var statement in statements)
             {

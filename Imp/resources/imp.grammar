@@ -41,7 +41,11 @@ declare_symbol = id @(type_info, 0, 1) @(optional_assignment, 0, 1)
 
 type_info = colon signature
 
-signature = @(const, 0, 1) @(value_type, path_separator, 1, 0) @(generic_info, 0, 1) @(empty_array, 0, 1)
+signature = function_signature | variable_signature
+
+variable_signature = @(const, 0, 1) @(value_type, path_separator, 1, 0) @(generic_info, 0, 1) @(empty_array, 0, 1)
+
+function_signature = group_start @(signature, comma, 0, 0) type_info
 
 generic_info = < @(signature, comma, 1, 0) >
 
