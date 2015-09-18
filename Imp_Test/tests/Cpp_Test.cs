@@ -22,7 +22,7 @@ namespace imp_test.tests
             var pizza = overlord.root.dungeons["test"].dungeons["Pizza"];
 
             // Source file
-            var strokes = new List<Stroke>{ target.generate_class_file(pizza) };
+            var strokes = new List<Stroke>{ Source_File.generate_source_file(target, pizza) };
             var output = Overlord.strokes_to_string(strokes);
             var goal = Utility.load_resource("cpp.pizza.cpp");
             Utility.diff(goal, output);
@@ -51,7 +51,7 @@ namespace imp_test.tests
             Utility.diff(goal, output);
 
             // Source file
-            strokes = new List<Stroke> { target.generate_class_file(dynamic) };
+            strokes = new List<Stroke> { Source_File.generate_source_file(target,dynamic) };
             output = Overlord.strokes_to_string(strokes);
             goal = Utility.load_resource("cpp.Bag.cpp");
             Utility.diff(goal, output);

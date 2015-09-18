@@ -247,7 +247,9 @@ namespace imperative.summoner
                     foreach (var type_name in parts[2].children)
                     {
                         var generic_dungeon = new Dungeon(type_name.text, null, null);
-                        context.set_pattern(type_name.text, new Profession(generic_dungeon));
+                        var profession = new Profession(generic_dungeon);
+                        context.set_pattern(type_name.text, profession);
+                        dungeon.generic_parameters[type_name.text] = profession;
                     }
                 }
 
@@ -270,7 +272,9 @@ namespace imperative.summoner
 
             if (source.children.Count > 3 && source.children[3] != null)
             {
-                var parent = (Dungeon)get_dungeon(context.dungeon, source.children[3].children);
+                var profession = parse_type2(source.children[3].children[0], context);
+//                var parent = (Dungeon)get_dungeon(context.dungeon, source.children[3].children);
+                var parent = (Dungeon)profession.dungeon;
                 dungeon.parent = parent;
                 parent.children.Add(dungeon);
             }

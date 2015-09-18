@@ -151,6 +151,7 @@ namespace imperative.summoner
             if (project != null && !dungeon.is_external)
             {
                 project.dungeons[dungeon.name] = dungeon;
+                dungeon.project = project;
             }
         }
     }

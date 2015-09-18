@@ -386,16 +386,17 @@ namespace metahub.render.targets
 
         string render_function_declarations(Dungeon dungeon)
         {
-            var declarations = dungeon.stubs.Select(line).ToList();
-
-            if (dungeon.hooks.ContainsKey("initialize_post"))
-            {
-                declarations.Add(line("void initialize_post(); // Externally defined."));
-            }
-
-            declarations.AddRange(dungeon.minions.Values.Select(render_function_declaration));
-
-            return declarations.join("");
+            throw new Exception("This code is dead.");
+//            var declarations = dungeon.stubs.Select(line).ToList();
+//
+//            if (dungeon.hooks.ContainsKey("initialize_post"))
+//            {
+//                declarations.Add(line("void initialize_post(); // Externally defined."));
+//            }
+//
+//            declarations.AddRange(dungeon.minions.Values.Select(render_function_declaration));
+//
+//            return declarations.join("");
         }
 
         static bool has_header(IEnumerable<External_Header> list, string name)

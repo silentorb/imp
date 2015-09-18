@@ -37,13 +37,14 @@ namespace imperative.schema
         public bool is_virtual = false;
         public bool is_dynamic = false;
         public string source_file { get; set; }
-        public List<string> stubs = new List<string>();
         public Dictionary<string, object> hooks = new Dictionary<string, object>();
         public List<Dungeon> interfaces = new List<Dungeon>();
         public string class_export = "";
         public event Dungeon_Minion_Event on_add_minion;
         public string external_name;
+        public Dictionary<string, Profession> generic_parameters = new Dictionary<string, Profession>();
         public Dictionary<string, Dungeon_Additional> trellis_additional = new Dictionary<string, Dungeon_Additional>();
+        public Project project;
 
         public object default_value { get; set; }
 
@@ -152,22 +153,6 @@ namespace imperative.schema
 
             if (map.default_value != null) // Should only be set if is_value is set to true
                 default_value = map.default_value;
-
-            if (map.hooks != null)
-            {
-                foreach (var item in map.hooks)
-                {
-                    hooks[item.Key] = item.Value;
-                }
-            }
-
-            if (map.stubs != null)
-            {
-                foreach (var item in map.stubs)
-                {
-                    stubs.Add(item);
-                }
-            }
 
             if (map.properties != null)
             {

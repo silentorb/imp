@@ -5,6 +5,7 @@ using System.Text;
 using imperative.schema;
 using metahub.render.targets;
 using imperative.expressions;
+using metahub.render;
 
 namespace imperative.render.artisan.targets.cpp
 {
@@ -26,7 +27,7 @@ namespace imperative.render.artisan.targets.cpp
             .ToList();
 
             var result = new Stroke_Token("#pragma once") + new Stroke_Newline()
-                + Cpp.render_includes(target, headers) + new Stroke_Newline() + new Stroke_Newline()
+                + Cpp.render_includes(headers) + new Stroke_Newline() + new Stroke_Newline()
                 + render_outer_dependencies(target, dungeon)
                 + target.render_realm(dungeon.realm, () =>
                     render_inner_dependencies(target, dungeon).Concat(new[] { class_declaration(target,dungeon) }).ToList());
@@ -104,6 +105,14 @@ namespace imperative.render.artisan.targets.cpp
         {
             target.current_dungeon = dungeon;
             Stroke first = new Stroke_Token("class ");
+
+            if (dungeon.generic_parameters.Count > 0)
+            {
+                var template_text = "template <" + dungeon.generic_parameters.Keys
+                    .Select(p => "typename " + p).join(", ") + ">";
+
+                first = new Stroke_Token(template_text) + new Stroke_Newline() + first;
+            }
             if (dungeon.class_export.Length > 0)
                 first += new Stroke_Token(dungeon.class_export + " ");
 

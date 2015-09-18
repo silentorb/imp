@@ -99,7 +99,7 @@ class_or_struct = class | struct
 
 property_declaration = @(member_attribute, 0, 0) id @(type_info, 0, 1) @(optional_assignment, 0, 1)
 
-optional_parent_classes = colon @(id, comma_or_newline, 1, 0)
+optional_parent_classes = colon @(signature, comma_or_newline, 1, 0)
 
 block = long_block | @(statement, 1, 1)
 

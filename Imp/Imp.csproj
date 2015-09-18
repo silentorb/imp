@@ -54,7 +54,9 @@
     <Compile Include="legion\Mobilize.cs" />
     <Compile Include="legion\Project.cs" />
     <Compile Include="expressions\Create_Dictionary.cs" />
+    <Compile Include="render\artisan\Common_Functions.cs" />
     <Compile Include="render\artisan\Common_Target2.cs" />
+    <Compile Include="render\artisan\Statement_Router.cs" />
     <Compile Include="render\artisan\targets\cpp\CMake.cs" />
     <Compile Include="render\artisan\targets\cpp\Cpp.cs" />
     <Compile Include="render\artisan\targets\cpp\Header_File.cs" />
