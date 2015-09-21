@@ -9,7 +9,7 @@ using metahub.render;
 
 namespace imperative.render.artisan.targets.cpp
 {
-   public static class Header_File
+    public static class Header_File
     {
         public static Stroke generate_header_file(Cpp target, Dungeon dungeon)
         {
@@ -29,8 +29,8 @@ namespace imperative.render.artisan.targets.cpp
             var result = new Stroke_Token("#pragma once") + new Stroke_Newline()
                 + Cpp.render_includes(headers) + new Stroke_Newline() + new Stroke_Newline()
                 + render_outer_dependencies(target, dungeon)
-                + target.render_realm(dungeon.realm, () =>
-                    render_inner_dependencies(target, dungeon).Concat(new[] { class_declaration(target,dungeon) }).ToList());
+                + target.render_realm2(dungeon.realm, () =>
+                    render_inner_dependencies(target, dungeon).Concat(new[] { class_declaration(target, dungeon) }).ToList());
 
             return result;
         }
@@ -81,38 +81,45 @@ namespace imperative.render.artisan.targets.cpp
 
         static List<Stroke> render_inner_dependencies(Cpp target, Dungeon dungeon)
         {
-            bool lines = false;
             var result = new List<Stroke>();
             foreach (var d in dungeon.dependencies.Values)
             {
                 var dependency = d.dungeon;
                 if (d.allow_partial && dependency.realm == dungeon.realm)
                 {
-                    result.Add(new Stroke_Token("class ")
-                        + target.render_dungeon_path(dependency) + new Stroke_Token(";"));
+                    Stroke addition = new Stroke_Token("class ")
+                                      + target.render_dungeon_path(dependency) + new Stroke_Token(";");
 
-                    lines = true;
+                    var current = (Dungeon)d.dungeon;
+                    if (current.generic_parameters.Count > 0)
+                    {
+                        addition = render_template_prefix(dungeon) + new Stroke_Newline() + addition;
+                    }
+                    result.Add(addition);
                 }
             }
 
-            //            if (result.Length > 0)
-            //                result += new Stroke_Newline();
-
             return result;
+        }
+
+        static Stroke render_template_prefix(Dungeon dungeon)
+        {
+            return new Stroke_Token("template <" + dungeon.generic_parameters.Keys
+                     .Select(p => "typename " + p).join(", ") + ">");
         }
 
         static Stroke class_declaration(Cpp target, Dungeon dungeon)
         {
             target.current_dungeon = dungeon;
             Stroke first = new Stroke_Token("class ");
+            var context = new Render_Context(dungeon.realm, Cpp.static_config,
+              Cpp.statement_router, target);
 
             if (dungeon.generic_parameters.Count > 0)
             {
-                var template_text = "template <" + dungeon.generic_parameters.Keys
-                    .Select(p => "typename " + p).join(", ") + ">";
-
-                first = new Stroke_Token(template_text) + new Stroke_Newline() + first;
+                first = render_template_prefix(dungeon) + new Stroke_Newline() + first;
             }
+
             if (dungeon.class_export.Length > 0)
                 first += new Stroke_Token(dungeon.class_export + " ");
 
@@ -122,7 +129,8 @@ namespace imperative.render.artisan.targets.cpp
             if (parents.Count > 0)
             {
                 first += new Stroke_Token(" : ") + Stroke.join(
-                    parents.Select(p => new Stroke_Token("public ") + target.render_dungeon_path(p)).ToList(), ", ");
+                    parents.Select(p => new Stroke_Token("public ") +
+                        Cpp.render_profession2(p, context, false, true)).ToList(), ", ");
             }
 
             var lines = new List<Stroke>
@@ -166,26 +174,45 @@ namespace imperative.render.artisan.targets.cpp
             //                declarations.Add(line("void initialize_post(); // Externally defined."));
             //            }
 
-            declarations.AddRange(dungeon.minions.Values.Select(d=> render_function_declaration(target, d)));
+            declarations.AddRange(dungeon.minions.Values.Select(d => render_function_declaration(target, d)));
 
             return declarations;
         }
 
         static Stroke render_function_declaration(Cpp target, Minion definition)
         {
-            return new Stroke_Token(definition.return_type != null ? "virtual " : "")
-                        + (definition.return_type != null ? target.render_profession(definition.return_type)
-                        + new Stroke_Token(" ") : new Stroke_Token(""))
-                        + new Stroke_Token(definition.name)
-                        + new Stroke_Token("(")
-                        + Stroke.join(definition.parameters.Select(p=> render_declaration_parameter(target, p)), ", ")
-                        + new Stroke_Token(")")
-                        + new Stroke_Token(definition.is_abstract ? " = 0;" : ";");
+            if (definition.generic_parameters.Count > 0)
+            {
+                var context = new Render_Context(definition.dungeon.realm, Cpp.static_config, Cpp.statement_router, target);
+                return Source_File.render_function_intro(definition, context, definition.name)
+                + Source_File.render_function_body(definition, context);
+            }
+
+            return render_function_declaration_intro(target, definition)
+                + new Stroke_Token("(")
+                + Stroke.join(definition.parameters.Select(p => render_declaration_parameter(target, p)), ", ")
+                + new Stroke_Token(")")
+                + new Stroke_Token(definition.is_abstract ? " = 0;" : ";");
+        }
+
+        static Stroke render_function_declaration_intro(Cpp target, Minion definition)
+        {
+            if (definition.name == "constructor")
+            {
+                return new Stroke_Token(definition.dungeon.name);
+            }
+
+            return new Stroke_Token("virtual ")
+                   + (definition.return_type != null
+                       ? target.render_profession(definition.return_type)
+                         + new Stroke_Token(" ")
+                       : new Stroke_Token(""))
+                   + new Stroke_Token(definition.name);
         }
 
         static Stroke render_declaration_parameter(Cpp target, Parameter parameter)
         {
-            return target.render_profession(parameter.symbol, true) + new Stroke_Token(" " + parameter.symbol.name)
+            return target.render_profession(parameter.symbol.profession, true) + new Stroke_Token(" " + parameter.symbol.name)
                    + (parameter.default_value != null
                           ? new Stroke_Token(" = ") + target.render_expression(parameter.default_value)
                           : new Stroke_Token()

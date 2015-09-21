@@ -269,9 +269,9 @@ namespace metahub.render.targets
             return result;
         }
 
-        static List<Dungeon> get_dungeon_parents(Dungeon dungeon)
+        static List<Profession> get_dungeon_parents(Dungeon dungeon)
         {
-            var parents = new List<Dungeon>();
+            var parents = new List<Profession>();
             if (dungeon.parent != null)
                 parents.Add(dungeon.parent);
 
@@ -291,7 +291,7 @@ namespace metahub.render.targets
 
             if (parents.Count > 0)
             {
-                first += " : " + parents.Select(p => "public " + render_trellis_name(p)).join(", ");
+//                first += " : " + parents.Select(p => "public " + render_trellis_name(p)).join(", ");
             }
 
             result = line(first + " {")

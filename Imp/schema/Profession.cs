@@ -10,12 +10,21 @@ namespace imperative.schema
     public class Profession
     {
 //        public bool is_list = false;
-        public IDungeon dungeon;
+        public Dungeon dungeon;
         public List<Profession> children;
+        public bool is_generic_parameter = false;
+
+        public string name {get { return dungeon.name; }}
+
+        public Profession(Dungeon dungeon, List<Profession> children = null)
+        {
+            this.dungeon = dungeon;
+            this.children = children;
+        }
 
         public Profession(IDungeon dungeon, List<Profession> children = null)
         {
-            this.dungeon = dungeon;
+            this.dungeon = (Dungeon)dungeon;
             this.children = children;
         }
 

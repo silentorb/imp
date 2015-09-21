@@ -99,7 +99,7 @@ namespace metahub.render.targets
                 + render_static_minions(dungeon_prefix, static_minions)
                 + (total == 0 ? "" :
                 add(dungeon_prefix + ".prototype = " + (dungeon.parent != null 
-                    ? "Object.create(" + render_dungeon_path(dungeon.parent) + ".prototype)"
+                    ? "Object.create(" + render_dungeon_path(dungeon.parent.dungeon) + ".prototype)"
                     : "{}")) 
                     + newline()
 
@@ -125,7 +125,7 @@ namespace metahub.render.targets
         {
             return !dungeon.minions.ContainsKey("constructor")
                 ? "function() {" + (dungeon.parent != null 
-                    ? newline() + indent() + add(render_dungeon_path(dungeon.parent) + ".apply(this)") + newline() + unindent()
+                    ? newline() + indent() + add(render_dungeon_path(dungeon.parent.dungeon) + ".apply(this)") + newline() + unindent()
                     : "") + add("}")
                 : render_function_definition(dungeon.minions["constructor"]);
         }

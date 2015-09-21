@@ -602,7 +602,7 @@ namespace imperative.render
         protected string render_realm_path(Dungeon realm, string separator)
         {
             return realm.parent != null && realm.parent.name != ""
-                ? render_realm_path(realm.parent, separator) + separator + realm.name
+                ? render_realm_path(realm.parent.dungeon, separator) + separator + realm.name
                 : realm.name;
         }
 

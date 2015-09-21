@@ -9,6 +9,7 @@ using imperative.render;
 using imperative.schema;
 
 using imperative.expressions;
+using imperative.legion;
 using metahub.render;
 
 namespace imperative.render.artisan.targets
@@ -53,6 +54,11 @@ namespace imperative.render.artisan.targets
 
             Generator.create_file(output_path, output);
 //            Generator.create_file(map_file, source_map_content);
+        }
+
+        public override void build_wrapper_project(Project config1)
+        {
+
         }
 
         public string generate_string()
@@ -126,7 +132,7 @@ namespace imperative.render.artisan.targets
             result.Add(total == 0
                 ? new Stroke_Token("")
                 : new Stroke_Token(dungeon_prefix + ".prototype = ") + (dungeon.parent != null
-                    ? new Stroke_Token("Object.create(") + render_dungeon_path(dungeon.parent) + new Stroke_Token(".prototype)")
+                    ? new Stroke_Token("Object.create(") + render_dungeon_path(dungeon.parent.dungeon) + new Stroke_Token(".prototype)")
                     : new Stroke_Token("{}")
                     )
                 );
@@ -150,7 +156,7 @@ namespace imperative.render.artisan.targets
         {
             return !dungeon.minions.ContainsKey("constructor")
                 ? new Stroke_Token("function() {") + (dungeon.parent != null
-                    ? render_dungeon_path(dungeon.parent) + new Stroke_Token(".apply(this)") + new Stroke_Token("}")
+                    ? render_dungeon_path(dungeon.parent.dungeon) + new Stroke_Token(".apply(this)") + new Stroke_Token("}")
                     : new Stroke_Token("}"))
                 : render_function_definition(dungeon.minions["constructor"]);
         }

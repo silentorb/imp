@@ -12,7 +12,12 @@ namespace imperative.render.artisan.targets.cpp
 {
     public class Cpp : Common_Target2
     {
-        private static Target_Configuration static_config;
+        public static Target_Configuration static_config;
+
+        public static Statement_Router statement_router = new Statement_Router
+        {
+            render_function_definition = Source_File.render_function_definition
+        };
 
         public Cpp(Overlord overlord = null)
             : base(overlord)
@@ -51,6 +56,12 @@ namespace imperative.render.artisan.targets.cpp
             }
         }
 
+        public override void build_wrapper_project(Project project)
+        {
+            var dependencies = CMake.get_project_dependencies(project);
+            CMake.create_wrapper_cmakelists_txt(project);
+        }
+
         public void render_full_dungeon(Dungeon dungeon, Build_Orders config1)
         {
             if (dungeon.portals.Length > 0 || dungeon.minions.Count > 0)
@@ -60,6 +71,8 @@ namespace imperative.render.artisan.targets.cpp
                 Generator.create_folder(dir);
 
                 var name = dir + "/" + dungeon.name;
+
+                prepare_constructor(dungeon);
 
                 Generator.create_file(name + ".h",
                     Overlord.stroke_to_string(Header_File.generate_header_file(this, dungeon)));
@@ -72,6 +85,32 @@ namespace imperative.render.artisan.targets.cpp
             //            {
             //                render_full_dungeon(child, config1);
             //            }
+        }
+
+        public static void prepare_constructor(Dungeon dungeon)
+        {
+            if (dungeon.has_minion("constructor"))
+            {
+                dungeon.minions["constructor"].return_type = null;
+                return;
+            }
+
+            var expressions = new List<Expression>();
+            foreach (var portal in dungeon.portals)
+            {
+                if (portal.default_expression != null)
+                {
+                    var assignment = new Assignment(new Portal_Expression(portal), "=", portal.default_expression);
+                    expressions.Insert(0, assignment);
+                }
+            }
+
+            if (expressions.Count == 0)
+                return;
+
+           var constructor= dungeon.spawn_minion("constructor");
+            constructor.return_type = null;
+            constructor.expressions = expressions;
         }
 
         public List<Stroke> generate_source_strokes()
@@ -89,43 +128,82 @@ namespace imperative.render.artisan.targets.cpp
             return output;
         }
 
-        public static List<Dungeon> get_dungeon_parents(Dungeon dungeon)
+        public static List<Profession> get_dungeon_parents(Dungeon dungeon)
         {
-            var parents = new List<Dungeon>();
+            var parents = new List<Profession>();
             if (dungeon.parent != null)
                 parents.Add(dungeon.parent);
 
             return parents.Concat(dungeon.interfaces).ToList();
         }
 
-        public static Stroke render_profession2(Symbol symbol, bool is_parameter = false)
+        public override Stroke render_profession(Profession signature, bool is_parameter = false)
         {
-            if (symbol.profession != null)
-                return render_profession2(symbol.profession, is_parameter);
+            var context = new Render_Context(current_dungeon.realm, Cpp.static_config,
+                Cpp.statement_router, this);
 
-            return render_profession2(symbol.profession, is_parameter);
+            return render_profession2(signature, context, is_parameter);
         }
 
-        public static Stroke render_profession2(Profession signature, bool is_parameter = false)
+        public static Stroke render_profession2(Profession signature, Render_Context context,
+            bool is_parameter = false, bool is_type = false)
         {
             if (signature.dungeon == Professions.List)
-                return listify(render_profession2(signature.children[0]), signature);
-            //            throw new Exception("Not implemented.");
+                return listify2(render_profession2(signature.children[0], context), signature);
+
             var lower_name = signature.dungeon.name.ToLower();
             var name = types.ContainsKey(lower_name)
                 ? new Stroke_Token(types[lower_name])
-                : render_dungeon_path(signature.dungeon);
+                : render_dungeon_path2(signature.dungeon, context);
 
-            if (!signature.dungeon.is_value)
+            if (signature.children != null && signature.children.Count > 0)
+            {
+                name += new Stroke_Token("<")
+                    + Stroke.join(signature.children.Select(p => render_profession2(p, context)), ", ")
+                    + new Stroke_Token(">");
+            }
+
+            if (!signature.dungeon.is_value && !signature.is_generic_parameter && !is_type)
                 name = new Stroke_Token("std::shared_ptr<") + name + new Stroke_Token(">");
 
             return name;
         }
 
-        public static Stroke render_definition_parameter2(Parameter parameter)
+        public static Stroke render_dungeon_path2(IDungeon dungeon, Render_Context context)
         {
-            return Cpp.render_profession2(parameter.symbol, true) + new Stroke_Token(" " + parameter.symbol.name);
+            return dungeon.realm != null && dungeon.realm.name != ""
+                && (dungeon.realm != context.realm)
+                ? render_dungeon_path2(dungeon.realm, context) + new Stroke_Token("::" + dungeon.name)
+                : new Stroke_Token(dungeon.name);
         }
+
+        public static Stroke render_definition_parameter2(Parameter parameter, Render_Context context)
+        {
+            return Cpp.render_profession2(parameter.symbol.profession, context, true) + new Stroke_Token(" " + parameter.symbol.name);
+        }
+
+        override protected Stroke render_portal(Portal_Expression portal_expression)
+        {
+            var portal = portal_expression.portal;
+            Stroke result = new Stroke_Token(portal.name);
+            if (is_start_portal(portal_expression))
+            {
+                if (portal.has_enchantment(Enchantments.Static))
+                {
+                    if (portal.dungeon.name != "")
+                        result = render_dungeon_path(portal.dungeon) + get_delimiter(portal) + result;
+                }
+                else if (!config.implicit_this && portal.dungeon.name != "")
+                {
+                    result = render_this() + new Stroke_Token("->") + result;
+                }
+            }
+            if (portal_expression.index != null)
+                result += new Stroke_Token("[") + render_expression(portal_expression.index) + new Stroke_Token("]");
+
+            return result;
+        }
+
 
         public static Stroke render_includes(IEnumerable<External_Header> headers)
         {
@@ -146,6 +224,11 @@ namespace imperative.render.artisan.targets.cpp
             return new Stroke_Token("std::vector<") + type + new Stroke_Token(">");
         }
 
+        public static Stroke listify2(Stroke type, Profession signature)
+        {
+            return new Stroke_Token("std::vector<") + type + new Stroke_Token(">");
+        }
+
         protected override Stroke render_platform_function_call(Platform_Function expression, Expression parent)
         {
             throw new Exception("Not implemented.");
@@ -161,6 +244,59 @@ namespace imperative.render.artisan.targets.cpp
 
             result.expression = declaration;
             return result;
+        }
+
+        public Stroke render_realm2(Dungeon realm, Stroke_List_Delegate action)
+        {
+            if (realm == null || realm.name == "")
+                return new Stroke_Token() + action();
+
+            Stroke_Delegate block = () =>
+            {
+                current_realm = realm;
+                var result = new Stroke_Token(config.namespace_keyword + " ")
+                         + render_realm_path(realm, config.namespace_separator)
+                         + render_block(action(), false);
+
+                current_realm = null;
+                return result;
+            };
+
+            if (realm.realm != null)
+            {
+                return render_realm(realm.realm, () => new List<Stroke> { block() });
+            }
+
+            return block();
+        }
+
+        protected override Stroke render_null()
+        {
+            return new Stroke_Token("NULL");
+        }
+
+        bool is_pointer(Profession profession)
+        {
+            return true;
+        }
+
+        override protected Stroke get_connector(Expression expression)
+        {
+            if (expression.type == Expression_Type.parent_class)
+                return new Stroke_Token("::");
+
+            if (expression.type == Expression_Type.portal && ((Portal_Expression)expression).index != null)
+                return new Stroke_Token("->");
+
+            var profession = expression.get_profession();
+            return new Stroke_Token(profession == null
+                       ? is_pointer(expression.get_profession()) ? "->" : "."
+                       : is_pointer(profession) ? "->" : ".");
+        }
+
+        override protected string get_connector(Profession profession)
+        {
+            return is_pointer(profession) ? "->" : ".";
         }
 
     }

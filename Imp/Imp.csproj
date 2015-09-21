@@ -56,6 +56,7 @@
     <Compile Include="expressions\Create_Dictionary.cs" />
     <Compile Include="render\artisan\Common_Functions.cs" />
     <Compile Include="render\artisan\Common_Target2.cs" />
+    <Compile Include="render\artisan\Render_Context.cs" />
     <Compile Include="render\artisan\Statement_Router.cs" />
     <Compile Include="render\artisan\targets\cpp\CMake.cs" />
     <Compile Include="render\artisan\targets\cpp\Cpp.cs" />
@@ -72,6 +73,9 @@
     <Compile Include="render\artisan\Scribe.cs" />
     <Compile Include="schema\Dungeon_Types.cs" />
     <Compile Include="schema\Professions.cs" />
+    <Compile Include="scholar\Dungeon_Journal.cs" />
+    <Compile Include="scholar\Minion_Journal.cs" />
+    <Compile Include="scholar\Portal_Journal.cs" />
     <Compile Include="summoner\Tunneler.cs" />
     <Compile Include="wizard\Conjure.cs" />
     <Compile Include="wizard\Entity.cs" />

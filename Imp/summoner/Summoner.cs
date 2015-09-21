@@ -9,6 +9,7 @@ using imperative.Properties;
 using imperative.schema;
 using imperative.expressions;
 using imperative.legion;
+using imperative.scholar;
 using metahub.jackolantern.expressions;
 using metahub.render;
 using metahub.schema;
@@ -219,7 +220,7 @@ namespace imperative.summoner
                     }
                     else
                     {
-                        parent_dungeon =  parent_dungeon.dungeons[token];
+                        parent_dungeon = parent_dungeon.dungeons[token];
                     }
                 }
 
@@ -247,13 +248,15 @@ namespace imperative.summoner
                     foreach (var type_name in parts[2].children)
                     {
                         var generic_dungeon = new Dungeon(type_name.text, null, null);
-                        var profession = new Profession(generic_dungeon);
+                        var profession = new Profession(generic_dungeon)
+                        {
+                            is_generic_parameter = true
+                        };
                         context.set_pattern(type_name.text, profession);
                         dungeon.generic_parameters[type_name.text] = profession;
                     }
                 }
 
-                //                dungeon.generate_code();
                 context.dungeon = dungeon;
                 return dungeon;
             }
@@ -273,10 +276,9 @@ namespace imperative.summoner
             if (source.children.Count > 3 && source.children[3] != null)
             {
                 var profession = parse_type2(source.children[3].children[0], context);
-//                var parent = (Dungeon)get_dungeon(context.dungeon, source.children[3].children);
-                var parent = (Dungeon)profession.dungeon;
-                dungeon.parent = parent;
-                parent.children.Add(dungeon);
+                //                var parent = (Dungeon)get_dungeon(context.dungeon, source.children[3].children);
+                dungeon.parent = profession;
+                profession.dungeon.children.Add(dungeon);
             }
 
             foreach (var statement in statements)
@@ -366,23 +368,33 @@ namespace imperative.summoner
             var name = parts[1].text;
             var context = original_context;
 
-            if (parts[2] != null)
+            Minion minion;
+            if (context.dungeon.has_minion(name))
             {
-                context = new Summoner_Context(source, context) { dungeon = original_context.dungeon };
-                foreach (var type_name in parts[2].children)
-                {
-                    var generic_dungeon = new Dungeon(type_name.text, null, null);
-                    context.set_pattern(type_name.text, new Profession(generic_dungeon));
-                }
+                minion = context.dungeon.summon_minion(name);
             }
+            else
+            {
+                //                minion = context.dungeon.spawn_simple_minion(name);
+                minion = context.dungeon.spawn_minion(name);
 
-            var minion = context.dungeon.has_minion(name)
-                ? context.dungeon.summon_minion(name)
-                : simple
-                ? context.dungeon.spawn_simple_minion(name,
-                    parts[3].children.Select(p => process_parameter(p, context)).ToList())
-                    : context.dungeon.spawn_minion(name,
-                    parts[3].children.Select(p => process_parameter(p, context)).ToList());
+                if (parts[2] != null)
+                {
+                    context = new Summoner_Context(source, context) { dungeon = original_context.dungeon };
+                    foreach (var type_name in parts[2].children)
+                    {
+                        var generic_dungeon = new Dungeon(type_name.text, null, null);
+                        var profession = new Profession(generic_dungeon)
+                        {
+                            is_generic_parameter = true
+                        };
+                        context.set_pattern(type_name.text, profession);
+                        minion.generic_parameters[type_name.text] = profession;
+                    }
+                }
+
+                process_parameters(minion, parts[3].children, context);
+            }
 
             var new_context = new Summoner_Context(context) { scope = minion.scope };
 
@@ -409,7 +421,46 @@ namespace imperative.summoner
                     minion.add_enchantment(new Enchantment("abstract"));
                 }
                 else
-                    minion.add_to_block(process_block(parts[5], new_context));
+                {
+                    var block = process_block(parts[5], new_context);
+                    minion.add_to_block(block);
+
+                    // Support for using generic parameters without them being used as regular parameters or return value.
+                    // Not sure how often this will actually come up so commented out for now.
+                    // Also, if I do uncomment, it's not fully working yet.
+
+                    //                    var generic_professions = block.SelectMany(Minion_Journal.get_all_expressions)
+                    //                        .Select(e => e.get_profession())
+                    //                        .Where(p => p.is_generic_parameter)
+                    //                        .Distinct();
+                    //
+                    //                    foreach (var profession in generic_professions)
+                    //                    {
+                    //                        if (!minion.generic_parameters.ContainsKey(profession.dungeon.name))
+                    //                        {
+                    //                            minion.generic_parameters[profession.dungeon.name] = profession;
+                    //                        }
+                    //                    }
+                }
+            }
+        }
+
+        private void process_parameters(Minion minion, List<Legend> legends, Summoner_Context context)
+        {
+            foreach (var parameter_source in legends)
+            {
+                var parameter = process_parameter(parameter_source, context);
+                minion.add_parameter(parameter);
+                if (parameter.symbol.profession.children != null)
+                {
+                    foreach (var child in parameter.symbol.profession.children)
+                    {
+                        if (child.is_generic_parameter && !minion.generic_parameters.ContainsKey(child.dungeon.name))
+                        {
+                            minion.generic_parameters[child.dungeon.name] = child;
+                        }
+                    }
+                }
             }
         }
 

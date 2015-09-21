@@ -36,6 +36,7 @@ namespace imperative.schema
 //        public bool is_static = false;
         public List<Enchantment> enchantments = new List<Enchantment>();
         public Function_Definition expression;
+        public Dictionary<string, Profession> generic_parameters = new Dictionary<string, Profession>();
 
         public bool is_abstract
         {
@@ -129,6 +130,12 @@ namespace imperative.schema
         {
             var symbol = scope.create_symbol(name, profession);
             var parameter = new Parameter(symbol, default_value);
+            parameters.Add(parameter);
+            return parameter;
+        }
+
+        public Parameter add_parameter(Parameter parameter)
+        {
             parameters.Add(parameter);
             return parameter;
         }

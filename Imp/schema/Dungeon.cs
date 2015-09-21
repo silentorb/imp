@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using imperative.expressions;
 using imperative.legion;
+using imperative.scholar;
 using metahub.render;
 using metahub.schema;
 using Expression = imperative.expressions.Expression;
@@ -21,7 +22,7 @@ namespace imperative.schema
         public string name { get; set; }
         public Dungeon realm { get; set; }
         public Dictionary<string, Dungeon> dungeons = new Dictionary<string, Dungeon>();
-        public Dungeon parent;
+        public Profession parent;
         public List<Dungeon> children = new List<Dungeon>();
         //        public List<Expression> code;
         Dictionary<string, Accordian> blocks = new Dictionary<string, Accordian>();
@@ -38,14 +39,14 @@ namespace imperative.schema
         public bool is_dynamic = false;
         public string source_file { get; set; }
         public Dictionary<string, object> hooks = new Dictionary<string, object>();
-        public List<Dungeon> interfaces = new List<Dungeon>();
+        public List<Profession> interfaces = new List<Profession>();
         public string class_export = "";
         public event Dungeon_Minion_Event on_add_minion;
         public string external_name;
         public Dictionary<string, Profession> generic_parameters = new Dictionary<string, Profession>();
         public Dictionary<string, Dungeon_Additional> trellis_additional = new Dictionary<string, Dungeon_Additional>();
         public Project project;
-
+        public Dungeon_Journal journal;
         public object default_value { get; set; }
 
         private Portal[] _portals;
@@ -89,13 +90,14 @@ namespace imperative.schema
         private static int next_id = 1;
 #endif
 
-        public Dungeon(string name, Overlord overlord, Dungeon realm, Dungeon parent = null, bool is_value = false)
+        public Dungeon(string name, Overlord overlord, Dungeon realm, Profession parent = null, bool is_value = false)
         {
 #if DEBUG
             id = next_id++;
 #endif
 
             this.name = name;
+            journal = new Dungeon_Journal(this);
             if (overlord != null)
             {
                 this.overlord = overlord;
@@ -107,8 +109,8 @@ namespace imperative.schema
             if (parent != null)
             {
                 this.parent = parent;
-                parent.children.Add(this);
-                foreach (var portal in parent.all_portals.Values)
+                parent.dungeon.children.Add(this);
+                foreach (var portal in parent.dungeon.all_portals.Values)
                 {
                     all_portals[portal.name] = new Portal(portal, this);
                 }
@@ -273,12 +275,12 @@ namespace imperative.schema
 
         public void analyze()
         {
-            if (parent != null && !parent.is_abstract)
-                add_dependency(parent).allow_partial = false;
+            if (parent != null && !parent.dungeon.is_abstract)
+                add_dependency(parent.dungeon).allow_partial = false;
 
             foreach (var @interface in interfaces)
             {
-                add_dependency(@interface).allow_partial = false;
+                add_dependency(@interface.dungeon).allow_partial = false;
             }
 
             foreach (var portal in all_portals.Values)
@@ -292,6 +294,11 @@ namespace imperative.schema
 
             foreach (var minion in minions.Values)
             {
+                analyze_profession(minion.return_type);
+                foreach (var parameter in minion.parameters)
+                {
+                    analyze_profession(parameter.symbol.profession);
+                }
                 analyze_expressions(minion.expressions);
             }
         }
@@ -514,7 +521,7 @@ namespace imperative.schema
             if (result || !check_ancestors || parent == null)
                 return result;
 
-            return parent.has_minion(minion_name, true);
+            return parent.dungeon.has_minion(minion_name, true);
         }
 
         public Minion summon_minion(string minion_name, bool check_ancestors = false)
@@ -525,7 +532,7 @@ namespace imperative.schema
             if (!check_ancestors || parent == null)
                 return null;
 
-            return parent.summon_minion(minion_name, true);
+            return parent.dungeon.summon_minion(minion_name, true);
         }
 
         public string get_available_name(string key, int start = 0)

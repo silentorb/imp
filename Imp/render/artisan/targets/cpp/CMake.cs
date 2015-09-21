@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using imperative.legion;
@@ -10,40 +11,103 @@ namespace imperative.render.artisan.targets.cpp
 {
     static class CMake
     {
-        public static void create_files(Project orders, Overlord overlord)
+        public static void create_files(Project project, Overlord overlord)
         {
-            var dir = orders.output + "/";
-            create_cmakelists_txt(orders, overlord, dir);
-            create_config(orders, overlord, dir);
+            var dependencies = get_project_dependencies(project);
+
+            create_cmakelists_txt(project, dependencies);
+            create_config(project, dependencies);
         }
 
-        static void create_cmakelists_txt(Project orders, Overlord overlord, string dir)
+        static void create_config(Project project, List<Project> dependencies)
         {
+            var dir = project.output + "/";
             var sources = new List<String>();
-            gather_source_paths(orders.dungeons.Values, sources);
+            gather_source_paths(project.dungeons.Values, sources);
 
-            var dependencies = get_project_dependencies(orders.dungeons.Values, new[] { orders }).ToList();
             var load_projects = dependencies.Select(render_find_package).join("");
+            var name = project.name;
 
             string output = ""
                 + load_projects + "\r\n"
-                + "set(" + orders.name + "_includes\r\n"
+
+                + "set(" + name + "_includes\r\n"
                 + dependencies.Select(d => "\t${" + d.name + "_includes}\r\n").join("")
                 + "  ${CMAKE_CURRENT_LIST_DIR}\r\n"
-                + ")\r\n"
-                + "\r\n"
-                + "set(" + orders.name + "_sources\r\n"
+                + ")\r\n\r\n"
+
+                + "set(" + name + "_sources\r\n"
                 + sources.join("\r\n")
                 + "\r\n"
-                + ")\r\n";
+                + ")\r\n\r\n"
 
-            Generator.create_file(dir + orders.name + "-config.cmake", output);
+                + "set(" + name + "_libs\r\n"
+                + "\t${CMAKE_BINARY_DIR}/lib" + name + ".a" + "\r\n"
+                + ")\r\n"
 
+                + "";
+
+            Generator.create_file(dir + project.name + "-config.cmake", output);
         }
 
-        private static void create_config(Build_Orders orders, Overlord overlord, string dir)
+        public static string render_cmakelists_txt_header(string name)
         {
-            Generator.create_file(dir + "CMakeLists.txt", "project(" + orders.name + ")");
+            return ""
+                + "cmake_minimum_required(VERSION 3.3)\r\n\r\n"
+
+                + (string.IsNullOrEmpty(name) ? "" : "project(" + name + ")\r\n\r\n"
+
+                + "set(CMAKE_CXX_FLAGS \"${CMAKE_CXX_FLAGS} -std=c++11\")\r\n\r\n")
+
+                + "";
+        }
+
+        public static void create_cmakelists_txt(Build_Orders project, List<Project> dependencies)
+        {
+            var dir = project.output + "/";
+            var name = project.name;
+            var text = ""
+                + render_cmakelists_txt_header(name)
+
+                + "include(" + name + "-config.cmake)\r\n\r\n"
+
+                + "add_library(" + name + "\r\n"
+                + "\t${" + name + "_sources}\r\n"
+                + ")\r\n\r\n"
+
+                + "include_directories(\r\n"
+                + "\t${" + name + "_includes}\r\n"
+                + ")\r\n\r\n"
+
+                + "target_link_libraries(" + name + "\r\n"
+                + dependencies.Select(d => "\t${" + d.name + "_libs}\r\n").join("")
+                + ")\r\n\r\n"
+
+                + "";
+
+            Generator.create_file(dir + "CMakeLists.txt", text);
+        }
+
+        public static void create_wrapper_cmakelists_txt(Project project)
+        {
+            var dir = Path.GetDirectoryName(project.path).Replace("\\", "/") + "/";
+            var name = project.name;
+            var text = ""
+                + render_cmakelists_txt_header(name)
+               
+                + project.projects.Select(render_sub_project_include).join("\r\n\r\n")
+                
+                + "";
+
+            Generator.create_file(dir + "CMakeLists.txt", text);
+        }
+
+        public static string render_sub_project_include(Project project)
+        {
+            return ""
+                + "set(" + project.name + "_DIR ${CMAKE_SOURCE_DIR}/" + project.name + "/output)\r\n"
+                + "add_subdirectory(" + project.name + "/output)"
+                + "";
         }
 
         public static void gather_source_paths(IEnumerable<Dungeon> dungeons, List<String> sources)
@@ -61,7 +125,6 @@ namespace imperative.render.artisan.targets.cpp
 
                     sources.Add("\t" + space + dungeon.name + ".cpp");
                 }
-                //                gather_source_paths(child, sources);
             }
         }
 
@@ -69,6 +132,11 @@ namespace imperative.render.artisan.targets.cpp
         {
             return dungeons.SelectMany(d =>
                 d.dependencies.Values.Select(d2 => (Dungeon)d2.dungeon)).Distinct();
+        }
+
+        public static List<Project> get_project_dependencies(Project project)
+        {
+            return get_project_dependencies(project.dungeons.Values, new[] { project }).ToList();
         }
 
         public static IEnumerable<Project> get_project_dependencies(IEnumerable<Dungeon> dungeons, IEnumerable<Project> exclude)

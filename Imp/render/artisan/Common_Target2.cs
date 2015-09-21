@@ -3,19 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using imperative.expressions;
+using imperative.legion;
 using imperative.schema;
 using metahub.render;
 using metahub.schema;
 
 namespace imperative.render.artisan
 {
+    public delegate Stroke Stroke_Delegate();
     public delegate List<Stroke> Stroke_List_Delegate();
 
     public abstract class Common_Target2
     {
         public Overlord overlord;
         public Target_Configuration config;
-        protected Dictionary<string, string> types = new Dictionary<string, string>
+        protected static Dictionary<string, string> types = new Dictionary<string, string>
             {
                 {"string", "string"},
                 {"int", "int"},
@@ -49,6 +51,7 @@ namespace imperative.render.artisan
         }
 
         public abstract void run(Build_Orders config1, string[] sources);
+        public abstract void build_wrapper_project(Project project);
 
         public static string render_strokes(List<Stroke> strokes)
         {
@@ -86,6 +89,9 @@ namespace imperative.render.artisan
                 case Expression_Type.portal:
                     result = render_portal((Portal_Expression)expression);
                     break;
+
+                case Expression_Type.if_statement:
+                    return render_if((If)expression);
 
                 case Expression_Type.function_call:
                     result = render_function_call((Abstract_Function_Call)expression, parent);
@@ -131,7 +137,7 @@ namespace imperative.render.artisan
                     break;
 
                 case Expression_Type.parent_class:
-                    result = render_dungeon_path(current_dungeon.parent);
+                    result = render_dungeon_path(current_dungeon.parent.dungeon);
                     break;
 
                 case Expression_Type.insert:
@@ -152,7 +158,7 @@ namespace imperative.render.artisan
                 var text = child.full_text();
                 result += !string.IsNullOrEmpty(text) && text[0] == '['
                     ? child
-                    : new Stroke_Token(".") + child;
+                    : get_connector(expression) + child;
             }
 
             return result;
@@ -249,12 +255,12 @@ namespace imperative.render.artisan
             }
         }
 
-        virtual protected Stroke terminate_statement()
+        virtual public Stroke terminate_statement()
         {
             return new Stroke_Token(config.statement_terminator);
         }
 
-        virtual protected List<Stroke> render_statements(IEnumerable<Expression> statements)
+        virtual public List<Stroke> render_statements(IEnumerable<Expression> statements)
         {
             return statements.Select(render_statement).ToList();
         }
@@ -605,7 +611,7 @@ namespace imperative.render.artisan
         protected Stroke render_realm_path(Dungeon realm, string separator)
         {
             return new Stroke_Token(realm.parent != null && realm.parent.name != ""
-                ? render_realm_path(realm.parent, separator) + separator + realm.name
+                ? render_realm_path(realm.parent.dungeon, separator) + separator + realm.name
                 : realm.name);
         }
 
@@ -679,13 +685,10 @@ namespace imperative.render.artisan
                 : new Stroke_Token(dungeon.name);
         }
 
-        virtual public Stroke render_profession(Symbol symbol, bool is_parameter = false)
-        {
-            if (symbol.profession != null)
-                return render_profession(symbol.profession, is_parameter);
-
-            return render_profession(symbol.profession, is_parameter);
-        }
+        //        virtual public Stroke render_profession(Symbol symbol, bool is_parameter = false)
+        //        {
+        //            return render_profession(symbol.profession, is_parameter);
+        //        }
 
         virtual public Stroke render_profession(Profession signature, bool is_parameter = false)
         {
@@ -714,7 +717,7 @@ namespace imperative.render.artisan
             var intro = new Stroke_Token((config.explicit_public_members ? "public " : "")
                 + (definition.is_abstract ? "abstract " : "")
                 + (definition.is_static ? "static " : ""))
-                + (definition.return_type != null 
+                + (definition.return_type != null
                     ? render_profession(definition.return_type) + new Stroke_Token(" ")
                     : new Stroke_Token())
                 + new Stroke_Token(definition.name
@@ -729,17 +732,17 @@ namespace imperative.render.artisan
             return result;
         }
 
-        virtual protected Stroke render_definition_parameter(Parameter parameter)
+        virtual public Stroke render_definition_parameter(Parameter parameter)
         {
-            return render_profession(parameter.symbol, true) + new Stroke_Token(" " + parameter.symbol.name);
+            return render_profession(parameter.symbol.profession, true) + new Stroke_Token(" " + parameter.symbol.name);
         }
 
-        virtual protected string get_connector(Expression expression)
+        virtual protected Stroke get_connector(Expression expression)
         {
             if (expression.type == Expression_Type.parent_class)
-                return config.namespace_separator;
+                return new Stroke_Token(config.namespace_separator);
 
-            return config.path_separator;
+            return new Stroke_Token(config.path_separator);
         }
 
         virtual protected string get_connector(Profession profession)
@@ -773,7 +776,8 @@ namespace imperative.render.artisan
             return result;
         }
 
-        public Stroke render_block(List<Stroke> strokes, bool try_minimal = true, bool is_succeeded = false)
+        public Stroke render_block(List<Stroke> strokes, bool try_minimal = true,
+            bool is_succeeded = false)
         {
             var block = new Stroke_List(Stroke_Type.block, strokes);
             if (strokes.Count == 1 && try_minimal)

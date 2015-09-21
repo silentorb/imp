@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using imperative.expressions;
+using imperative.legion;
 using imperative.schema;
 using metahub.render;
 using metahub.schema;
@@ -49,6 +50,11 @@ namespace imperative.render.artisan.targets
             }
         }
 
+        public override void build_wrapper_project(Project config1)
+        {
+
+        }
+
         public List<Stroke> generate_dungeon_file_contents(Dungeon dungeon)
         {
             return render_dependencies(dungeon).Concat(new Stroke[] {
@@ -82,7 +88,7 @@ namespace imperative.render.artisan.targets
             if (expression.reference != null)
             {
                 ref_string = render_expression(expression.reference);
-                ref_full = ref_string + new Stroke_Token(get_connector(expression.reference.get_end()));
+                ref_full = ref_string + get_connector(expression.reference.get_end());
             }
 
             switch (expression.name)

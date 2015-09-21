@@ -31,76 +31,69 @@ namespace imperative.render.artisan.targets.cpp
                 }
             }
 
+            var context = new Render_Context(dungeon.realm, Cpp.static_config, Cpp.statement_router, target);
             return
                 Cpp.render_includes(headers) + new Stroke_Newline() + new Stroke_Newline()
-                + render_dungeon(dungeon);
+                + render_dungeon(dungeon, context);
         }
 
-        static Stroke render_dungeon(Dungeon dungeon)
+        static Stroke render_dungeon(Dungeon dungeon, Render_Context context)
         {
             if (dungeon.realm != null && dungeon.realm.name != "")
             {
-                return render_realm(dungeon.realm, () =>
-                    render_minions(dungeon));
+                return context.target.render_realm(dungeon.realm, () =>
+                    render_minions(dungeon, context));
             }
 
             return new Stroke_List(Stroke_Type.statements,
-                render_minions(dungeon));
+                render_minions(dungeon, context));
         }
 
 
-        static List<Stroke> render_minions(Dungeon dungeon)
+        static List<Stroke> render_minions(Dungeon dungeon, Render_Context context)
         {
-            return new List<Stroke> { render_constructor(dungeon) }
+            return new List<Stroke> { render_constructor(dungeon, context) }
                 .Concat(dungeon.minions.Values
                 .Where(m => m.name != "constructor")
-                .Select(f => render_function_definition(f, f.name))).ToList();
+                .Select(f => render_function_definition(f, context, f.name))).ToList();
         }
 
-        static Stroke render_constructor(Dungeon dungeon)
+        static Stroke render_constructor(Dungeon dungeon, Render_Context context)
         {
-            Minion constructor;
-            if (dungeon.has_minion("constructor"))
-            {
-                constructor = dungeon.minions["constructor"];
-            }
-            else
-            {
-                constructor = new Minion("constructor", dungeon);
-                constructor.parameters = new List<Parameter>();
-            }
-
-            foreach (var portal in dungeon.portals)
-            {
-                if (portal.default_expression != null)
-                {
-                    var assignment = new Assignment(new Portal_Expression(portal), "=", portal.default_expression);
-                    constructor.expressions.Insert(0, assignment);
-                }
-            }
-
-            if (constructor.expressions.Count == 0)
+            if (!dungeon.has_minion("constructor"))
                 return new Stroke_Token();
 
-            return render_function_definition(constructor, dungeon.name);
+            var constructor = dungeon.minions["constructor"];
+            return render_function_definition(constructor, context, dungeon.name);
         }
 
-        static Stroke render_function_definition(Minion definition, string name)
+        public static Stroke render_function_definition(Minion definition, Render_Context context, string name)
         {
-            if (definition.is_abstract)
+            if (definition.is_abstract || definition.generic_parameters.Count > 0)
                 return new Stroke_Token();
 
+            return render_function_intro(definition, context, definition.dungeon.name + "::" + name)
+                + render_function_body(definition, context);
+        }
+
+        public static Stroke render_function_intro(Minion definition, Render_Context context, string name)
+        {
             var a = (definition.return_type != null
-                ? Cpp.render_profession2(definition.return_type) + new Stroke_Token(" ")
-                : new Stroke_Token());
+             ? Cpp.render_profession2(definition.return_type, context) + new Stroke_Token(" ")
+             : new Stroke_Token());
 
-            var intro = a
-                + new Stroke_Token(definition.dungeon.name + "::" + name)
+            return a
+                + new Stroke_Token(name)
                 + new Stroke_Token("(")
-                + new Stroke_Token(definition.parameters.Select(p => Cpp.render_definition_parameter2(p).full_text()).@join(", "))
+                + new Stroke_Token(definition.parameters.Select(p => context.target.render_definition_parameter(p).full_text()).@join(", "))
                 + new Stroke_Token(")");
+        }
 
-            return intro + Common_Functions.render_block(Common_Functions.render_statements(definition.expressions), false) + new Stroke_Newline();
+        public static Stroke render_function_body(Minion definition, Render_Context context)
+        {
+            return Common_Functions.render_block(context.target
+                .render_statements(definition.expressions), false) +
+                   new Stroke_Newline();
         }
 
     }
