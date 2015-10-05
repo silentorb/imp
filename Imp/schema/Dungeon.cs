@@ -71,7 +71,7 @@ namespace imperative.schema
         bool _is_value = false;
         public bool is_value
         {
-            get { return _is_value; }
+            get { return _is_value || is_enum; }
             set { _is_value = value; }
         }
 
@@ -165,7 +165,7 @@ namespace imperative.schema
             }
         }
 
-        public Dependency add_dependency(IDungeon dungeon)
+        public Dependency add_dependency(Dungeon dungeon)
         {
             if (dungeon == null || dungeon == this)
                 return null;
@@ -668,16 +668,9 @@ namespace imperative.schema
             return Dungeon_Types.Class;
         }
 
-        //        public Treasury create_treasury(string treasury_name, List<string> jewels)
-        //        {
-        //            if (get_dungeon(treasury_name) != null)
-        //                throw new Exception("Realm " + name + " already contains a type named " + treasury_name + ".");
-        //
-        //            var treasury = new Treasury(treasury_name, jewels, this);
-        //            treasuries[treasury_name] = treasury;
-        //
-        //            return treasury;
-        //        }
-
+        public bool is_enum
+        {
+            get { return parent != null && parent == Professions.Int; }
+        }
     }
 }

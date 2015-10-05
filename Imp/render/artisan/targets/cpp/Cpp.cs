@@ -58,7 +58,7 @@ namespace imperative.render.artisan.targets.cpp
 
         public override void build_wrapper_project(Project project)
         {
-            var dependencies = CMake.get_project_dependencies(project);
+//            var dependencies = CMake.get_project_dependencies(project);
             CMake.create_wrapper_cmakelists_txt(project);
         }
 
@@ -77,8 +77,11 @@ namespace imperative.render.artisan.targets.cpp
                 Generator.create_file(name + ".h",
                     Overlord.stroke_to_string(Header_File.generate_header_file(this, dungeon)));
 
-                Generator.create_file(name + ".cpp",
-                    Overlord.stroke_to_string(Source_File.generate_source_file(this, dungeon)));
+                if (!dungeon.is_enum)
+                {
+                    Generator.create_file(name + ".cpp",
+                        Overlord.stroke_to_string(Source_File.generate_source_file(this, dungeon)));
+                }
             }
 
             //            foreach (var child in dungeon.dungeons.Values)
@@ -208,10 +211,18 @@ namespace imperative.render.artisan.targets.cpp
         public static Stroke render_includes(IEnumerable<External_Header> headers)
         {
             return new Stroke_List(Stroke_Type.statements, headers
-                .Select(h => (Stroke)new Stroke_Token(h.is_standard
-                    ? "#include <" + h.name + ">"
-                    : "#include \"" + h.name + ".h\""
-                    )).ToList()) { margin_bottom = 1 };
+                .Select(render_include).ToList()) { margin_bottom = 1 };
+        }
+
+        public static Stroke render_include(External_Header header)
+        {
+            if (string.IsNullOrEmpty(header.name))
+                throw new Exception("Empty header file name");
+
+            return new Stroke_Token(header.is_standard
+                ? "#include <" + header.name + ">"
+                : "#include \"" + header.name + ".h\""
+                );
         }
 
         public static bool has_header(IEnumerable<External_Header> list, string name)

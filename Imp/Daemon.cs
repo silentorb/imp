@@ -187,7 +187,10 @@ namespace imperative
 
         void run_project_file(string project_file)
         {
-            var project = Mobilize.load_project(project_file);
+            var project = Mobilize.load_project(project_file) as Project;
+            if (project == null)
+                throw new Exception("Could not find project file.");
+
             var overlord = new Overlord(project.target);
 
             Mobilize.build_all(project, overlord);

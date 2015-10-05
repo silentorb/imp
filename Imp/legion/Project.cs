@@ -15,10 +15,25 @@ namespace imperative.legion
         public string[] inputs;
     }
 
-    public class Project : Build_Orders
+    public interface IProject
+    {
+        string name { get; set; }
+    }
+
+    public class External_Project : IProject
     {
         public string name { get; set; }
-        public List<Project> projects;
+
+        public External_Project(string name)
+        {
+            this.name = name;
+        }
+    }
+
+    public class Project : Build_Orders, IProject
+    {
+        public string name { get; set; }
+        public List<IProject> projects;
         public List<string> inputs { get; set; }
         public string output { get; set; }
         public string target { get; set; }

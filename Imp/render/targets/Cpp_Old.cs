@@ -113,7 +113,7 @@ namespace metahub.render.targets
             scopes = new List<Dictionary<string, Profession>>();
             List<External_Header> headers = new List<External_Header> { new External_Header("stdafx") }.Concat(
                 new List<External_Header> { new External_Header(dungeon.source_file) }.Concat(
-                    dungeon.dependencies.Values.Where(d => d.dungeon != dungeon.parent && d.dungeon.source_file != null)
+                    dungeon.dependencies.Values.Where(d => d.dungeon.source_file != null)
                            .Select(d => new External_Header(d.dungeon.source_file)))
                                                                                       .OrderBy(h => h.name)
                 ).ToList();

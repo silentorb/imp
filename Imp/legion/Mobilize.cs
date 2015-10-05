@@ -9,7 +9,7 @@ namespace imperative.legion
 {
     static class Mobilize
     {
-        public static Project load_project(string path)
+        public static IProject load_project(string path)
         {
             var dir = Path.GetDirectoryName(path);
             var json = File.ReadAllText(path);
@@ -34,28 +34,37 @@ namespace imperative.legion
             if (source.projects != null)
             {
                 project.projects = source.projects.Select(p =>
-                    load_project(dir + "/" + p + "/imp.json")).ToList();
+                    load_project(dir, p)).ToList();
             }
             else
             {
-                project.projects = new List<Project>();
+                project.projects = new List<IProject>();
             }
 
             return project;
+        }
+
+        public static IProject load_project(string first, string second)
+        {
+            var path = first + "/" + second + "/imp.json";
+            if (!File.Exists(path))
+                return new External_Project(second);
+
+            return load_project(path);
         }
 
         public static void build_all(Project project, Overlord overlord)
         {
             if (project.output != null)
             {
-              build_project(project, overlord);
+                build_project(project, overlord);
             }
             else
             {
                 overlord.target.build_wrapper_project(project);
             }
 
-            foreach (var child in project.projects)
+            foreach (var child in project.projects.OfType<Project>())
             {
                 build_all(child, overlord);
             }

@@ -102,11 +102,13 @@ namespace imperative.render.artisan.targets.cpp
             Generator.create_file(dir + "CMakeLists.txt", text);
         }
 
-        public static string render_sub_project_include(Project project)
+        public static string render_sub_project_include(IProject project)
         {
+            var dir = project.name + (project.GetType() == typeof (Project) ? "/output" : "");
+
             return ""
-                + "set(" + project.name + "_DIR ${CMAKE_SOURCE_DIR}/" + project.name + "/output)\r\n"
-                + "add_subdirectory(" + project.name + "/output)"
+                + "set(" + project.name + "_DIR ${CMAKE_SOURCE_DIR}/" + dir + ")\r\n"
+                + "add_subdirectory(" + dir + ")"
                 + "";
         }
 
@@ -114,7 +116,7 @@ namespace imperative.render.artisan.targets.cpp
         {
             foreach (var dungeon in dungeons)
             {
-                if (dungeon.is_external || (dungeon.is_abstract && dungeon.is_external))
+                if (dungeon.is_external || dungeon.is_enum || (dungeon.is_abstract && dungeon.is_external))
                     continue;
 
                 if (dungeon.portals.Length > 0 || dungeon.minions.Count > 0)

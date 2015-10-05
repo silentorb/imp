@@ -17,7 +17,7 @@ namespace imperative.render.artisan.targets.cpp
             //            var headers = new List<External_Header> { new External_Header("stdafx") }.Concat(
             var headers = new List<External_Header> { }.Concat(
              new List<External_Header> { new External_Header(dungeon.source_file) }.Concat(
-                 dungeon.dependencies.Values.Where(d => d.dungeon != dungeon.parent && d.dungeon.source_file != null)
+                 dungeon.dependencies.Values.Where(d => (dungeon.parent == null || d.dungeon != dungeon.parent.dungeon) && d.dungeon.source_file != null)
                         .Select(d => new External_Header(d.dungeon.source_file)))
                                                                                    .OrderBy(h => h.name)
              ).ToList();

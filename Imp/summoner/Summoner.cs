@@ -240,7 +240,7 @@ namespace imperative.summoner
                     dungeon.is_external = is_external || attributes.Any(p => p.text == "external");
                     dungeon.is_abstract = attributes.Any(p => p.text == "abstract");
                     dungeon.is_dynamic = attributes.Any(p => p.text == "dynamic");
-                    //                    dungeon.is_value = attributes.Any(p => p.text == "value");
+                    dungeon.is_value = attributes.Any(p => p.text == "struct");
                 }
 
                 if (parts[2] != null)
