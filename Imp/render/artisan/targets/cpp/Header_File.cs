@@ -24,9 +24,9 @@ namespace imperative.render.artisan.targets.cpp
             if (!dungeon.is_enum)
             {
                 headers = headers.Concat(
-                    dungeon.dependencies.Values.Where(d => !d.allow_partial && d.dungeon.source_file != null)
-                        .OrderBy(d => d.dungeon.source_file)
-                        .Select(d => new External_Header(d.dungeon.source_file))
+                    dungeon.dependencies.Values.Where(d => !d.allow_partial && !d.dungeon.is_standard)
+                        .OrderBy(d => Cpp.render_source_path(d.dungeon))
+                        .Select(d => new External_Header(Cpp.render_source_path(d.dungeon)))
                     )
                     .ToList();
             }
@@ -35,16 +35,26 @@ namespace imperative.render.artisan.targets.cpp
                 + Cpp.render_includes(headers) + new Stroke_Newline() + new Stroke_Newline()
                 + render_outer_dependencies(target, dungeon)
                 + target.render_realm2(dungeon.realm, () =>
-                    render_inner_dependencies(target, dungeon).Concat(
-                    dungeon.is_enum
-                    ? new[] { enum_declaration(target, dungeon) }
-                    : new[]
-                    {
-                        class_declaration(target, dungeon),
-                        render_pointer_alias(dungeon), 
-                    }).ToList());
+                    render_inner_dependencies(target, dungeon)
+                    .Concat(render_body(target, dungeon))
+                    .ToList());
 
             return result;
+        }
+
+        private static IEnumerable<Stroke> render_body(Cpp target, Dungeon dungeon)
+        {
+            if (dungeon.is_enum)
+                return new[] { enum_declaration(target, dungeon) };
+
+            if (dungeon.is_value)
+                return new[] { class_declaration(target, dungeon) };
+
+            return new[]
+            {
+                class_declaration(target, dungeon),
+                render_pointer_alias(dungeon)
+            };
         }
 
         private static Stroke render_pointer_alias(Dungeon dungeon)
@@ -129,7 +139,7 @@ namespace imperative.render.artisan.targets.cpp
         static Stroke class_declaration(Cpp target, Dungeon dungeon)
         {
             target.current_dungeon = dungeon;
-            Stroke first = new Stroke_Token("class ");
+            Stroke first = new Stroke_Token(dungeon.is_value ? "struct " : "class ");
             var context = new Render_Context(dungeon.realm, Cpp.static_config,
               Cpp.statement_router, target);
 
@@ -151,10 +161,10 @@ namespace imperative.render.artisan.targets.cpp
                         Cpp.render_profession2(p, context, false, true)).ToList(), ", ");
             }
 
-            var lines = new List<Stroke>
-            {
-                new Stroke_Token("public:")
-            };
+            var lines = new List<Stroke>();
+
+            if (!dungeon.is_value)
+                lines.Add(new Stroke_Token("public:"));
 
             foreach (var portal in dungeon.core_portals.Values)
             {

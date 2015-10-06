@@ -37,7 +37,7 @@ namespace imperative.schema
         public bool is_abstract = false;
         public bool is_virtual = false;
         public bool is_dynamic = false;
-        public string source_file { get; set; }
+
         public Dictionary<string, object> hooks = new Dictionary<string, object>();
         public List<Profession> interfaces = new List<Profession>();
         public string class_export = "";
@@ -48,6 +48,24 @@ namespace imperative.schema
         public Project project;
         public Dungeon_Journal journal;
         public object default_value { get; set; }
+
+        private bool _is_standard = false;
+        public bool is_standard
+        {
+            get { return _is_standard; }
+            set
+            {
+                if (value == _is_standard)
+                    return;
+
+                foreach (var child in children)
+                {
+                    child.is_standard = value;
+                }
+
+                _is_standard = value;
+            }
+        }
 
         private Portal[] _portals;
         public Portal[] portals
@@ -120,50 +138,12 @@ namespace imperative.schema
             {
                 this.realm = realm;
                 realm.dungeons[name] = this;
-                var realm_prefix = realm.name.Length > 0
-                    ? realm.name + "/"
-                    : "";
-
-                if (!is_external && source_file == null)
-                    source_file = realm_prefix + name;
-
                 is_external = realm.is_external;
                 class_export = realm.class_export;
-                if (!is_external && source_file == null)
-                    source_file = realm_prefix + name;
+                is_standard = realm.is_standard;
             }
         }
 
-        private void load_additional()
-        {
-            if (!realm.trellis_additional.ContainsKey(name))
-                return;
-
-            var map = realm.trellis_additional[name];
-
-            if (map.is_external.HasValue)
-                is_external = map.is_external.Value;
-
-            //            if (map.name != null)
-            //                rail_name = map.name;
-
-            if (map.source_file != null)
-                source_file = map.source_file;
-
-            if (map.class_export != null)
-                class_export = map.class_export;
-
-            if (map.default_value != null) // Should only be set if is_value is set to true
-                default_value = map.default_value;
-
-            if (map.properties != null)
-            {
-                foreach (var item in map.properties)
-                {
-                    //                    property_additional[item.Key] = item.Value;
-                }
-            }
-        }
 
         public Dependency add_dependency(Dungeon dungeon)
         {
@@ -286,15 +266,24 @@ namespace imperative.schema
             foreach (var portal in all_portals.Values)
             {
                 var other_dungeon = portal.other_dungeon;
-                if (other_dungeon != null && (other_dungeon.GetType() != typeof(Dungeon) || !((Dungeon)other_dungeon).is_abstract))
+                if (other_dungeon != null && (other_dungeon.GetType() != typeof(Dungeon) || !other_dungeon.is_abstract))
                 {
                     add_dependency(portal.other_dungeon);
+                    if (portal.profession.children != null)
+                    {
+                        foreach (var profession in portal.profession.children)
+                        {
+                            add_dependency(profession.dungeon);
+                        }
+                    }
                 }
             }
 
             foreach (var minion in minions.Values)
             {
-                analyze_profession(minion.return_type);
+                if (minion.return_type != null)
+                    analyze_profession(minion.return_type);
+
                 foreach (var parameter in minion.parameters)
                 {
                     analyze_profession(parameter.symbol.profession);

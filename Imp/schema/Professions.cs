@@ -55,13 +55,13 @@ namespace imperative.schema
             initialize_list();
             initialize_exception();
 
-            Dictionary = new Dungeon("Dictionary", null, null);
+            Dictionary = new Dungeon("Dictionary", null, null) { is_standard = true };
 
         }
 
         private static void initialize_list()
         {
-            List = new Dungeon("List", null, null);
+            List = new Dungeon("List", null, null) { is_standard = true };
             List.spawn_simple_minion("get", new List<Parameter>
             {
                 new Parameter(new Symbol("index", Int, null))
@@ -77,29 +77,19 @@ namespace imperative.schema
 
         private static void initialize_exception()
         {
-            exception = new Dungeon("Exception", null, null);
+            exception = new Dungeon("Exception", null, null) { is_standard = true };
         }
 
         static Profession create_type(string name, bool is_value = true)
         {
             var dungeon = new Dungeon(name, null, null)
             {
-                is_value = is_value
+                is_value = is_value,
+                is_standard = true
             };
             return Profession.create(dungeon);
         }
-
-//        public Profession get(IDungeon dungeon)
-//        {
-//            var fullname = dungeon.fullname;
-//            if (!professions.ContainsKey(fullname))
-//            {
-//                var result = new Profession(dungeon, children);
-//                professions[fullname] = new List<Profession> { result };
-//                return result;
-//            }
-//        }
-
+        
         public Profession get(IDungeon dungeon, IDungeon one)
         {
             return get(dungeon, new List<Profession> { get(one) });

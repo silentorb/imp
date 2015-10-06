@@ -18,31 +18,36 @@ namespace imperative.legion
     public interface IProject
     {
         string name { get; set; }
+        string relative_path { get; set; }
     }
 
     public class External_Project : IProject
     {
         public string name { get; set; }
+        public string relative_path { get; set; }
 
         public External_Project(string name)
         {
             this.name = name;
+            relative_path = name;
         }
     }
 
     public class Project : Build_Orders, IProject
     {
         public string name { get; set; }
-        public List<IProject> projects;
+        public List<IProject> projects { get; set; }
         public List<string> inputs { get; set; }
         public string output { get; set; }
         public string target { get; set; }
         public string path { get; set; }
+        public string relative_path { get; set; }
         public Dictionary<string, Dungeon> dungeons { get; set; }
 
         public Project()
         {
             dungeons = new Dictionary<string, Dungeon>();
+            projects = new List<IProject>();
         }
     }
 }

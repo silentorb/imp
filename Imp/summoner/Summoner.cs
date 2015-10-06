@@ -248,6 +248,7 @@ namespace imperative.summoner
                     foreach (var type_name in parts[2].children)
                     {
                         var generic_dungeon = new Dungeon(type_name.text, null, null);
+                        generic_dungeon.is_standard = true;
                         var profession = new Profession(generic_dungeon)
                         {
                             is_generic_parameter = true
@@ -384,6 +385,7 @@ namespace imperative.summoner
                     foreach (var type_name in parts[2].children)
                     {
                         var generic_dungeon = new Dungeon(type_name.text, null, null);
+                        generic_dungeon.is_standard = true;
                         var profession = new Profession(generic_dungeon)
                         {
                             is_generic_parameter = true

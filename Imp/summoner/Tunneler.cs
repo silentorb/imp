@@ -88,8 +88,8 @@ namespace imperative.summoner
         {
             var pattern = patterns[step];
             var token = pattern.children[0].text;
-            if (dungeon.has_minion(token))
-                return process_minion(dungeon.minions[token], summoner, patterns, context, step);
+            if (dungeon.has_minion(token, true))
+                return process_minion(dungeon.summon_minion(token, true), summoner, patterns, context, step);
 
             if (dungeon.has_portal(token))
                 return process_portal(dungeon.all_portals[token], summoner, patterns, context, step);

@@ -25,14 +25,17 @@ namespace imperative.render.artisan.targets.cpp
             var sources = new List<String>();
             gather_source_paths(project.dungeons.Values, sources);
 
-            var load_projects = dependencies.Select(render_find_package).join("");
+            var all_dependencies = dependencies.Concat(project.projects).ToList();
+
+            var load_projects = all_dependencies.Select(render_find_package).join("");
+            
             var name = project.name;
 
             string output = ""
                 + load_projects + "\r\n"
 
                 + "set(" + name + "_includes\r\n"
-                + dependencies.Select(d => "\t${" + d.name + "_includes}\r\n").join("")
+                + all_dependencies.Select(d => "\t${" + d.name + "_includes}\r\n").join("")
                 + "  ${CMAKE_CURRENT_LIST_DIR}\r\n"
                 + ")\r\n\r\n"
 
@@ -41,8 +44,10 @@ namespace imperative.render.artisan.targets.cpp
                 + "\r\n"
                 + ")\r\n\r\n"
 
+                + "string(REPLACE \"\\\\\" \"/\" \"BIN_PATH\" \"${CMAKE_RUNTIME_OUTPUT_DIRECTORY}\")\r\n"
+
                 + "set(" + name + "_libs\r\n"
-                + "\t${CMAKE_BINARY_DIR}/lib" + name + ".a" + "\r\n"
+                + "\t${BIN_PATH}/lib" + name + ".dll.a" + "\r\n"
                 + ")\r\n"
 
                 + "";
@@ -66,12 +71,14 @@ namespace imperative.render.artisan.targets.cpp
         {
             var dir = project.output + "/";
             var name = project.name;
+            var all_dependencies = dependencies.Concat(project.projects).ToList();
+
             var text = ""
                 + render_cmakelists_txt_header(name)
 
                 + "include(" + name + "-config.cmake)\r\n\r\n"
 
-                + "add_library(" + name + "\r\n"
+                + "add_library(" + name + " SHARED\r\n"
                 + "\t${" + name + "_sources}\r\n"
                 + ")\r\n\r\n"
 
@@ -80,7 +87,7 @@ namespace imperative.render.artisan.targets.cpp
                 + ")\r\n\r\n"
 
                 + "target_link_libraries(" + name + "\r\n"
-                + dependencies.Select(d => "\t${" + d.name + "_libs}\r\n").join("")
+                + all_dependencies.Select(d => "\t${" + d.name + "_libs}\r\n").join("")
                 + ")\r\n\r\n"
 
                 + "";
@@ -92,22 +99,45 @@ namespace imperative.render.artisan.targets.cpp
         {
             var dir = Path.GetDirectoryName(project.path).Replace("\\", "/") + "/";
             var name = project.name;
+
             var text = ""
                 + render_cmakelists_txt_header(name)
-               
-                + project.projects.Select(render_sub_project_include).join("\r\n\r\n")
+
+                + great_wrapper_project_entries(project.projects).join("\r\n\r\n")
                 
                 + "";
 
             Generator.create_file(dir + "CMakeLists.txt", text);
         }
 
+        public static List<string> great_wrapper_project_entries(List<IProject> projects)
+        {
+            var result = new List<string>();
+            for (var i = 0; i < projects.Count; ++i)
+            {
+                var project = projects[i];
+                var entry = render_sub_project_include(project);
+                if (i > 0)
+                {
+                    entry += "\r\n" 
+                        + "add_dependencies("
+                        + project.name.Replace('/', '_')
+                        + " " + projects[i - 1].name.Replace('/', '_')
+                        + ")";
+                }
+                result.Add(entry);
+            }
+
+            return result;
+        }
+
         public static string render_sub_project_include(IProject project)
         {
-            var dir = project.name + (project.GetType() == typeof (Project) ? "/output" : "");
+            var dir = project.relative_path + (project.GetType() == typeof (Project) ? "/output" : "");
+            var name = project.name.Replace('/', '_');
 
             return ""
-                + "set(" + project.name + "_DIR ${CMAKE_SOURCE_DIR}/" + dir + ")\r\n"
+                + "set(" + name + "_DIR ${CMAKE_SOURCE_DIR}/" + dir + ")\r\n"
                 + "add_subdirectory(" + dir + ")"
                 + "";
         }
@@ -133,7 +163,7 @@ namespace imperative.render.artisan.targets.cpp
         public static IEnumerable<Dungeon> get_dungeon_dependencies(IEnumerable<Dungeon> dungeons)
         {
             return dungeons.SelectMany(d =>
-                d.dependencies.Values.Select(d2 => (Dungeon)d2.dungeon)).Distinct();
+                d.dependencies.Values.Select(d2 => d2.dungeon)).Distinct();
         }
 
         public static List<Project> get_project_dependencies(Project project)
@@ -149,7 +179,7 @@ namespace imperative.render.artisan.targets.cpp
                 .Except(exclude);
         }
 
-        public static string render_find_package(Project project)
+        public static string render_find_package(IProject project)
         {
             return "find_package(" + project.name + ")\r\n";
         }

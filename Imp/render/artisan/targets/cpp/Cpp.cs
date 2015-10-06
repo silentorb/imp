@@ -58,7 +58,7 @@ namespace imperative.render.artisan.targets.cpp
 
         public override void build_wrapper_project(Project project)
         {
-//            var dependencies = CMake.get_project_dependencies(project);
+            //            var dependencies = CMake.get_project_dependencies(project);
             CMake.create_wrapper_cmakelists_txt(project);
         }
 
@@ -111,7 +111,7 @@ namespace imperative.render.artisan.targets.cpp
             if (expressions.Count == 0)
                 return;
 
-           var constructor= dungeon.spawn_minion("constructor");
+            var constructor = dungeon.spawn_minion("constructor");
             constructor.return_type = null;
             constructor.expressions = expressions;
         }
@@ -169,6 +169,9 @@ namespace imperative.render.artisan.targets.cpp
             if (!signature.dungeon.is_value && !signature.is_generic_parameter && !is_type)
                 name = new Stroke_Token("std::shared_ptr<") + name + new Stroke_Token(">");
 
+            if (is_parameter && !signature.dungeon.is_value)
+                name += new Stroke_Token("&");
+
             return name;
         }
 
@@ -214,6 +217,11 @@ namespace imperative.render.artisan.targets.cpp
                 .Select(render_include).ToList()) { margin_bottom = 1 };
         }
 
+        public static string render_source_path(Dungeon dungeon)
+        {
+            return Common_Functions.render_realm_path_string(dungeon, "/");
+        }
+
         public static Stroke render_include(External_Header header)
         {
             if (string.IsNullOrEmpty(header.name))
@@ -255,6 +263,17 @@ namespace imperative.render.artisan.targets.cpp
 
             result.expression = declaration;
             return result;
+        }
+
+        override protected Stroke render_instantiation(Instantiate expression)
+        {
+            if (expression.profession.dungeon == Professions.List)
+                return render_list(expression.profession, expression.args);
+
+            var args = expression.args.Select(a => render_expression(a).full_text()).join(", ");
+            var context = new Render_Context(current_realm, config, statement_router, this);
+            return render_profession(expression.profession)
+                + new Stroke_Token("(new " + Cpp.render_dungeon_path2(expression.profession.dungeon, context).full_text() + "(" + args + "))");
         }
 
         public Stroke render_realm2(Dungeon realm, Stroke_List_Delegate action)

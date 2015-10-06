@@ -27,6 +27,13 @@ namespace imperative.render.artisan
                 ? render_realm_path(realm.parent.dungeon, separator) + separator + realm.name
                 : realm.name);
         }
+        
+        public static string render_realm_path_string(Dungeon realm, string separator)
+        {
+            return realm.realm != null && realm.realm.name != ""
+                ? render_realm_path_string(realm.realm, separator) + separator + realm.name
+                : realm.name;
+        }
 
         public static Stroke render_block(List<Stroke> strokes, bool try_minimal = true, 
             bool is_succeeded = false)

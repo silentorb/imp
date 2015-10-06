@@ -14,13 +14,10 @@ namespace imperative.render.artisan.targets.cpp
 
         public static Stroke generate_source_file(Cpp target, Dungeon dungeon)
         {
-            //            var headers = new List<External_Header> { new External_Header("stdafx") }.Concat(
-            var headers = new List<External_Header> { }.Concat(
-             new List<External_Header> { new External_Header(dungeon.source_file) }.Concat(
-                 dungeon.dependencies.Values.Where(d => (dungeon.parent == null || d.dungeon != dungeon.parent.dungeon) && d.dungeon.source_file != null)
-                        .Select(d => new External_Header(d.dungeon.source_file)))
-                                                                                   .OrderBy(h => h.name)
-             ).ToList();
+            var headers = new List<External_Header> { new External_Header(Cpp.render_source_path(dungeon)) }
+                .Concat(get_dependency_headers(dungeon))
+                .OrderBy(h => h.name)
+                .ToList();
 
             foreach (var func in dungeon.used_functions.Values)
             {
@@ -37,11 +34,18 @@ namespace imperative.render.artisan.targets.cpp
                 + render_dungeon(dungeon, context);
         }
 
+        static IEnumerable<External_Header> get_dependency_headers(Dungeon dungeon)
+        {
+            return dungeon.dependencies.Values
+                .Where(d => !d.dungeon.is_standard && (dungeon.parent == null || d.dungeon != dungeon.parent.dungeon))
+                .Select(d => new External_Header(Cpp.render_source_path(d.dungeon)));
+        }
+
         static Stroke render_dungeon(Dungeon dungeon, Render_Context context)
         {
             if (dungeon.realm != null && dungeon.realm.name != "")
             {
-                return context.target.render_realm(dungeon.realm, () =>
+                return ((Cpp)context.target).render_realm2(dungeon.realm, () =>
                     render_minions(dungeon, context));
             }
 

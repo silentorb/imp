@@ -556,7 +556,7 @@ namespace imperative.render.artisan
                 : "// " + comment.text);
         }
 
-        private Stroke render_instantiation(Instantiate expression)
+        virtual protected Stroke render_instantiation(Instantiate expression)
         {
             if (expression.profession.dungeon == Professions.List)
                 return render_list(expression.profession, expression.args);

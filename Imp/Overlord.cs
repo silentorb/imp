@@ -24,7 +24,8 @@ namespace imperative
         string target { get; }
         string name { get; }
         string path { get; set; }
-        Dictionary<string, Dungeon> dungeons { get; set; }
+        Dictionary<string, Dungeon> dungeons { get; }
+        List<IProject> projects { get; }
     }
 
     public class Overlord_Configuration : Build_Orders
@@ -35,6 +36,7 @@ namespace imperative
         public string name { get; set; }
         public string path { get; set; }
         public Dictionary<string, Dungeon> dungeons { get; set; }
+        public List<IProject> projects { get; private set; }
 
         public Overlord_Configuration()
         {
@@ -42,6 +44,7 @@ namespace imperative
             output = "";
             target = "";
             name = "";
+            projects = new List<IProject>();
         }
     }
 
@@ -233,6 +236,7 @@ namespace imperative
                 var code = Library.load_resource("imp.collections.Array.imp");
                 summon(code, "Standard Library", null);
                 root.dungeons["imp"].dungeons["collections"].is_virtual = true;
+                root.dungeons["imp"].dungeons["collections"].is_standard = true;
                 array = root.dungeons["imp"].dungeons["collections"].dungeons["Array"];
             }
 

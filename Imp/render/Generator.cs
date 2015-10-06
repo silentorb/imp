@@ -16,8 +16,8 @@ namespace metahub.render
         {
             switch (target_name)
             {
-                case "cpp":
-                    return new Cpp(minion);
+//                case "cpp":
+//                    return new Cpp(minion);
 
                 case "js":
                     return new JavaScript(minion);
@@ -52,11 +52,10 @@ namespace metahub.render
         public static List<string> get_namespace_path(Dungeon region)
         {
             var tokens = new List<string>();
-            while (region != null && region.name != "root")
+            while (region != null && region.name != "")
             {
                 tokens.Insert(0, region.external_name ?? region.name);
-                //region = region.parent;
-                break;
+                region = region.realm;
             }
 
             return tokens;
@@ -69,6 +68,10 @@ namespace metahub.render
 
         public static void create_file(string url, string contents)
         {
+            var directory = Path.GetDirectoryName(url);
+            if (!Directory.Exists(directory))
+                create_folder(directory);
+
             File.WriteAllText(url, contents);
         }
 

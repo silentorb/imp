@@ -9,7 +9,7 @@ namespace imperative.legion
 {
     static class Mobilize
     {
-        public static IProject load_project(string path)
+        public static Project load_project(string path)
         {
             var dir = Path.GetDirectoryName(path);
             var json = File.ReadAllText(path);
@@ -50,7 +50,9 @@ namespace imperative.legion
             if (!File.Exists(path))
                 return new External_Project(second);
 
-            return load_project(path);
+            var result = load_project(path);
+            result.relative_path = second;
+            return result;
         }
 
         public static void build_all(Project project, Overlord overlord)

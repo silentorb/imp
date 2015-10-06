@@ -21,7 +21,7 @@ namespace metahub.render.targets
             this.is_standard = is_standard;
         }
     }
-
+    /*
     public class Cpp : Common_Target
     {
         public Cpp(Overlord overlord = null)
@@ -832,12 +832,6 @@ namespace metahub.render.targets
             return line(render_expression(statement.target) + " " + statement.op + " " + render_expression(statement.expression) + ";");
         }
 
-        string render_comment(Comment comment)
-        {
-            return comment.is_multiline
-                       ? "/* " + comment.text + "*/"
-                       : "// " + comment.text;
-        }
     }
-
+    */
 }
