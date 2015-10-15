@@ -399,6 +399,15 @@ namespace imperative.render.artisan.targets
             }
         }
 
+        protected override Stroke render_instantiation(Instantiate expression)
+        {
+            if (expression.profession.dungeon == Professions.Dictionary)
+                return new Stroke_Token("{}");
+
+            return base.render_instantiation(expression);
+        }
+
+
         //        string render_function_call(Class_Function_Call expression, Expression parent)
         //        {
         //            var ref_string = expression.reference != null
