@@ -381,18 +381,8 @@ namespace imperative.summoner
 
                 if (parts[2] != null)
                 {
-                    context = new Summoner_Context(source, context) { dungeon = original_context.dungeon };
-                    foreach (var type_name in parts[2].children)
-                    {
-                        var generic_dungeon = new Dungeon(type_name.text, null, null);
-                        generic_dungeon.is_standard = true;
-                        var profession = new Profession(generic_dungeon)
-                        {
-                            is_generic_parameter = true
-                        };
-                        context.set_pattern(type_name.text, profession);
-                        minion.generic_parameters[type_name.text] = profession;
-                    }
+                    check_generic_parameters(parts[2].children, minion,
+                        new Summoner_Context(source, context) { dungeon = original_context.dungeon });
                 }
 
                 process_parameters(minion, parts[3].children, context);
@@ -447,6 +437,21 @@ namespace imperative.summoner
             }
         }
 
+        private void check_generic_parameters(List<Legend> source, Minion minion, Summoner_Context context)
+        {
+            foreach (var type_name in source)
+            {
+                var generic_dungeon = new Dungeon(type_name.text, null, null);
+                generic_dungeon.is_standard = true;
+                var profession = new Profession(generic_dungeon)
+                {
+                    is_generic_parameter = true
+                };
+                context.set_pattern(type_name.text, profession);
+                minion.generic_parameters[type_name.text] = profession;
+            }
+        }
+
         private void process_parameters(Minion minion, List<Legend> legends, Summoner_Context context)
         {
             foreach (var parameter_source in legends)
@@ -462,6 +467,10 @@ namespace imperative.summoner
                             minion.generic_parameters[child.dungeon.name] = child;
                         }
                     }
+                }
+                else if (parameter.symbol.profession.is_generic_parameter)
+                {
+                    minion.generic_parameters[parameter.symbol.name] = parameter.symbol.profession;
                 }
             }
         }

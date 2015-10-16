@@ -11,6 +11,7 @@ namespace imperative.render.artisan.targets.cpp
 {
     public static class Header_File
     {
+
         public static Stroke generate_header_file(Cpp target, Dungeon dungeon)
         {
             List<External_Header> headers = new List<External_Header>
@@ -24,7 +25,7 @@ namespace imperative.render.artisan.targets.cpp
             if (!dungeon.is_enum)
             {
                 headers = headers.Concat(
-                    dungeon.dependencies.Values.Where(d => !d.allow_partial && !d.dungeon.is_standard)
+                    dungeon.dependencies.Values.Where(d => needs_header(d, dungeon))
                         .OrderBy(d => Cpp.render_source_path(d.dungeon))
                         .Select(d => new External_Header(Cpp.render_source_path(d.dungeon)))
                     )
@@ -40,6 +41,14 @@ namespace imperative.render.artisan.targets.cpp
                     .ToList());
 
             return result;
+        }
+
+        private static bool needs_header(Dependency d, Dungeon current_dungeon)
+        {
+            if (d.dungeon.is_standard)
+                return false;
+
+            return !d.allow_partial || (d.dungeon.generic_parameters.Count > 0 && current_dungeon.generic_parameters.Count == 0);
         }
 
         private static IEnumerable<Stroke> render_body(Cpp target, Dungeon dungeon)

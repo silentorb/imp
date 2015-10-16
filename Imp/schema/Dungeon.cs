@@ -373,6 +373,10 @@ namespace imperative.schema
                     {
                         var definition = (Abstract_Function_Call)expression;
                         analyze_expressions(definition.args);
+                        if (definition.GetType() == typeof(Method_Call) && overlord.target.GetType() == typeof(render.artisan.targets.cpp.Cpp))
+                        {
+                            analyze_expressions(((Method_Call)definition).minion.expressions);
+                        }
                     }
                     break;
 
@@ -413,6 +417,7 @@ namespace imperative.schema
 
                 case Expression_Type.portal:
                     var portal_expression = (Portal_Expression)expression;
+                    add_dependency(portal_expression.portal.dungeon);
                     analyze_profession(portal_expression.get_profession());
                     break;
 

@@ -48,6 +48,11 @@ namespace imperative.render.artisan.targets.cpp
 
             foreach (var dungeon in config1.dungeons.Values)
             {
+                prepare_constructor(dungeon);
+            }
+
+            foreach (var dungeon in config1.dungeons.Values)
+            {
                 if (dungeon.is_external || (dungeon.is_abstract && dungeon.is_external))
                     continue;
 
@@ -71,9 +76,7 @@ namespace imperative.render.artisan.targets.cpp
                 Generator.create_folder(dir);
 
                 var name = dir + "/" + dungeon.name;
-
-                prepare_constructor(dungeon);
-
+                
                 Generator.create_file(name + ".h",
                     Overlord.stroke_to_string(Header_File.generate_header_file(this, dungeon)));
 
@@ -307,6 +310,9 @@ namespace imperative.render.artisan.targets.cpp
 
         bool is_pointer(Profession profession)
         {
+            if (profession.dungeon == Professions.List)
+                return false;
+
             return true;
         }
 
@@ -315,18 +321,35 @@ namespace imperative.render.artisan.targets.cpp
             if (expression.type == Expression_Type.parent_class)
                 return new Stroke_Token("::");
 
-            if (expression.type == Expression_Type.portal && ((Portal_Expression)expression).index != null)
-                return new Stroke_Token("->");
+//            if (expression.type == Expression_Type.portal && ((Portal_Expression)expression).index != null)
+//                return new Stroke_Token("->");
 
             var profession = expression.get_profession();
-            return new Stroke_Token(profession == null
-                       ? is_pointer(expression.get_profession()) ? "->" : "."
-                       : is_pointer(profession) ? "->" : ".");
+            return new Stroke_Token(is_pointer(profession) ? "->" : ".");
         }
 
         override protected string get_connector(Profession profession)
         {
             return is_pointer(profession) ? "->" : ".";
+        }
+
+        override protected Stroke render_iterator_block(Iterator statement)
+        {
+            var parameter = statement.parameter;
+            //            var it = parameter.scope.create_symbol(parameter.name, parameter.profession);
+            var expression = render_iterator(parameter, statement.expression);
+
+            var result = new Stroke_Token(config.foreach_symbol + " (") + expression + new Stroke_Token(")")
+                + render_block(render_statements(statement.body));
+
+            result.expression = statement;
+            return result;
+        }
+
+        override protected Stroke render_iterator(Symbol parameter, Expression expression)
+        {
+            var path_string = render_expression(expression);
+            return new Stroke_Token("auto &" + parameter.name + " : ") + path_string;
         }
 
     }
