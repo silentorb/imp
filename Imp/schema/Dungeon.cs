@@ -5,6 +5,7 @@ using System.Linq;
 using imperative.expressions;
 using imperative.legion;
 using imperative.scholar;
+using imperative.scholar.crawling;
 using metahub.render;
 using metahub.schema;
 using Expression = imperative.expressions.Expression;
@@ -156,7 +157,11 @@ namespace imperative.schema
             if (dungeon.realm != null && dungeon.realm != realm && !dungeon.realm.is_virtual && !needed_realms.Contains(dungeon.realm))
                 needed_realms.Add(dungeon.realm);
 
-            return dependencies[dungeon.name];
+            var result = dependencies[dungeon.name];
+            if ((parent != null && dungeon == parent.dungeon) || interfaces.Any(i => i.dungeon == dungeon))
+                result.allow_partial = false;
+
+            return result;
         }
 
         //        public void generate_code()
@@ -255,41 +260,58 @@ namespace imperative.schema
 
         public void analyze()
         {
-            if (parent != null && !parent.dungeon.is_abstract)
-                add_dependency(parent.dungeon).allow_partial = false;
-
-            foreach (var @interface in interfaces)
+            Dungeon_Crawler.crawl(this, d => add_dependency(d), expression =>
             {
-                add_dependency(@interface.dungeon).allow_partial = false;
-            }
-
-            foreach (var portal in all_portals.Values)
-            {
-                var other_dungeon = portal.other_dungeon;
-                if (other_dungeon != null && (other_dungeon.GetType() != typeof(Dungeon) || !other_dungeon.is_abstract))
+                if (expression.type == Expression_Type.function_call)
                 {
-                    add_dependency(portal.other_dungeon);
-                    if (portal.profession.children != null)
+                    var definition = (Abstract_Function_Call)expression;
+                    if (definition.GetType() == typeof(Method_Call) && overlord.target.GetType() == typeof(render.artisan.targets.cpp.Cpp))
                     {
-                        foreach (var profession in portal.profession.children)
-                        {
-                            add_dependency(profession.dungeon);
-                        }
+                        var minion = ((Method_Call)definition).minion;
+                        if (minion.expressions.Count > 0)
+                            return ((Method_Call)definition).minion.expressions;
                     }
                 }
-            }
 
-            foreach (var minion in minions.Values)
-            {
-                if (minion.return_type != null)
-                    analyze_profession(minion.return_type);
+                return null;
+            });
 
-                foreach (var parameter in minion.parameters)
-                {
-                    analyze_profession(parameter.symbol.profession);
-                }
-                analyze_expressions(minion.expressions);
-            }
+            //            if (parent != null && !parent.dungeon.is_abstract)
+            //                add_dependency(parent.dungeon).allow_partial = false;
+
+
+            //            foreach (var @interface in interfaces)
+            //            {
+            //                add_dependency(@interface.dungeon).allow_partial = false;
+            //            }
+            //
+            //            foreach (var portal in all_portals.Values)
+            //            {
+            //                var other_dungeon = portal.other_dungeon;
+            //                if (other_dungeon != null && (other_dungeon.GetType() != typeof(Dungeon) || !other_dungeon.is_abstract))
+            //                {
+            //                    add_dependency(portal.other_dungeon);
+            //                    if (portal.profession.children != null)
+            //                    {
+            //                        foreach (var profession in portal.profession.children)
+            //                        {
+            //                            add_dependency(profession.dungeon);
+            //                        }
+            //                    }
+            //                }
+            //            }
+            //
+            //            foreach (var minion in minions.Values)
+            //            {
+            //                if (minion.return_type != null)
+            //                    analyze_profession(minion.return_type);
+            //
+            //                foreach (var parameter in minion.parameters)
+            //                {
+            //                    analyze_profession(parameter.symbol.profession);
+            //                }
+            //                analyze_expressions(minion.expressions);
+            //            }
         }
 
         void transform_expression(Expression expression, Expression parent)
@@ -348,124 +370,124 @@ namespace imperative.schema
                 transform_expression(expression, parent_expression);
             }
         }
-
-
-        void analyze_expression(Expression expression)
-        {
-            //            overlord.target.analyze_expression(expression);
-
-            switch (expression.type)
-            {
-                case Expression_Type.function_definition:
-                    analyze_expressions(((Function_Definition)expression).expressions);
-                    break;
-
-                case Expression_Type.operation:
-                    analyze_expressions(((Operation)expression).children);
-                    break;
-
-                case Expression_Type.flow_control:
-                    analyze_expression(((Flow_Control)expression).condition);
-                    analyze_expressions(((Flow_Control)expression).body);
-                    break;
-
-                case Expression_Type.function_call:
-                    {
-                        var definition = (Abstract_Function_Call)expression;
-                        analyze_expressions(definition.args);
-                        if (definition.GetType() == typeof(Method_Call) && overlord.target.GetType() == typeof(render.artisan.targets.cpp.Cpp))
-                        {
-                            analyze_expressions(((Method_Call)definition).minion.expressions);
-                        }
-                    }
-                    break;
-
-                case Expression_Type.platform_function:
-                    {
-                        var definition = (Platform_Function)expression;
-                        if (!used_functions.ContainsKey(definition.name))
-                            used_functions[definition.name] = new Used_Function(definition.name,
-                                                                                true);
-
-                        analyze_expressions(definition.args);
-                    }
-                    break;
-
-                case Expression_Type.property_function_call:
-                    var property_function = (Property_Function_Call)expression;
-                    if (property_function.reference != null)
-                        analyze_expression(property_function.reference);
-
-                    analyze_expressions(property_function.args);
-                    break;
-
-                case Expression_Type.assignment:
-                    {
-                        var assignment = (Assignment)expression;
-                        analyze_expression(assignment.target);
-                        analyze_expression(assignment.expression);
-                    }
-                    break;
-
-                case Expression_Type.declare_variable:
-                    var declare_variable = (Declare_Variable)expression;
-                    analyze_profession(declare_variable.symbol.profession);
-                    if (declare_variable.expression != null)
-                        analyze_expression(declare_variable.expression);
-
-                    break;
-
-                case Expression_Type.portal:
-                    var portal_expression = (Portal_Expression)expression;
-                    add_dependency(portal_expression.portal.dungeon);
-                    analyze_profession(portal_expression.get_profession());
-                    break;
-
-                case Expression_Type.variable:
-                    var variable_expression = (Variable)expression;
-                    if (!Professions.is_scalar(variable_expression.symbol.profession))
-                        analyze_profession(variable_expression.symbol.profession);
-
-                    break;
-
-                case Expression_Type.iterator:
-                    var iterator = (Iterator)expression;
-                    analyze_expression(iterator.expression);
-                    analyze_expressions(iterator.body);
-                    break;
-
-                case Expression_Type.instantiate:
-                    var instantiation = (Instantiate)expression;
-                    analyze_profession(instantiation.profession);
-                    analyze_expressions(instantiation.args);
-                    break;
-            }
-
-            if (expression.next != null)
-                analyze_expression(expression.next);
-        }
-
-        void analyze_profession(Profession profession)
-        {
-            if (profession.dungeon != null)
-                add_dependency(profession.dungeon);
-
-            if (profession.children == null)
-                return;
-
-            foreach (var child in profession.children)
-            {
-                analyze_profession(child);
-            }
-        }
-
-        void analyze_expressions(IEnumerable<Expression> expressions)
-        {
-            foreach (var expression in expressions)
-            {
-                analyze_expression(expression);
-            }
-        }
+        //
+        //
+        //        void analyze_expression(Expression expression)
+        //        {
+        //            //            overlord.target.analyze_expression(expression);
+        //
+        //            switch (expression.type)
+        //            {
+        //                case Expression_Type.function_definition:
+        //                    analyze_expressions(((Function_Definition)expression).expressions);
+        //                    break;
+        //
+        //                case Expression_Type.operation:
+        //                    analyze_expressions(((Operation)expression).children);
+        //                    break;
+        //
+        //                case Expression_Type.flow_control:
+        //                    analyze_expression(((Flow_Control)expression).condition);
+        //                    analyze_expressions(((Flow_Control)expression).body);
+        //                    break;
+        //
+        //                case Expression_Type.function_call:
+        //                    {
+        //                        var definition = (Abstract_Function_Call)expression;
+        //                        analyze_expressions(definition.args);
+        //                        if (definition.GetType() == typeof(Method_Call) && overlord.target.GetType() == typeof(render.artisan.targets.cpp.Cpp))
+        //                        {
+        //                            analyze_expressions(((Method_Call)definition).minion.expressions);
+        //                        }
+        //                    }
+        //                    break;
+        //
+        //                case Expression_Type.platform_function:
+        //                    {
+        //                        var definition = (Platform_Function)expression;
+        //                        if (!used_functions.ContainsKey(definition.name))
+        //                            used_functions[definition.name] = new Used_Function(definition.name,
+        //                                                                                true);
+        //
+        //                        analyze_expressions(definition.args);
+        //                    }
+        //                    break;
+        //
+        //                case Expression_Type.property_function_call:
+        //                    var property_function = (Property_Function_Call)expression;
+        //                    if (property_function.reference != null)
+        //                        analyze_expression(property_function.reference);
+        //
+        //                    analyze_expressions(property_function.args);
+        //                    break;
+        //
+        //                case Expression_Type.assignment:
+        //                    {
+        //                        var assignment = (Assignment)expression;
+        //                        analyze_expression(assignment.target);
+        //                        analyze_expression(assignment.expression);
+        //                    }
+        //                    break;
+        //
+        //                case Expression_Type.declare_variable:
+        //                    var declare_variable = (Declare_Variable)expression;
+        //                    analyze_profession(declare_variable.symbol.profession);
+        //                    if (declare_variable.expression != null)
+        //                        analyze_expression(declare_variable.expression);
+        //
+        //                    break;
+        //
+        //                case Expression_Type.portal:
+        //                    var portal_expression = (Portal_Expression)expression;
+        //                    add_dependency(portal_expression.portal.dungeon);
+        //                    analyze_profession(portal_expression.get_profession());
+        //                    break;
+        //
+        //                case Expression_Type.variable:
+        //                    var variable_expression = (Variable)expression;
+        //                    if (!Professions.is_scalar(variable_expression.symbol.profession))
+        //                        analyze_profession(variable_expression.symbol.profession);
+        //
+        //                    break;
+        //
+        //                case Expression_Type.iterator:
+        //                    var iterator = (Iterator)expression;
+        //                    analyze_expression(iterator.expression);
+        //                    analyze_expressions(iterator.body);
+        //                    break;
+        //
+        //                case Expression_Type.instantiate:
+        //                    var instantiation = (Instantiate)expression;
+        //                    analyze_profession(instantiation.profession);
+        //                    analyze_expressions(instantiation.args);
+        //                    break;
+        //            }
+        //
+        //            if (expression.next != null)
+        //                analyze_expression(expression.next);
+        //        }
+        //
+        //        void analyze_profession(Profession profession)
+        //        {
+        //            if (profession.dungeon != null)
+        //                add_dependency(profession.dungeon);
+        //
+        //            if (profession.children == null)
+        //                return;
+        //
+        //            foreach (var child in profession.children)
+        //            {
+        //                analyze_profession(child);
+        //            }
+        //        }
+        //
+        //        void analyze_expressions(IEnumerable<Expression> expressions)
+        //        {
+        //            foreach (var expression in expressions)
+        //            {
+        //                analyze_expression(expression);
+        //            }
+        //        }
 
         public Function_Definition add_function(string function_name, List<Parameter> parameters, Profession return_type = null)
         {

@@ -429,9 +429,14 @@ namespace imperative.render.artisan
                 operation.children.Select(c =>
                     c.type == Expression_Type.operation
                         && ((Operation)c).is_condition() == operation.is_condition()
-                        ? new Stroke_Token("(") + render_expression(c) + new Stroke_Token(")")
-                        : render_expression(c)
+                        ? new Stroke_Token("(") + render_operation_part(c) + new Stroke_Token(")")
+                        : render_operation_part(c)
                     ).ToList(), " " + operation.op + " "));
+        }
+
+        virtual protected Stroke render_operation_part(Expression expression)
+        {
+            return render_expression(expression);
         }
 
         virtual protected Stroke render_property_function_call(Property_Function_Call expression, Expression parent)
@@ -535,9 +540,14 @@ namespace imperative.render.artisan
                  + new Stroke_Token(")");
         }
 
-        private Stroke render_arguments(List<Expression> args)
+        protected Stroke render_arguments(List<Expression> args)
         {
-            return new Stroke_List(Stroke_Type.chain, Stroke.join(args.Select(a => render_expression(a)).ToList(), ", "));
+            return new Stroke_List(Stroke_Type.chain, Stroke.join(args.Select(a => render_argument(a)).ToList(), ", "));
+        }
+
+        protected virtual Stroke render_argument(Expression expression)
+        {
+            return render_expression(expression);
         }
 
         virtual protected Stroke render_assignment(Assignment statement)
@@ -561,9 +571,8 @@ namespace imperative.render.artisan
             if (expression.profession.dungeon == Professions.List)
                 return render_list(expression.profession, expression.args);
 
-            var args = expression.args.Select(a => render_expression(a).full_text()).join(", ");
             return new Stroke_Token("new ") + render_profession(expression.profession)
-                + new Stroke_Token("(" + args + ")");
+                + new Stroke_Token("(" + render_arguments(expression.args) + ")");
         }
 
         //        protected abstract Stroke render_function_definition(Function_Definition definition);

@@ -21,6 +21,9 @@ namespace imperative.schema
         public List<Portal_Expression> expressions = new List<Portal_Expression>();
         public List<Enchantment> enchantments = new List<Enchantment>();
 
+        // Only used for C++ resource management.  Determines if the dungeon has ownership of the values assigned to this portal.
+        public bool is_owner = true; 
+
         private Portal _other_portal;
 
         public Portal other_portal

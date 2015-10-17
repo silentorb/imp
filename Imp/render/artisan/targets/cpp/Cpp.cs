@@ -48,7 +48,7 @@ namespace imperative.render.artisan.targets.cpp
 
             foreach (var dungeon in config1.dungeons.Values)
             {
-                prepare_constructor(dungeon);
+                prepare_dungeon(dungeon);
             }
 
             foreach (var dungeon in config1.dungeons.Values)
@@ -76,7 +76,7 @@ namespace imperative.render.artisan.targets.cpp
                 Generator.create_folder(dir);
 
                 var name = dir + "/" + dungeon.name;
-                
+
                 Generator.create_file(name + ".h",
                     Overlord.stroke_to_string(Header_File.generate_header_file(this, dungeon)));
 
@@ -91,6 +91,15 @@ namespace imperative.render.artisan.targets.cpp
             //            {
             //                render_full_dungeon(child, config1);
             //            }
+        }
+
+        public static void prepare_dungeon(Dungeon dungeon)
+        {
+            prepare_constructor(dungeon);
+            if (dungeon.has_minion("constructor"))
+            {
+
+            }
         }
 
         public static void prepare_constructor(Dungeon dungeon)
@@ -151,6 +160,21 @@ namespace imperative.render.artisan.targets.cpp
             return render_profession2(signature, context, is_parameter);
         }
 
+        public static bool is_shared_pointer(Profession signature, bool is_type = false)
+        {
+            return !signature.dungeon.is_value && !signature.is_generic_parameter && !is_type;
+        }
+
+        public static bool is_shared_pointer(Expression expression, bool is_type = false)
+        {
+            var end = expression.get_end();
+            if (end.type != Expression_Type.portal && end.type != Expression_Type.variable)
+                return false;
+
+            var profession = expression.get_profession();
+            return is_shared_pointer(profession, is_type);
+        }
+
         public static Stroke render_profession2(Profession signature, Render_Context context,
             bool is_parameter = false, bool is_type = false)
         {
@@ -169,13 +193,18 @@ namespace imperative.render.artisan.targets.cpp
                     + new Stroke_Token(">");
             }
 
-            if (!signature.dungeon.is_value && !signature.is_generic_parameter && !is_type)
-                name = new Stroke_Token("std::shared_ptr<") + name + new Stroke_Token(">");
+            if (is_shared_pointer(signature, is_type))
+                name = shared_pointer(name);
 
-            if (is_parameter && !signature.dungeon.is_value)
-                name += new Stroke_Token("&");
+            //            if (is_parameter && !signature.dungeon.is_value)
+            //                name += new Stroke_Token("&");
 
             return name;
+        }
+
+        public static Stroke shared_pointer(Stroke stroke)
+        {
+            return new Stroke_Token("std::shared_ptr<") + stroke + new Stroke_Token(">");
         }
 
         public static Stroke render_dungeon_path2(IDungeon dungeon, Render_Context context)
@@ -273,10 +302,14 @@ namespace imperative.render.artisan.targets.cpp
             if (expression.profession.dungeon == Professions.List)
                 return render_list(expression.profession, expression.args);
 
-            var args = expression.args.Select(a => render_expression(a).full_text()).join(", ");
+            var args = render_arguments(expression.args);
             var context = new Render_Context(current_realm, config, statement_router, this);
             return render_profession(expression.profession)
-                + new Stroke_Token("(new " + Cpp.render_dungeon_path2(expression.profession.dungeon, context).full_text() + "(" + args + "))");
+                + new Stroke_Token("(new ")
+                + Cpp.render_dungeon_path2(expression.profession.dungeon, context)
+                + new Stroke_Token("(")
+                + args
+                + new Stroke_Token("))");
         }
 
         public Stroke render_realm2(Dungeon realm, Stroke_List_Delegate action)
@@ -321,8 +354,8 @@ namespace imperative.render.artisan.targets.cpp
             if (expression.type == Expression_Type.parent_class)
                 return new Stroke_Token("::");
 
-//            if (expression.type == Expression_Type.portal && ((Portal_Expression)expression).index != null)
-//                return new Stroke_Token("->");
+            //            if (expression.type == Expression_Type.portal && ((Portal_Expression)expression).index != null)
+            //                return new Stroke_Token("->");
 
             var profession = expression.get_profession();
             return new Stroke_Token(is_pointer(profession) ? "->" : ".");
@@ -350,6 +383,47 @@ namespace imperative.render.artisan.targets.cpp
         {
             var path_string = render_expression(expression);
             return new Stroke_Token("auto &" + parameter.name + " : ") + path_string;
+        }
+
+        Stroke wrap_pointer(Dungeon dungeon, Expression expression)
+        {
+            return shared_pointer(new Stroke_Token(dungeon.name))
+                    + new Stroke_Token("(")
+                    + render_expression(expression)
+                    + new Stroke_Token(")");
+        }
+
+        protected override Stroke render_argument(Expression expression)
+        {
+            if (expression.type == Expression_Type.self)
+            {
+                return wrap_pointer(current_dungeon, expression);
+            }
+            return base.render_argument(expression);
+        }
+
+        override protected Stroke render_operation_part(Expression expression)
+        {
+            var result = render_expression(expression);
+            if (is_shared_pointer(expression))
+                result = new Stroke_Token("&*") + result;
+
+            return result;
+        }
+
+        override protected Stroke render_assignment(Assignment statement)
+        {
+            var value = statement.expression.get_end().type == Expression_Type.self
+                ? wrap_pointer(current_dungeon, statement.expression)
+                : render_expression(statement.expression);
+
+            var result = render_expression(statement.target)
+                + new Stroke_Token(" " + statement.op + " ")
+                + value
+                + terminate_statement();
+
+            result.expression = statement;
+            return result;
         }
 
     }

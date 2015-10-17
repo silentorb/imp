@@ -73,6 +73,8 @@
     <Compile Include="render\artisan\Scribe.cs" />
     <Compile Include="schema\Dungeon_Types.cs" />
     <Compile Include="schema\Professions.cs" />
+    <Compile Include="scholar\crawling\Crawler.cs" />
+    <Compile Include="scholar\crawling\Dungeon_Crawler.cs" />
     <Compile Include="scholar\Dungeon_Journal.cs" />
     <Compile Include="scholar\Minion_Journal.cs" />
     <Compile Include="scholar\Portal_Journal.cs" />
