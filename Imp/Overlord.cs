@@ -99,15 +99,15 @@ namespace imperative
             }
         }
 
-        public void flatten()
-        {
-            var temp = dungeons.Where(d => !d.is_external).Select(d => d.name);
-
-            foreach (var dungeon in dungeons.Where(d => !d.is_external))
-            {
-                dungeon.flatten();
-            }
-        }
+//        public void flatten()
+//        {
+//            var temp = dungeons.Where(d => !d.is_external).Select(d => d.name);
+//
+//            foreach (var dungeon in dungeons.Where(d => !d.is_external))
+//            {
+//                dungeon.flatten();
+//            }
+//        }
 
         //        public void summon(string code, string filename, bool is_external = false)
         //        {
@@ -208,7 +208,6 @@ namespace imperative
 
         public void generate(Build_Orders config, string[] sources)
         {
-            flatten();
             post_analyze();
 
             if (Directory.Exists(config.output))

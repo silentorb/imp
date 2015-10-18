@@ -29,7 +29,7 @@ namespace imperative.schema
         public bool is_platform_specific;
         public List<Minion> invokers = new List<Minion>();
         public List<Minion> invokees = new List<Minion>();
-        public Accordian accordian;
+//        public Accordian accordian;
         public Minion parent;
         public List<Minion> children = new List<Minion>();
 //        public bool is_abstract = false;
@@ -57,7 +57,6 @@ namespace imperative.schema
             this.name = name;
             this.dungeon = dungeon;
             this.portal = portal;
-            accordian = dungeon.create_block(name, scope, expressions);
 
 #if DEBUG
             stack_trace = Environment.StackTrace;
@@ -154,27 +153,27 @@ namespace imperative.schema
             return parameter;
         }
 
-        public void add_to_block(Expression expression)
-        {
-            accordian.add(expression);
-//            if (on_add_expression != null)
-//                on_add_expression(this, expression);
-        }
-
-        public void add_to_block(IEnumerable<Expression> expressions)
-        {
-            foreach (var expression in expressions)
-            {
-                add_to_block(expression);
-            }
-        }
-
-        public void add_to_block(string division, Expression expression)
-        {
-            accordian.add(division, expression);
-//            if (on_add_expression != null)
-//                on_add_expression(this, expression);
-        }
+//        public void add_to_block(Expression expression)
+//        {
+//            accordian.add(expression);
+////            if (on_add_expression != null)
+////                on_add_expression(this, expression);
+//        }
+//
+//        public void add_to_block(IEnumerable<Expression> expressions)
+//        {
+//            foreach (var expression in expressions)
+//            {
+//                add_to_block(expression);
+//            }
+//        }
+//
+//        public void add_to_block(string division, Expression expression)
+//        {
+//            accordian.add(division, expression);
+////            if (on_add_expression != null)
+////                on_add_expression(this, expression);
+//        }
 
         public bool has_enchantment(string name)
         {

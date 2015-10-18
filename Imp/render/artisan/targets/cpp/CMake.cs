@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using imperative.legion;
 using imperative.schema;
@@ -28,7 +29,7 @@ namespace imperative.render.artisan.targets.cpp
             var all_dependencies = dependencies.Concat(project.projects).ToList();
 
             var load_projects = all_dependencies.Select(render_find_package).join("");
-            
+
             var name = project.name;
 
             string output = ""
@@ -104,7 +105,7 @@ namespace imperative.render.artisan.targets.cpp
                 + render_cmakelists_txt_header(name)
 
                 + great_wrapper_project_entries(project.projects).join("\r\n\r\n")
-                
+
                 + "";
 
             Generator.create_file(dir + "CMakeLists.txt", text);
@@ -119,7 +120,7 @@ namespace imperative.render.artisan.targets.cpp
                 var entry = render_sub_project_include(project);
                 if (i > 0)
                 {
-                    entry += "\r\n" 
+                    entry += "\r\n"
                         + "add_dependencies("
                         + project.name.Replace('/', '_')
                         + " " + projects[i - 1].name.Replace('/', '_')
@@ -133,7 +134,7 @@ namespace imperative.render.artisan.targets.cpp
 
         public static string render_sub_project_include(IProject project)
         {
-            var dir = project.relative_path + (project.GetType() == typeof (Project) ? "/output" : "");
+            var dir = project.relative_path + (project.GetType() == typeof(Project) ? "/output" : "");
             var name = project.name.Replace('/', '_');
 
             return ""
@@ -168,7 +169,10 @@ namespace imperative.render.artisan.targets.cpp
 
         public static List<Project> get_project_dependencies(Project project)
         {
-            return get_project_dependencies(project.dungeons.Values, new[] { project }).ToList();
+            var projects = get_project_dependencies(project.dungeons.Values, new[] { project }).ToList();
+            return projects.Concat(projects.SelectMany(get_project_dependencies))
+                .Distinct()
+                .ToList();
         }
 
         public static IEnumerable<Project> get_project_dependencies(IEnumerable<Dungeon> dungeons, IEnumerable<Project> exclude)

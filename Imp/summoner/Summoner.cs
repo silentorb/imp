@@ -412,7 +412,7 @@ namespace imperative.summoner
                 else
                 {
                     var block = process_block(parts[5], new_context);
-                    minion.add_to_block(block);
+                    minion.expressions = block;
 
                     // Support for using generic parameters without them being used as regular parameters or return value.
                     // Not sure how often this will actually come up so commented out for now.

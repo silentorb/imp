@@ -32,7 +32,6 @@ namespace imp_test.fixtures
 //                overlord.summon_many(code, script_name);
 //            }
 
-            overlord.flatten();
             overlord.post_analyze();
             return overlord;
         }
@@ -41,7 +40,6 @@ namespace imp_test.fixtures
         {
             var overlord = new Overlord(target_name);
             overlord.summon_input(new[] { script_path }, null);
-            overlord.flatten();
             overlord.post_analyze();
             return overlord;
         }

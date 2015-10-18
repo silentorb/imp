@@ -229,13 +229,13 @@ namespace imperative.schema
             return null;
         }
 
-        public void flatten()
-        {
-            foreach (var block in blocks.Values)
-            {
-                block.flatten();
-            }
-        }
+//        public void flatten()
+//        {
+//            foreach (var block in blocks.Values)
+//            {
+//                block.flatten();
+//            }
+//        }
 
         public void analyze()
         {
@@ -489,7 +489,7 @@ namespace imperative.schema
             };
 
             if (expressions != null)
-                minion.add_to_block(expressions);
+                minion.expressions = expressions;
 
             minions_old[minion_name] = minion;
             if (!minions_more.ContainsKey(minion_name))

@@ -158,7 +158,10 @@ namespace imperative.render.artisan.targets.cpp
         {
             if (dungeon.has_minion("constructor"))
             {
-                dungeon.minions_old["constructor"].return_type = null;
+                foreach (var minion in dungeon.minions_more["constructor"])
+                {
+                    minion.return_type = null;
+                }
                 return;
             }
 
@@ -384,12 +387,26 @@ namespace imperative.render.artisan.targets.cpp
                 : new Stroke_Token();
 
             var context = new Render_Context(current_realm, config, statement_router, this);
-            return render_profession(expression.profession)
+
+            if (is_shared_pointer(expression.profession))
+            {
+                return render_profession(expression.profession)
                 + new Stroke_Token("(new ")
                 + Cpp.render_dungeon_path2(expression.profession.dungeon, context)
                 + new Stroke_Token("(")
                 + args
                 + new Stroke_Token("))");
+            }
+
+            var result = Cpp.render_dungeon_path2(expression.profession.dungeon, context)
+                + new Stroke_Token("(")
+                + args
+                + new Stroke_Token(")");
+
+            if (!expression.profession.dungeon.is_value)
+                result = new Stroke_Token("new ") + result;
+
+            return result;
         }
 
         public Stroke render_realm2(Dungeon realm, Stroke_List_Delegate action)
