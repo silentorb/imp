@@ -31,13 +31,6 @@ namespace imperative.expressions
 
         public override Profession get_profession()
         {
-//            if (_profession == null)
-//                _profession = Professions.get(Professions.any.dungeon, false, new List<Profession>()
-//                {
-//                    new Profession(Kind.String),
-//                    new Profession(Kind.unknown)
-//                });
-
             return _profession;
         }
     }

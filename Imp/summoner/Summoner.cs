@@ -249,10 +249,7 @@ namespace imperative.summoner
                     {
                         var generic_dungeon = new Dungeon(type_name.text, null, null);
                         generic_dungeon.is_standard = true;
-                        var profession = new Profession(generic_dungeon)
-                        {
-                            is_generic_parameter = true
-                        };
+                        var profession = Profession.create_generic_symbol(generic_dungeon);
                         context.set_pattern(type_name.text, profession);
                         dungeon.generic_parameters[type_name.text] = profession;
                     }
@@ -443,10 +440,7 @@ namespace imperative.summoner
             {
                 var generic_dungeon = new Dungeon(type_name.text, null, null);
                 generic_dungeon.is_standard = true;
-                var profession = new Profession(generic_dungeon)
-                {
-                    is_generic_parameter = true
-                };
+                var profession = Profession.create_generic_symbol(generic_dungeon);
                 context.set_pattern(type_name.text, profession);
                 minion.generic_parameters[type_name.text] = profession;
             }
@@ -804,6 +798,13 @@ namespace imperative.summoner
             return new Parameter(new Symbol(source.children[0].text, type, null), default_value);
         }
 
+        public Profession get_next_to_deepest_child(Profession profession, Profession last = null)
+        {
+            return profession.children != null && profession.children.Count > 0
+                ? get_next_to_deepest_child(profession.children[0], profession)
+                : last ?? profession;
+        }
+
         private Profession parse_type2(Legend source, Summoner_Context context)
         {
             var path = source.children[1].children.Select(p => p.text).ToArray();
@@ -817,8 +818,14 @@ namespace imperative.summoner
 
             if (source.children[2] != null)
             {
-
-                result.get_deepest_child().children = source.children[2].children.Select(c => parse_type2(c, context)).ToList();
+                var new_children = source.children[2].children.Select(c => parse_type2(c, context)).ToList();
+                //                result = result.with_children(new_children);
+                var child = get_next_to_deepest_child(result);
+                if (child.children == null)
+                    result = result.with_children(new_children);
+                else
+                    child.children[0] = child.children[0].with_children(new_children);
+                //                result.get_deepest_child().children = source.children[2].children.Select(c => parse_type2(c, context)).ToList();
             }
             if (result.is_array(overlord) && result.children.Count == 0)
                 throw new Parser_Exception("Missing generic parameters.", source.position);

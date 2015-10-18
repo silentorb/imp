@@ -87,9 +87,9 @@ namespace imperative.schema
                 is_value = is_value,
                 is_standard = true
             };
-            return Profession.create(dungeon);
+            return new Profession(dungeon, null);
         }
-        
+
         public Profession get(IDungeon dungeon, IDungeon one)
         {
             return get(dungeon, new List<Profession> { get(one) });
@@ -100,12 +100,13 @@ namespace imperative.schema
             return get(dungeon, new List<Profession> { one });
         }
 
-        public Profession get(IDungeon dungeon, List<Profession> children = null)
+        public Profession get(IDungeon dungeon, List<Profession> children = null,
+            Cpp_Type cpp_type = Cpp_Type.none)
         {
             var fullname = dungeon.fullname;
             if (!professions.ContainsKey(fullname))
             {
-                var result = new Profession(dungeon, children);
+                var result = new Profession(dungeon, this, children);
                 professions[fullname] = new List<Profession> { result };
                 return result;
             }
@@ -113,6 +114,9 @@ namespace imperative.schema
             var group = professions[fullname];
             foreach (var item in group)
             {
+                if (item.cpp_type != cpp_type)
+                    continue;
+
                 if ((item.children != null) == (children != null))
                 {
                     if (children == null || compare_children(children, item.children))
@@ -121,7 +125,7 @@ namespace imperative.schema
             }
 
             {
-                var result = new Profession(dungeon, children);
+                var result = new Profession(dungeon,this, children, cpp_type);
                 group.Add(result);
                 return result;
             }

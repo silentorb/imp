@@ -84,5 +84,13 @@ namespace imperative.scholar
                 analyze_expression(expression, action);
             }
         }
+
+        public static void analyze_minions(Dungeon dungeon, Expression_Delegate action)
+        {
+            foreach (var minion in dungeon.minions.Values)
+            {
+                analyze_expressions(minion.expressions, action);
+            }
+        }
     }
 }

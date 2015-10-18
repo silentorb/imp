@@ -243,10 +243,10 @@ namespace imperative.render.artisan.targets.cpp
 
         static Stroke render_function_declaration(Cpp target, Minion definition)
         {
-            if (definition.generic_parameters.Count > 0)
+            if (definition.generic_parameters.Count > 0 && !definition.is_abstract)
             {
                 var context = new Render_Context(definition.dungeon.realm, Cpp.static_config, Cpp.statement_router, target);
-                return Source_File.render_function_intro(definition, context, definition.name)
+                return /*new Stroke_Token("virtual ") +*/ Source_File.render_function_intro(definition, context, definition.name)
                 + Source_File.render_function_body(definition, context);
             }
 

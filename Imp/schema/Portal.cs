@@ -51,8 +51,8 @@ namespace imperative.schema
 
         public Dungeon other_dungeon
         {
-            get { return (Dungeon)profession.dungeon; }
-            set { profession.dungeon = value; }
+            get { return profession.dungeon; }
+//            set { profession.dungeon = value; }
         }
 
         public bool is_list

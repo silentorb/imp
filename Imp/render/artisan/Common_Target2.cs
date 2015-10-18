@@ -536,16 +536,22 @@ namespace imperative.render.artisan
                 ? ref_string + second
                 : second;
 
-            return ref_full + render_arguments(expression.args)
+            return ref_full + render_arguments(expression.args, ((Method_Call)expression).minion.parameters)
                  + new Stroke_Token(")");
         }
 
-        protected Stroke render_arguments(List<Expression> args)
+        protected Stroke render_arguments(List<Expression> args, List<Parameter>parameters)
         {
-            return new Stroke_List(Stroke_Type.chain, Stroke.join(args.Select(a => render_argument(a)).ToList(), ", "));
+            var strokes = new List<Stroke>();
+            for (int i = 0; i < args.Count; ++i)
+            {
+                strokes.Add(render_argument(args[i], parameters[i]));
+            }
+            
+            return new Stroke_List(Stroke_Type.chain, Stroke.join(strokes, ", "));
         }
 
-        protected virtual Stroke render_argument(Expression expression)
+        protected virtual Stroke render_argument(Expression expression, Parameter parameter)
         {
             return render_expression(expression);
         }
@@ -571,8 +577,12 @@ namespace imperative.render.artisan
             if (expression.profession.dungeon == Professions.List)
                 return render_list(expression.profession, expression.args);
 
+            var args = expression.args.Count > 0
+                ? render_arguments(expression.args, expression.profession.dungeon.minions["constructor"].parameters)
+                : new Stroke_Token();
+
             return new Stroke_Token("new ") + render_profession(expression.profession)
-                + new Stroke_Token("(" + render_arguments(expression.args) + ")");
+                + new Stroke_Token("(" + args + ")");
         }
 
         //        protected abstract Stroke render_function_definition(Function_Definition definition);

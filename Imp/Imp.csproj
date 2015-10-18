@@ -75,6 +75,7 @@
     <Compile Include="schema\Professions.cs" />
     <Compile Include="scholar\crawling\Crawler.cs" />
     <Compile Include="scholar\crawling\Dungeon_Crawler.cs" />
+    <Compile Include="scholar\crawling\Profession_Crawler.cs" />
     <Compile Include="scholar\Dungeon_Journal.cs" />
     <Compile Include="scholar\Minion_Journal.cs" />
     <Compile Include="scholar\Portal_Journal.cs" />

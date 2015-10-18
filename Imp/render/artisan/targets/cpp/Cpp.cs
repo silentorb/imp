@@ -5,6 +5,8 @@ using System.Text;
 using imperative.expressions;
 using imperative.legion;
 using imperative.schema;
+using imperative.scholar;
+using imperative.scholar.crawling;
 using metahub.render;
 using metahub.render.targets;
 
@@ -96,10 +98,56 @@ namespace imperative.render.artisan.targets.cpp
         public static void prepare_dungeon(Dungeon dungeon)
         {
             prepare_constructor(dungeon);
+            determine_dungeon_ownership(dungeon);
+            determine_cpp_types(dungeon);
+        }
+
+        public static void determine_dungeon_ownership(Dungeon dungeon)
+        {
             if (dungeon.has_minion("constructor"))
             {
-
+                var constructor = dungeon.minions["constructor"];
+                Crawler.analyze_expressions(constructor.expressions, expression =>
+                {
+                    if (expression.type == Expression_Type.assignment)
+                    {
+                        var assignment = (Assignment)expression;
+                        var target_end = assignment.target.get_end();
+                        if (target_end.type == Expression_Type.portal
+                            && assignment.expression.type == Expression_Type.variable
+                            && is_pointer_or_shared(assignment.expression.get_profession()))
+                        {
+                            var portal = ((Portal_Expression)target_end).portal;
+                            var variable = (Variable)assignment.expression;
+                            var parameter = constructor.parameters.FirstOrDefault(p => p.symbol == variable.symbol);
+                            if (parameter != null)
+                            {
+                                portal.is_owner = false;
+                                parameter.symbol.profession = portal.profession =
+                                    portal.profession.change_cpp_type(Cpp_Type.pointer);
+                            }
+                        }
+                    }
+                });
             }
+        }
+
+        public static void determine_cpp_types(Dungeon dungeon)
+        {
+            Crawler.analyze_minions(dungeon, expression =>
+            {
+                switch (expression.type)
+                {
+                    case Expression_Type.declare_variable:
+                        var variable_declaration = (Declare_Variable)expression;
+                        var profession = variable_declaration.symbol.profession;
+                        if (is_shared_pointer(profession) && profession.cpp_type != Cpp_Type.shared_pointer)
+                        {
+                            variable_declaration.symbol.profession = profession.change_cpp_type(Cpp_Type.shared_pointer);
+                        }
+                        break;
+                }
+            });
         }
 
         public static void prepare_constructor(Dungeon dungeon)
@@ -160,8 +208,16 @@ namespace imperative.render.artisan.targets.cpp
             return render_profession2(signature, context, is_parameter);
         }
 
+        public static bool is_pointer_or_shared(Profession signature)
+        {
+            return !signature.dungeon.is_value && !signature.is_generic_parameter;
+        }
+
         public static bool is_shared_pointer(Profession signature, bool is_type = false)
         {
+            if (signature.cpp_type != Cpp_Type.none && signature.cpp_type != Cpp_Type.shared_pointer)
+                return false;
+
             return !signature.dungeon.is_value && !signature.is_generic_parameter && !is_type;
         }
 
@@ -170,6 +226,13 @@ namespace imperative.render.artisan.targets.cpp
             var end = expression.get_end();
             if (end.type != Expression_Type.portal && end.type != Expression_Type.variable)
                 return false;
+
+            if (end.type == Expression_Type.portal)
+            {
+                var portal = ((Portal_Expression)end).portal;
+                if (!portal.is_owner)
+                    return false;
+            }
 
             var profession = expression.get_profession();
             return is_shared_pointer(profession, is_type);
@@ -193,9 +256,14 @@ namespace imperative.render.artisan.targets.cpp
                     + new Stroke_Token(">");
             }
 
-            if (is_shared_pointer(signature, is_type))
+            if (signature.cpp_type == Cpp_Type.pointer)
+            {
+                name = name + new Stroke_Token("*");
+            }
+            else if (is_shared_pointer(signature, is_type))
+            {
                 name = shared_pointer(name);
-
+            }
             //            if (is_parameter && !signature.dungeon.is_value)
             //                name += new Stroke_Token("&");
 
@@ -302,7 +370,10 @@ namespace imperative.render.artisan.targets.cpp
             if (expression.profession.dungeon == Professions.List)
                 return render_list(expression.profession, expression.args);
 
-            var args = render_arguments(expression.args);
+            var args = expression.args.Count > 0
+                ? render_arguments(expression.args, expression.profession.dungeon.minions["constructor"].parameters)
+                : new Stroke_Token();
+
             var context = new Render_Context(current_realm, config, statement_router, this);
             return render_profession(expression.profession)
                 + new Stroke_Token("(new ")
@@ -393,20 +464,33 @@ namespace imperative.render.artisan.targets.cpp
                     + new Stroke_Token(")");
         }
 
-        protected override Stroke render_argument(Expression expression)
+        protected static Stroke dereference_shared_pointer()
         {
-            if (expression.type == Expression_Type.self)
+            return new Stroke_Token("&*");
+        }
+
+        protected override Stroke render_argument(Expression expression, Parameter parameter)
+        {
+            if (expression.get_profession().cpp_type != Cpp_Type.shared_pointer
+                && parameter.symbol.profession.cpp_type == Cpp_Type.shared_pointer)
             {
                 return wrap_pointer(current_dungeon, expression);
             }
-            return base.render_argument(expression);
+
+            if (expression.get_profession().cpp_type == Cpp_Type.shared_pointer
+              && parameter.symbol.profession.cpp_type == Cpp_Type.pointer)
+            {
+                return dereference_shared_pointer() + base.render_argument(expression, parameter);
+            }
+
+            return base.render_argument(expression, parameter);
         }
 
         override protected Stroke render_operation_part(Expression expression)
         {
             var result = render_expression(expression);
             if (is_shared_pointer(expression))
-                result = new Stroke_Token("&*") + result;
+                result = dereference_shared_pointer() + result;
 
             return result;
         }

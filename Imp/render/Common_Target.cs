@@ -386,27 +386,6 @@ namespace imperative.render
 //            throw new Exception("Invalid literal " + value + " type " + profession.dungeon.name + ".");
         }
 
-        //        virtual protected string render_enum_value(Treasury treasury, int value)
-        //        {
-        //            return config.supports_enums
-        //                ? treasury.name + get_connector(new Profession(Kind.reference, treasury)) + treasury.jewels[value]
-        //                : value.ToString();
-        //        }
-
-//        virtual protected string render_dungeon_name(IDungeon dungeon)
-//        {
-//            if (dungeon.realm != current_realm)
-//                return render_dungeon_path(dungeon.realm) + "." + dungeon.name;
-//
-//            return dungeon.name;
-//        }
-
-//        virtual protected string render_realm_name(Dungeon realm)
-//        {
-//            var path = Generator.get_namespace_path(realm);
-//            return path.join(".");
-//        }
-
         virtual protected string render_scope(List<Expression> statements, bool minimal = false, bool is_succeeded = false)
         {
             indent();

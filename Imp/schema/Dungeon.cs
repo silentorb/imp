@@ -164,29 +164,6 @@ namespace imperative.schema
             return result;
         }
 
-        //        public void generate_code()
-        //        {
-        //            if (initial_generation_is_done)
-        //                return;
-        //
-        //            initial_generation_is_done = true;
-        //            var root_scope = new Scope();
-        //            code = new List<Expression>();
-        //            var root = create_block("root", root_scope, code);
-        //            root.divide("pre");
-        //
-        //            var class_expressions = new List<Expression>();
-        //            create_block("class_definition", root_scope, class_expressions);
-        //
-        //            root.divide(null, new List<Expression> {
-        //			    new Namespace(realm, new List<Expression> { 
-        //                    new Class_Definition(this, class_expressions)
-        //                })
-        //            });
-        //
-        //            root.divide("post");
-        //        }
-
         public Accordian create_block(string path, Scope scope, List<Expression> expressions = null)
         {
             var block = new Accordian(path, scope, this, expressions);
