@@ -272,7 +272,7 @@ namespace imperative.render.artisan
 
             current_dungeon = dungeon;
 
-            var abstract_keyword = dungeon.minions.Any(m => m.Value.is_abstract)
+            var abstract_keyword = dungeon.minions_old.Any(m => m.Value.is_abstract)
                 ? "abstract "
                 : "";
 
@@ -488,7 +488,7 @@ namespace imperative.render.artisan
             if (method_call != null)
             {
                 minion = method_call.minion;
-                if (minion == Professions.List.minions["get"])
+                if (minion == Professions.List.minions_old["get"])
                     return render_list(parent.get_profession(), expression.args);
 
                 if (method_call.parent == null || !method_call.parent.is_token())
@@ -578,7 +578,7 @@ namespace imperative.render.artisan
                 return render_list(expression.profession, expression.args);
 
             var args = expression.args.Count > 0
-                ? render_arguments(expression.args, expression.profession.dungeon.minions["constructor"].parameters)
+                ? render_arguments(expression.args, expression.profession.dungeon.minions_old["constructor"].parameters)
                 : new Stroke_Token();
 
             return new Stroke_Token("new ") + render_profession(expression.profession)

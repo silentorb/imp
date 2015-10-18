@@ -111,7 +111,7 @@ namespace imperative.render.artisan.targets
             var instance_portals = portals.Where(p => !p.has_enchantment("static")).ToArray();
             var static_portals = portals.Except(instance_portals).ToList();
 
-            var minions = dungeon.minions.Values.Where(p =>
+            var minions = dungeon.minions_old.Values.Where(p =>
                 !p.has_enchantment("abstract") && p.name != "constructor").ToArray();
             var instance_minions = minions.Where(p => !p.has_enchantment("static")).ToArray();
             var static_minions = minions.Except(instance_minions);
@@ -154,11 +154,11 @@ namespace imperative.render.artisan.targets
 
         Stroke render_constructor(Dungeon dungeon)
         {
-            return !dungeon.minions.ContainsKey("constructor")
+            return !dungeon.minions_old.ContainsKey("constructor")
                 ? new Stroke_Token("function() {") + (dungeon.parent != null
                     ? render_dungeon_path(dungeon.parent.dungeon) + new Stroke_Token(".apply(this)") + new Stroke_Token("}")
                     : new Stroke_Token("}"))
-                : render_function_definition(dungeon.minions["constructor"]);
+                : render_function_definition(dungeon.minions_old["constructor"]);
         }
 
         List<Stroke> render_static_properties(string dungeon_prefix, IEnumerable<Portal> portals)

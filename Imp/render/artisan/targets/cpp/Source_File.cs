@@ -56,20 +56,27 @@ namespace imperative.render.artisan.targets.cpp
 
         static List<Stroke> render_minions(Dungeon dungeon, Render_Context context)
         {
-            return new List<Stroke> { render_constructor(dungeon, context) }
-                .Concat(dungeon.minions.Values
-                .Where(m => m.name != "constructor")
-                .Select(f => render_function_definition(f, context, f.name))).ToList();
+            return new List<Stroke> { }
+                .Concat(dungeon.minions_more.Values.SelectMany(p => p)
+                .OrderBy(m => m.name == "constructor")
+                .Select(f => render_function_definition(f, context, get_minion_rendered_name(f)))).ToList();
         }
 
-        static Stroke render_constructor(Dungeon dungeon, Render_Context context)
+        static string get_minion_rendered_name(Minion minion)
         {
-            if (!dungeon.has_minion("constructor"))
-                return new Stroke_Token();
-
-            var constructor = dungeon.minions["constructor"];
-            return render_function_definition(constructor, context, dungeon.name);
+            return minion.name == "constructor"
+                ? minion.dungeon.name
+                : minion.name;
         }
+
+//        static Stroke render_constructor(Dungeon dungeon, Render_Context context)
+//        {
+//            if (!dungeon.has_minion("constructor"))
+//                return new Stroke_Token();
+//
+//            var constructor = dungeon.minions_old["constructor"];
+//            return render_function_definition(constructor, context, dungeon.name);
+//        }
 
         public static Stroke render_function_definition(Minion definition, Render_Context context, string name)
         {

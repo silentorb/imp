@@ -253,7 +253,7 @@ namespace imperative.render
 
             current_dungeon = dungeon;
 
-            var abstract_keyword = dungeon.minions.Any(m => m.Value.is_abstract)
+            var abstract_keyword = dungeon.minions_old.Any(m => m.Value.is_abstract)
                 ? "abstract "
                 : "";
 
@@ -479,7 +479,7 @@ namespace imperative.render
             if (method_call != null)
             {
                 var minion = method_call.minion;
-                if (minion == Professions.List.minions["get"])
+                if (minion == Professions.List.minions_old["get"])
                     return render_list(parent.get_profession(), expression.args);
 
                 if (method_call.parent == null || !method_call.parent.is_token())

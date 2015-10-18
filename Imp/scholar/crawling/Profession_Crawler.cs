@@ -30,7 +30,7 @@ namespace imperative.scholar.crawling
         public static void crawl_minions(Dungeon dungeon, Profession_Delegate action,
             Expression_Lister expression_action = null)
         {
-            foreach (var minion in dungeon.minions.Values)
+            foreach (var minion in dungeon.minions_old.Values)
             {
                 if (minion.return_type != null)
                     analyze_profession(minion.return_type, action);

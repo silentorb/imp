@@ -184,7 +184,7 @@ namespace imperative.summoner
                                                + " does not have a member named " + patterns[step + 1].children[0].text +
                                                ".", patterns[step + 1].position);
 
-                var minion = dungeon.spawn_minion(patterns[step + 1].children[0].text);
+                var minion = dungeon.spawn_minion(patterns[step + 1].children[0].text, new List<Parameter>());
                 child = new Method_Call(minion, null);
             }
             return append(result, child);

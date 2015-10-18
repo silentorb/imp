@@ -40,7 +40,7 @@ namespace imperative.render.artisan.targets.cpp
              };
 
             types["string"] = "std::string";
-            minion_names[Professions.List.minions["push"]] = "push_back";
+            minion_names[Professions.List.minions_old["push"]] = "push_back";
         }
 
         public override void run(Build_Orders config1, string[] sources)
@@ -71,7 +71,7 @@ namespace imperative.render.artisan.targets.cpp
 
         public void render_full_dungeon(Dungeon dungeon, Build_Orders config1)
         {
-            if (dungeon.portals.Length > 0 || dungeon.minions.Count > 0)
+            if (dungeon.portals.Length > 0 || dungeon.minions_old.Count > 0)
             {
                 var space = Generator.get_namespace_path(dungeon.realm);
                 var dir = config1.output + "/" + space.join("/");
@@ -106,7 +106,7 @@ namespace imperative.render.artisan.targets.cpp
         {
             if (dungeon.has_minion("constructor"))
             {
-                var constructor = dungeon.minions["constructor"];
+                var constructor = dungeon.minions_old["constructor"];
                 Crawler.analyze_expressions(constructor.expressions, expression =>
                 {
                     if (expression.type == Expression_Type.assignment)
@@ -146,6 +146,10 @@ namespace imperative.render.artisan.targets.cpp
                             variable_declaration.symbol.profession = profession.change_cpp_type(Cpp_Type.shared_pointer);
                         }
                         break;
+
+//                    case Expression_Type.self:
+//                        var self = (Self) expression;
+//                        self.
                 }
             });
         }
@@ -154,7 +158,7 @@ namespace imperative.render.artisan.targets.cpp
         {
             if (dungeon.has_minion("constructor"))
             {
-                dungeon.minions["constructor"].return_type = null;
+                dungeon.minions_old["constructor"].return_type = null;
                 return;
             }
 
@@ -171,7 +175,7 @@ namespace imperative.render.artisan.targets.cpp
             if (expressions.Count == 0)
                 return;
 
-            var constructor = dungeon.spawn_minion("constructor");
+            var constructor = dungeon.spawn_minion("constructor", new List<Parameter>());
             constructor.return_type = null;
             constructor.expressions = expressions;
         }
@@ -355,7 +359,12 @@ namespace imperative.render.artisan.targets.cpp
 
         override protected Stroke render_variable_declaration(Declare_Variable declaration)
         {
-            var result = new Stroke_Token("auto " + declaration.symbol.name)
+            var context = new Render_Context(current_realm, config, statement_router, this);
+            var start = declaration.expression != null
+                ? new Stroke_Token("auto")
+                : render_profession2(declaration.symbol.profession, context);
+
+            var result = start + new Stroke_Token(" " + declaration.symbol.name)
                 + (declaration.expression != null
                     ? new Stroke_Token(" = ") + render_expression(declaration.expression)
                     : null)
@@ -371,7 +380,7 @@ namespace imperative.render.artisan.targets.cpp
                 return render_list(expression.profession, expression.args);
 
             var args = expression.args.Count > 0
-                ? render_arguments(expression.args, expression.profession.dungeon.minions["constructor"].parameters)
+                ? render_arguments(expression.args, expression.profession.dungeon.minions_old["constructor"].parameters)
                 : new Stroke_Token();
 
             var context = new Render_Context(current_realm, config, statement_router, this);
@@ -415,6 +424,9 @@ namespace imperative.render.artisan.targets.cpp
         bool is_pointer(Profession profession)
         {
             if (profession.dungeon == Professions.List)
+                return false;
+
+            if (profession.cpp_type != Cpp_Type.pointer && profession.dungeon.is_value)
                 return false;
 
             return true;
@@ -489,7 +501,8 @@ namespace imperative.render.artisan.targets.cpp
         override protected Stroke render_operation_part(Expression expression)
         {
             var result = render_expression(expression);
-            if (is_shared_pointer(expression))
+            var end = expression.get_end();
+            if (is_shared_pointer(end))
                 result = dereference_shared_pointer() + result;
 
             return result;

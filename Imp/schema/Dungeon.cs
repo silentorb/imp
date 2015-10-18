@@ -26,9 +26,11 @@ namespace imperative.schema
         public Profession parent;
         public List<Dungeon> children = new List<Dungeon>();
         //        public List<Expression> code;
-        Dictionary<string, Accordian> blocks = new Dictionary<string, Accordian>();
+//        Dictionary<string, Accordian> blocks = new Dictionary<string, Accordian>();
         public Overlord overlord;
-        public Dictionary<string, Minion> minions = new Dictionary<string, Minion>();
+        public Dictionary<string, Minion> minions_old = new Dictionary<string, Minion>();
+        public Dictionary<string, List<Minion>> minions_more = new Dictionary<string, List<Minion>>();
+
         public Dictionary<string, Portal> all_portals = new Dictionary<string, Portal>();
         public Dictionary<string, Portal> core_portals = new Dictionary<string, Portal>();
         public Dictionary<string, Used_Function> used_functions = new Dictionary<string, Used_Function>();
@@ -164,7 +166,7 @@ namespace imperative.schema
             return result;
         }
 
-        public Accordian create_block(string path, Scope scope, List<Expression> expressions = null)
+      /*  public Accordian create_block(string path, Scope scope, List<Expression> expressions = null)
         {
             var block = new Accordian(path, scope, this, expressions);
             blocks[path] = block;
@@ -182,7 +184,7 @@ namespace imperative.schema
                 throw new Exception("Dungeon " + name + " does not have a block named " + path + ".");
 
             return blocks[path];
-        }
+        }*/
 
         public Portal add_portal(Portal portal)
         {
@@ -472,11 +474,13 @@ namespace imperative.schema
             return new Function_Definition(minion);
         }
 
-        public Minion spawn_simple_minion(string minion_name, List<Parameter> parameters = null,
+        public Minion spawn_simple_minion(string minion_name, List<Parameter> parameters,
             List<Expression> expressions = null, Profession return_type = null, Portal portal = null)
         {
-            if (minions.ContainsKey(minion_name))
+            if (has_minion(minion_name, parameters))
+            {
                 throw new Exception("Dungeon " + name + " already contains an minion named " + minion_name + ".");
+            }
 
             var minion = new Minion(minion_name, this, portal)
             {
@@ -487,11 +491,15 @@ namespace imperative.schema
             if (expressions != null)
                 minion.add_to_block(expressions);
 
-            minions[minion_name] = minion;
+            minions_old[minion_name] = minion;
+            if (!minions_more.ContainsKey(minion_name))
+                minions_more[minion_name] = new List<Minion>();
+
+            minions_more[minion_name].Add(minion);
             return minion;
         }
 
-        public Minion spawn_minion(string minion_name, List<Parameter> parameters = null, List<Expression> expressions = null, Profession return_type = null, Portal portal = null)
+        public Minion spawn_minion(string minion_name, List<Parameter> parameters, List<Expression> expressions = null, Profession return_type = null, Portal portal = null)
         {
             var minion = spawn_simple_minion(minion_name, parameters, expressions);
 
@@ -510,22 +518,44 @@ namespace imperative.schema
 
         public bool has_minion(string minion_name, bool check_ancestors = false)
         {
-            var result = minions.ContainsKey(minion_name);
+            var result = minions_old.ContainsKey(minion_name);
             if (result || !check_ancestors || parent == null)
                 return result;
 
             return parent.dungeon.has_minion(minion_name, true);
         }
 
+        public bool has_minion(string minion_name, List<Parameter> parameters, bool check_ancestors = false)
+        {
+            return summon_minion(minion_name, parameters, check_ancestors) != null;
+        }
+
         public Minion summon_minion(string minion_name, bool check_ancestors = false)
         {
-            if (minions.ContainsKey(minion_name))
-                return minions[minion_name];
+            if (minions_old.ContainsKey(minion_name))
+                return minions_old[minion_name];
 
             if (!check_ancestors || parent == null)
                 return null;
 
             return parent.dungeon.summon_minion(minion_name, true);
+        }
+
+        public Minion summon_minion(string minion_name, List<Parameter> parameters, bool check_ancestors = false)
+        {
+            if (minions_more.ContainsKey(minion_name))
+            {
+                foreach (var minion in minions_more[minion_name])
+                {
+                    if (minion.parameters_match(parameters))
+                        return minion;
+                }
+            }
+
+            if (check_ancestors && parent != null)
+                return parent.dungeon.summon_minion(minion_name, true);
+
+            return null;
         }
 
         public string get_available_name(string key, int start = 0)
@@ -655,7 +685,7 @@ namespace imperative.schema
 
         public Dungeon_Types get_type()
         {
-            if (all_portals.Count == 0 && minions.Count == 0)
+            if (all_portals.Count == 0 && minions_old.Count == 0)
                 return Dungeon_Types.Namespace;
 
             return Dungeon_Types.Class;

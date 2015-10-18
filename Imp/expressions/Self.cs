@@ -17,7 +17,7 @@ namespace imperative.expressions
 
         public override Profession get_profession()
         {
-            return dungeon.overlord.library.get(dungeon);
+            return dungeon.overlord.library.get(dungeon, null, Cpp_Type.pointer);
         }
 
         public override Expression clone()

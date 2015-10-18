@@ -15,7 +15,7 @@ namespace imperative.scholar
         public static void analyze_expression(Expression expression, Expression_Delegate action)
         {
             action(expression);
-
+/*
             switch (expression.type)
             {
                 case Expression_Type.function_definition:
@@ -29,6 +29,10 @@ namespace imperative.scholar
                 case Expression_Type.flow_control:
                     analyze_expression(((Flow_Control)expression).condition, action);
                     analyze_expressions(((Flow_Control)expression).body, action);
+                    break;
+
+                case Expression_Type.if_statement:
+                    var if_statement = (If) expression;
                     break;
 
                 case Expression_Type.function_call:
@@ -71,6 +75,14 @@ namespace imperative.scholar
                     var instantiation = (Instantiate)expression;
                     analyze_expressions(instantiation.args, action);
                     break;
+            }*/
+
+            foreach (var child in expression.children)
+            {
+                if (child == null)
+                    throw new Exception("Child expression cannot be null.");
+
+                analyze_expression(child, action);
             }
 
             if (expression.next != null)
@@ -87,7 +99,7 @@ namespace imperative.scholar
 
         public static void analyze_minions(Dungeon dungeon, Expression_Delegate action)
         {
-            foreach (var minion in dungeon.minions.Values)
+            foreach (var minion in dungeon.minions_old.Values)
             {
                 analyze_expressions(minion.expressions, action);
             }

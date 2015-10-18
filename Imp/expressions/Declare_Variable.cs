@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using imperative.schema;
 using runic.parser;
 
@@ -21,9 +22,14 @@ namespace imperative.expressions
             return new Declare_Variable(symbol, expression, legend);
         }
 
-        public override System.Collections.Generic.IEnumerable<Expression> children
+        public override IEnumerable<Expression> children
         {
-            get { return new[] {expression}; }
+            get
+            {
+                return expression != null
+                    ? new[] {expression}
+                    : new Expression[] {};
+            }
         }
     }
 

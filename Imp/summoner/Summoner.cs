@@ -366,15 +366,15 @@ namespace imperative.summoner
             var name = parts[1].text;
             var context = original_context;
 
+            var parameters = parts[3].children.Select(p => process_parameter(p, context)).ToList();
             Minion minion;
-            if (context.dungeon.has_minion(name))
+            if (context.dungeon.has_minion(name, parameters))
             {
-                minion = context.dungeon.summon_minion(name);
+                minion = context.dungeon.summon_minion(name, parameters);
             }
             else
             {
-                //                minion = context.dungeon.spawn_simple_minion(name);
-                minion = context.dungeon.spawn_minion(name);
+                minion = context.dungeon.spawn_minion(name, parameters);
 
                 if (parts[2] != null)
                 {
@@ -382,7 +382,7 @@ namespace imperative.summoner
                         new Summoner_Context(source, context) { dungeon = original_context.dungeon });
                 }
 
-                process_parameters(minion, parts[3].children, context);
+                process_parameters(minion, parameters);
             }
 
             var new_context = new Summoner_Context(context) { scope = minion.scope };
@@ -446,12 +446,11 @@ namespace imperative.summoner
             }
         }
 
-        private void process_parameters(Minion minion, List<Legend> legends, Summoner_Context context)
+        private void process_parameters(Minion minion, List<Parameter> parameters)
         {
-            foreach (var parameter_source in legends)
+            foreach (var parameter in parameters)
             {
-                var parameter = process_parameter(parameter_source, context);
-                minion.add_parameter(parameter);
+//                minion.add_parameter(parameter);
                 if (parameter.symbol.profession.children != null)
                 {
                     foreach (var child in parameter.symbol.profession.children)

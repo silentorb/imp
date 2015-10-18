@@ -106,7 +106,7 @@ namespace imperative.schema
             var fullname = dungeon.fullname;
             if (!professions.ContainsKey(fullname))
             {
-                var result = new Profession(dungeon, this, children);
+                var result = new Profession(dungeon, this, children, cpp_type);
                 professions[fullname] = new List<Profession> { result };
                 return result;
             }

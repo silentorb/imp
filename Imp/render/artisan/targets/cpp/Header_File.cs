@@ -236,7 +236,8 @@ namespace imperative.render.artisan.targets.cpp
             //                declarations.Add(line("void initialize_post(); // Externally defined."));
             //            }
 
-            declarations.AddRange(dungeon.minions.Values.Select(d => render_function_declaration(target, d)));
+            declarations.AddRange(dungeon.minions_more.Values.SelectMany(p => p)
+                .Select(d => render_function_declaration(target, d)));
 
             return declarations;
         }

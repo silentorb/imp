@@ -149,7 +149,7 @@ namespace imperative.render.artisan.targets.cpp
                 if (dungeon.is_external || dungeon.is_enum || (dungeon.is_abstract && dungeon.is_external))
                     continue;
 
-                if (dungeon.portals.Length > 0 || dungeon.minions.Count > 0)
+                if (dungeon.portals.Length > 0 || dungeon.minions_old.Count > 0)
                 {
                     var space = Generator.get_namespace_path(dungeon.realm).join("/") + "/";
                     if (space == "/")

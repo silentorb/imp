@@ -126,6 +126,20 @@ namespace imperative.schema
             return new Method_Call(minion, reference, args);
         }
 
+        public bool parameters_match(List<Parameter> input)
+        {
+            if (input.Count != parameters.Count)
+                return false;
+
+            for (int i = 0; i < parameters.Count; ++i)
+            {
+                if (input[i].symbol.profession != parameters[i].symbol.profession)
+                    return false;
+            }
+
+            return true;
+        }
+
         public Parameter add_parameter(string name, Profession profession, Expression default_value = null)
         {
             var symbol = scope.create_symbol(name, profession);
