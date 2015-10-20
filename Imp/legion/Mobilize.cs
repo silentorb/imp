@@ -61,14 +61,15 @@ namespace imperative.legion
             {
                 build_project(project, overlord);
             }
-            else
-            {
-                overlord.target.build_wrapper_project(project);
-            }
 
             foreach (var child in project.projects.OfType<Project>())
             {
                 build_all(child, overlord);
+            }
+
+            if (project.output == null)
+            {
+                overlord.target.build_wrapper_project(project);
             }
         }
 

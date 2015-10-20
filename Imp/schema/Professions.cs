@@ -54,9 +54,7 @@ namespace imperative.schema
 
             initialize_list();
             initialize_exception();
-
-            Dictionary = new Dungeon("Dictionary", null, null) { is_standard = true };
-
+            initialize_dictionary();
         }
 
         private static void initialize_list()
@@ -73,6 +71,21 @@ namespace imperative.schema
             List.add_portal(new Portal("count", Professions.Int, List));
             List.spawn_simple_minion("last", null, null, Professions.any);
             List.spawn_simple_minion("pop", null, null, Professions.any);
+        }
+
+        private static void initialize_dictionary()
+        {
+            Dictionary = new Dungeon("Dictionary", null, null) { is_standard = true };
+            Dictionary.spawn_simple_minion("set", new List<Parameter>
+            {
+                new Parameter(new Symbol("key", any, null)),
+                new Parameter(new Symbol("value", any, null))
+            });
+
+            Dictionary.spawn_simple_minion("get", new List<Parameter>
+            {
+                new Parameter(new Symbol("key", any, null))
+            });
         }
 
         private static void initialize_exception()

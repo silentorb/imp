@@ -223,7 +223,11 @@ namespace imperative.render.artisan.targets.cpp
             {
                 prefix += "static ";
             }
-            return new Stroke_Token(prefix) + target.render_profession(portal.get_profession()) + new Stroke_Token(" " + portal.name + ";");
+            var result = new Stroke_Token(prefix) + target.render_profession(portal.get_profession()) + new Stroke_Token(" " + portal.name);
+            if (portal.has_enchantment(Enchantments.Static) && portal.default_expression!= null)
+                result+= new Stroke_Token(" = ") + target.render_expression(portal.default_expression);
+
+            return result + new Stroke_Token(";");
         }
 
         static List<Stroke> render_function_declarations(Cpp target, Dungeon dungeon)

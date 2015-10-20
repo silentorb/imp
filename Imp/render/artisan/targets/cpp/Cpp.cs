@@ -143,13 +143,13 @@ namespace imperative.render.artisan.targets.cpp
                         var profession = variable_declaration.symbol.profession;
                         if (is_shared_pointer(profession) && profession.cpp_type != Cpp_Type.shared_pointer)
                         {
-                            variable_declaration.symbol.profession = profession.change_cpp_type(Cpp_Type.shared_pointer);
+//                            variable_declaration.symbol.profession = profession.change_cpp_type(Cpp_Type.shared_pointer);
                         }
                         break;
 
-//                    case Expression_Type.self:
-//                        var self = (Self) expression;
-//                        self.
+                    //                    case Expression_Type.self:
+                    //                        var self = (Self) expression;
+                    //                        self.
                 }
             });
         }
@@ -166,7 +166,7 @@ namespace imperative.render.artisan.targets.cpp
             }
 
             var expressions = new List<Expression>();
-            foreach (var portal in dungeon.portals)
+            foreach (var portal in dungeon.portals.Where(p => !p.has_enchantment(Enchantments.Static)))
             {
                 if (portal.default_expression != null)
                 {
@@ -251,7 +251,11 @@ namespace imperative.render.artisan.targets.cpp
             if (signature.dungeon == Professions.List)
                 return listify2(render_profession2(signature.children[0], context), signature);
 
+            if (signature.dungeon == Professions.Dictionary)
+                return render_dictionary_profession(signature, context);
+
             var lower_name = signature.dungeon.name.ToLower();
+
             var name = types.ContainsKey(lower_name)
                 ? new Stroke_Token(types[lower_name])
                 : render_dungeon_path2(signature.dungeon, context);
@@ -269,12 +273,22 @@ namespace imperative.render.artisan.targets.cpp
             }
             else if (is_shared_pointer(signature, is_type))
             {
-                name = shared_pointer(name);
+                name = name + new Stroke_Token("*");
+//                name = shared_pointer(name);
             }
             //            if (is_parameter && !signature.dungeon.is_value)
             //                name += new Stroke_Token("&");
 
             return name;
+        }
+
+        public static Stroke render_dictionary_profession(Profession profession, Render_Context context)
+        {
+            return new Stroke_Token("std::map<")
+                + render_profession2(profession.children[0], context)
+                +new Stroke_Token(", ")
+                + render_profession2(profession.children[1], context)                
+                + new Stroke_Token(">");
         }
 
         public static Stroke shared_pointer(Stroke stroke)
@@ -363,15 +377,42 @@ namespace imperative.render.artisan.targets.cpp
         override protected Stroke render_variable_declaration(Declare_Variable declaration)
         {
             var context = new Render_Context(current_realm, config, statement_router, this);
-            var start = declaration.expression != null
-                ? new Stroke_Token("auto")
-                : render_profession2(declaration.symbol.profession, context);
+            Stroke start = null;
+            bool convert = false;
+            if (declaration.expression != null)
+            {
+                if (declaration.symbol.profession == declaration.expression.get_profession()
+                    || declaration.symbol.profession == Professions.none)
+                {
+                    start = new Stroke_Token("auto");
+                }
+                else
+                {
+                    start = render_profession2(declaration.symbol.profession, context);
+                    convert = true;
+                }
+            }
+            else
+            {
+                start = render_profession2(declaration.symbol.profession, context);
+            }
 
-            var result = start + new Stroke_Token(" " + declaration.symbol.name)
-                + (declaration.expression != null
-                    ? new Stroke_Token(" = ") + render_expression(declaration.expression)
-                    : null)
-                + terminate_statement();
+            var result = start + new Stroke_Token(" " + declaration.symbol.name);
+
+            if (declaration.expression != null)
+            {
+                result += new Stroke_Token(" = ");
+                if (convert)
+                {
+                    result += new Stroke_Token("(")
+                              + render_profession2(declaration.symbol.profession, context)
+                              + new Stroke_Token(")");
+                }
+
+                result += render_expression(declaration.expression);
+            }
+              
+            result    += terminate_statement();
 
             result.expression = declaration;
             return result;
@@ -388,15 +429,15 @@ namespace imperative.render.artisan.targets.cpp
 
             var context = new Render_Context(current_realm, config, statement_router, this);
 
-            if (is_shared_pointer(expression.profession))
-            {
-                return render_profession(expression.profession)
-                + new Stroke_Token("(new ")
-                + Cpp.render_dungeon_path2(expression.profession.dungeon, context)
-                + new Stroke_Token("(")
-                + args
-                + new Stroke_Token("))");
-            }
+//            if (is_shared_pointer(expression.profession))
+//            {
+//                return render_profession(expression.profession)
+//                + new Stroke_Token("(new ")
+//                + Cpp.render_dungeon_path2(expression.profession.dungeon, context)
+//                + new Stroke_Token("(")
+//                + args
+//                + new Stroke_Token("))");
+//            }
 
             var result = Cpp.render_dungeon_path2(expression.profession.dungeon, context)
                 + new Stroke_Token("(")
@@ -440,7 +481,7 @@ namespace imperative.render.artisan.targets.cpp
 
         bool is_pointer(Profession profession)
         {
-            if (profession.dungeon == Professions.List)
+            if (profession.dungeon == Professions.List || profession.dungeon == Professions.Dictionary)
                 return false;
 
             if (profession.cpp_type != Cpp_Type.pointer && profession.dungeon.is_value)
@@ -503,13 +544,18 @@ namespace imperative.render.artisan.targets.cpp
             if (expression.get_profession().cpp_type != Cpp_Type.shared_pointer
                 && parameter.symbol.profession.cpp_type == Cpp_Type.shared_pointer)
             {
-                return wrap_pointer(current_dungeon, expression);
+//                return wrap_pointer(current_dungeon, expression);
+            }
+
+            if (expression.type == Expression_Type.self && parameter.symbol.profession.is_generic_parameter)
+            {
+//                return wrap_pointer(current_dungeon, expression);
             }
 
             if (expression.get_profession().cpp_type == Cpp_Type.shared_pointer
               && parameter.symbol.profession.cpp_type == Cpp_Type.pointer)
             {
-                return dereference_shared_pointer() + base.render_argument(expression, parameter);
+//                return dereference_shared_pointer() + base.render_argument(expression, parameter);
             }
 
             return base.render_argument(expression, parameter);
@@ -519,17 +565,17 @@ namespace imperative.render.artisan.targets.cpp
         {
             var result = render_expression(expression);
             var end = expression.get_end();
-            if (is_shared_pointer(end))
-                result = dereference_shared_pointer() + result;
+//            if (is_shared_pointer(end))
+//                result = dereference_shared_pointer() + result;
 
             return result;
         }
 
         override protected Stroke render_assignment(Assignment statement)
         {
-            var value = statement.expression.get_end().type == Expression_Type.self
+            var value = /*statement.expression.get_end().type == Expression_Type.self
                 ? wrap_pointer(current_dungeon, statement.expression)
-                : render_expression(statement.expression);
+                : */render_expression(statement.expression);
 
             var result = render_expression(statement.target)
                 + new Stroke_Token(" " + statement.op + " ")

@@ -258,6 +258,10 @@ namespace imperative.summoner
                 context.dungeon = dungeon;
                 return dungeon;
             }
+            else
+            {
+                context.dungeon = parent_dungeon.dungeons[name];
+            }
 
             return null;
         }
@@ -855,8 +859,16 @@ namespace imperative.summoner
                 if (profession != null)
                     return profession;
             }
+            IDungeon dungeon = null;
+            try
+            {
+                dungeon = context.get_dungeon(path);
+            }
+            catch
+            {
+                
+            }
 
-            var dungeon = context.get_dungeon(path);
             if (dungeon != null)
                 return overlord.library.get(dungeon);
 

@@ -347,6 +347,12 @@ namespace imperative.render.artisan
             return new Stroke_Token(config.list_start) + arg_string + new Stroke_Token(config.list_end);
         }
 
+
+        protected virtual Stroke render_index(Expression arg)
+        {
+            return new Stroke_Token("[") + render_expression(arg) + new Stroke_Token("]");
+        }
+
         virtual protected Stroke render_variable_declaration(Declare_Variable declaration)
         {
             var result = new Stroke_Token("var " + declaration.symbol.name)
@@ -488,8 +494,16 @@ namespace imperative.render.artisan
             if (method_call != null)
             {
                 minion = method_call.minion;
-                if (minion == Professions.List.minions_old["get"])
-                    return render_list(parent.get_profession(), expression.args);
+                if (minion == Professions.List.minions_old["get"]
+                    || minion == Professions.Dictionary.minions_old["get"])
+                    return render_index(expression.args[0]);
+
+                if (minion == Professions.Dictionary.minions_old["set"])
+                {
+                    return render_index(expression.args[0]) 
+                        + new Stroke_Token(" = ") 
+                        + render_expression(expression.args[1]);
+                }
 
                 if (method_call.parent == null || !method_call.parent.is_token())
                 {

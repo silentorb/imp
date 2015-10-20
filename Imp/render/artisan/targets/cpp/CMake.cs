@@ -14,20 +14,20 @@ namespace imperative.render.artisan.targets.cpp
     {
         public static void create_files(Project project, Overlord overlord)
         {
-            var dependencies = get_project_dependencies(project);
+            var sources = gather_source_paths(project.dungeons.Values);
+            if (sources.Count == 0)
+                return;
 
+            var dependencies = get_project_dependencies(project);
             create_cmakelists_txt(project, dependencies);
-            create_config(project, dependencies);
+            create_config(project, sources, dependencies);
         }
 
-        static void create_config(Project project, List<Project> dependencies)
+        static void create_config(Project project, List<String> sources, List<Project> dependencies)
         {
             var dir = project.output + "/";
-            var sources = new List<String>();
-            gather_source_paths(project.dungeons.Values, sources);
 
             var all_dependencies = dependencies.Concat(project.projects).ToList();
-
             var load_projects = all_dependencies.Select(render_find_package).join("");
 
             var name = project.name;
@@ -101,17 +101,21 @@ namespace imperative.render.artisan.targets.cpp
             var dir = Path.GetDirectoryName(project.path).Replace("\\", "/") + "/";
             var name = project.name;
 
+            var projects = project.projects
+                .Where(p => !(p is Project) || gather_source_paths(((Project)p).dungeons.Values).Count > 0)
+                .ToList();
+
             var text = ""
                 + render_cmakelists_txt_header(name)
 
-                + great_wrapper_project_entries(project.projects).join("\r\n\r\n")
+                + create_wrapper_project_entries(projects).join("\r\n\r\n")
 
                 + "";
 
             Generator.create_file(dir + "CMakeLists.txt", text);
         }
 
-        public static List<string> great_wrapper_project_entries(List<IProject> projects)
+        public static List<string> create_wrapper_project_entries(List<IProject> projects)
         {
             var result = new List<string>();
             for (var i = 0; i < projects.Count; ++i)
@@ -143,8 +147,9 @@ namespace imperative.render.artisan.targets.cpp
                 + "";
         }
 
-        public static void gather_source_paths(IEnumerable<Dungeon> dungeons, List<String> sources)
+        public static List<String> gather_source_paths(IEnumerable<Dungeon> dungeons)
         {
+            List<String> sources = new List<string>();
             foreach (var dungeon in dungeons)
             {
                 if (dungeon.is_external || dungeon.is_enum || (dungeon.is_abstract && dungeon.is_external))
@@ -159,6 +164,8 @@ namespace imperative.render.artisan.targets.cpp
                     sources.Add("\t" + space + dungeon.name + ".cpp");
                 }
             }
+
+            return sources;
         }
 
         public static IEnumerable<Dungeon> get_dungeon_dependencies(IEnumerable<Dungeon> dungeons)
@@ -178,7 +185,7 @@ namespace imperative.render.artisan.targets.cpp
         public static IEnumerable<Project> get_project_dependencies(IEnumerable<Dungeon> dungeons, IEnumerable<Project> exclude)
         {
             return get_dungeon_dependencies(dungeons)
-                .Where(d => d.project != null)
+                .Where(d => d.project != null && gather_source_paths(d.project.dungeons.Values).Count > 0)
                 .Select(d => d.project).Distinct()
                 .Except(exclude);
         }
