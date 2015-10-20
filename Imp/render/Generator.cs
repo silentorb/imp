@@ -16,8 +16,8 @@ namespace metahub.render
         {
             switch (target_name)
             {
-//                case "cpp":
-//                    return new Cpp(minion);
+                //                case "cpp":
+                //                    return new Cpp(minion);
 
                 case "js":
                     return new JavaScript(minion);
@@ -72,6 +72,12 @@ namespace metahub.render
             if (!Directory.Exists(directory))
                 create_folder(directory);
 
+            if (File.Exists(url))
+            {
+                var current_contents = File.ReadAllText(url);
+                if (contents == current_contents)
+                    return;
+            }
             File.WriteAllText(url, contents);
         }
 

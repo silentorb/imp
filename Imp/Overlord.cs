@@ -210,8 +210,8 @@ namespace imperative
         {
             post_analyze();
 
-            if (Directory.Exists(config.output))
-                Generator.clear_folder(config.output);
+//            if (Directory.Exists(config.output))
+//                Generator.clear_folder(config.output);
 
             target.run(config, sources);
         }
