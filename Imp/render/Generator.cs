@@ -72,13 +72,13 @@ namespace metahub.render
             if (!Directory.Exists(directory))
                 create_folder(directory);
 
-            if (File.Exists(url))
-            {
-                var current_contents = File.ReadAllText(url);
-                if (contents == current_contents)
-                    return;
-            }
-            File.WriteAllText(url, contents);
+//            if (File.Exists(url))
+//            {
+//                var current_contents = File.ReadAllText(url);
+//                if (contents == current_contents)
+//                    return;
+//            }
+//            File.WriteAllText(url, contents);
         }
 
         public static void clear_folder(string path)
