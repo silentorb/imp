@@ -78,7 +78,7 @@ namespace metahub.render
 //                if (contents == current_contents)
 //                    return;
 //            }
-//            File.WriteAllText(url, contents);
+            File.WriteAllText(url, contents);
         }
 
         public static void clear_folder(string path)

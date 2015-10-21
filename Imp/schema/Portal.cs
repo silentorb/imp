@@ -22,7 +22,7 @@ namespace imperative.schema
         public List<Enchantment> enchantments = new List<Enchantment>();
 
         // Only used for C++ resource management.  Determines if the dungeon has ownership of the values assigned to this portal.
-        public bool is_owner = true; 
+        public bool is_owner = false; 
 
         private Portal _other_portal;
 

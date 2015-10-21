@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using imperative.schema;
 
 namespace imperative.expressions
 {
@@ -17,6 +18,11 @@ namespace imperative.expressions
         public override IEnumerable<Expression> children
         {
             get { return new List<Expression>(); }
+        }
+
+        public override Profession get_profession()
+        {
+            return Professions.none;
         }
     }
 }

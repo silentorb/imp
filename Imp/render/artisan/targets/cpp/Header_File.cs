@@ -26,14 +26,14 @@ namespace imperative.render.artisan.targets.cpp
             {
                 headers = headers.Concat(
                     dungeon.dependencies.Values.Where(d => needs_header(d, dungeon))
-                        .OrderBy(d => Cpp.render_source_path(d.dungeon))
-                        .Select(d => new External_Header(Cpp.render_source_path(d.dungeon)))
+                        .OrderBy(d => Utility.render_source_path(d.dungeon))
+                        .Select(d => new External_Header(Utility.render_source_path(d.dungeon)))
                     )
                     .ToList();
             }
 
             var result = new Stroke_Token("#pragma once") + new Stroke_Newline()
-                + Cpp.render_includes(headers) + new Stroke_Newline() + new Stroke_Newline()
+                + Utility.render_includes(headers) + new Stroke_Newline() + new Stroke_Newline()
                 + render_outer_dependencies(target, dungeon)
                 + target.render_realm2(dungeon.realm, () =>
                     render_inner_dependencies(target, dungeon)
@@ -167,7 +167,7 @@ namespace imperative.render.artisan.targets.cpp
             {
                 first += new Stroke_Token(" : ") + Stroke.join(
                     parents.Select(p => new Stroke_Token("public ") +
-                        Cpp.render_profession2(p, context, false, true)).ToList(), ", ");
+                        Utility.render_profession2(p, context, false, true)).ToList(), ", ");
             }
 
             var lines = new List<Stroke>();
@@ -267,6 +267,11 @@ namespace imperative.render.artisan.targets.cpp
             if (definition.name == "constructor")
             {
                 return new Stroke_Token(definition.dungeon.name);
+            }
+
+            if (definition.name == "~" + definition.dungeon.name)
+            {
+                return new Stroke_Token(definition.name);
             }
 
             return new Stroke_Token("virtual ")

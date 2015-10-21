@@ -17,7 +17,7 @@ namespace imperative.render.artisan
     {
         public Overlord overlord;
         public Target_Configuration config;
-        protected static Dictionary<string, string> types = new Dictionary<string, string>
+        public static Dictionary<string, string> types = new Dictionary<string, string>
             {
                 {"string", "string"},
                 {"int", "int"},

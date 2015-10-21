@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using imperative.schema;
 
 namespace imperative.expressions
 {
@@ -61,6 +62,11 @@ namespace imperative.expressions
         public override IEnumerable<Expression> children
         {
             get { return expressions; }
+        }
+
+        public override Profession get_profession()
+        {
+            return Professions.any;
         }
     }
 }

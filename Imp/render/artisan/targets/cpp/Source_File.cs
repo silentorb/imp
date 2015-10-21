@@ -14,7 +14,7 @@ namespace imperative.render.artisan.targets.cpp
 
         public static Stroke generate_source_file(Cpp target, Dungeon dungeon)
         {
-            var headers = new List<External_Header> { new External_Header(Cpp.render_source_path(dungeon)) }
+            var headers = new List<External_Header> { new External_Header(Utility.render_source_path(dungeon)) }
                 .Concat(get_dependency_headers(dungeon))
                 .OrderBy(h => h.name)
                 .ToList();
@@ -23,14 +23,14 @@ namespace imperative.render.artisan.targets.cpp
             {
                 if (func.name == "rand" && func.is_platform_specific)
                 {
-                    if (!Cpp.has_header(headers, "stdlib"))
+                    if (!Utility.has_header(headers, "stdlib"))
                         headers.Add(new External_Header("stdlib", true));
                 }
             }
 
             var context = new Render_Context(dungeon.realm, Cpp.static_config, Cpp.statement_router, target);
             return
-                Cpp.render_includes(headers) + new Stroke_Newline() + new Stroke_Newline()
+                Utility.render_includes(headers) + new Stroke_Newline() + new Stroke_Newline()
                 + render_dungeon(dungeon, context);
         }
 
@@ -38,7 +38,7 @@ namespace imperative.render.artisan.targets.cpp
         {
             return dungeon.dependencies.Values
                 .Where(d => !d.dungeon.is_standard && (dungeon.parent == null || d.dungeon != dungeon.parent.dungeon))
-                .Select(d => new External_Header(Cpp.render_source_path(d.dungeon)));
+                .Select(d => new External_Header(Utility.render_source_path(d.dungeon)));
         }
 
         static Stroke render_dungeon(Dungeon dungeon, Render_Context context)
@@ -53,12 +53,22 @@ namespace imperative.render.artisan.targets.cpp
                 render_minions(dungeon, context));
         }
 
+        static int minion_order(Minion minion)
+        {
+            if (minion.name == "constructor")
+                return 1;
+
+            if (minion.name == "~" + minion.dungeon.name)
+                return 2;
+
+            return 3;
+        }
 
         static List<Stroke> render_minions(Dungeon dungeon, Render_Context context)
         {
             return new List<Stroke> { }
                 .Concat(dungeon.minions_more.Values.SelectMany(p => p)
-                .OrderBy(m => m.name == "constructor")
+                .OrderBy(minion_order)
                 .Select(f => render_function_definition(f, context, get_minion_rendered_name(f)))).ToList();
         }
 
@@ -90,7 +100,7 @@ namespace imperative.render.artisan.targets.cpp
         public static Stroke render_function_intro(Minion definition, Render_Context context, string name)
         {
             var a = (definition.return_type != null
-             ? Cpp.render_profession2(definition.return_type, context) + new Stroke_Token(" ")
+             ? Utility.render_profession2(definition.return_type, context) + new Stroke_Token(" ")
              : new Stroke_Token());
 
             return a

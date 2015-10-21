@@ -79,7 +79,7 @@ namespace imperative.schema
             Dictionary.spawn_simple_minion("set", new List<Parameter>
             {
                 new Parameter(new Symbol("key", any, null)),
-                new Parameter(new Symbol("value", any, null))
+                new Parameter(new Symbol("value", any, null)) { is_persistent = true }
             });
 
             Dictionary.spawn_simple_minion("get", new List<Parameter>

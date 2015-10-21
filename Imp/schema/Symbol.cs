@@ -10,6 +10,7 @@ namespace imperative.schema
         public string name;
         public Profession profession;
         public Scope scope;
+        public bool is_owner = true;
 
         public Symbol(string name, Profession profession, Scope scope)
         {

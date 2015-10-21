@@ -7,6 +7,7 @@ namespace imperative.expressions
     {
         public Symbol symbol;
         public Expression default_value;
+        public bool is_persistent = false;
 
         public Parameter(Symbol symbol, Expression default_value = null)
         {
