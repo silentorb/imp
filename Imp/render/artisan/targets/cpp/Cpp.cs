@@ -171,22 +171,37 @@ namespace imperative.render.artisan.targets.cpp
             var target_end = statement.target.get_end();
             if (target_end.type == Expression_Type.variable)
             {
-                var variable = (Variable) target_end;
+                var variable = (Variable)target_end;
                 is_owner = variable.symbol.is_owner;
             }
 
+            var assignment = render_assignment_expression(statement.target.get_end().get_profession(),
+                statement.expression, is_owner);
+
             var result = render_expression(statement.target)
                 + new Stroke_Token(" " + statement.op + " ")
-                + render_assignment_expression(statement.target.get_end().get_profession(), statement.expression, is_owner)
+                + assignment.expression
                 + terminate_statement();
+
+            if (assignment.pre_statement != null)
+                result = assignment.pre_statement + result;
 
             result.expression = statement;
             return result;
         }
 
-        protected Stroke render_assignment_expression(Profession target_profession, Expression expression, bool target_is_owner)
+        class Assignment_Expression_Result
+        {
+            public Stroke expression;
+            public Stroke pre_statement;
+        }
+
+        private static int next_unique_pointer_id = 1;
+
+        Assignment_Expression_Result render_assignment_expression(Profession target_profession, Expression expression, bool target_is_owner)
         {
             var value = render_expression(expression);
+            Stroke pre = null;
 
             var expression_end = expression.get_end();
             var expression_profession = expression_end.get_profession();
@@ -195,8 +210,16 @@ namespace imperative.render.artisan.targets.cpp
                 && expression_end.type == Expression_Type.instantiate
                 && Cpp.is_pointer(expression_profession))
             {
+                var pointer_name = "_unique_" + next_unique_pointer_id++;
+
                 var context = new Render_Context(current_dungeon.realm, Cpp.static_config, Cpp.statement_router, this);
-                value = Utility.unique_pointer(Utility.render_profession2(expression_profession, context), value);
+                var stroke = (Stroke_List)Utility.render_profession2(expression_profession, context);
+                stroke.children.RemoveAt(stroke.children.Count - 1);
+                pre = new Stroke_Token("std::unique_ptr<") + stroke + new Stroke_Token("> " + pointer_name + "(")
+                    + render_expression(expression) + new Stroke_Token(")")
+                    + terminate_statement();
+
+                value = new Stroke_Token("&*" + pointer_name);
             }
 
             if (target_profession != expression_profession && target_profession != Professions.none)
@@ -208,7 +231,11 @@ namespace imperative.render.artisan.targets.cpp
                         + value;
             }
 
-            return value;
+            return new Assignment_Expression_Result
+            {
+                expression = value,
+                pre_statement = pre
+            };
         }
 
         override protected Stroke render_variable_declaration(Declare_Variable declaration)
@@ -237,8 +264,14 @@ namespace imperative.render.artisan.targets.cpp
 
             if (declaration.expression != null)
             {
+                var assignment = render_assignment_expression(declaration.symbol.profession, declaration.expression,
+                    declaration.symbol.is_owner);
+
                 result += new Stroke_Token(" = ")
-                    + render_assignment_expression(declaration.symbol.profession, declaration.expression, declaration.symbol.is_owner);
+                    + assignment.expression;
+
+                if (assignment.pre_statement != null)
+                    result = assignment.pre_statement + result;
             }
 
             result += terminate_statement();

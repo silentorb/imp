@@ -53,6 +53,12 @@ namespace imperative.render.artisan.targets.cpp
             {
                 analyze_local_variable(minion, symbol);
             }
+
+            var variable_assignments = get_variable_to_variable_assignments(minion.expressions);
+            foreach (var assignment in variable_assignments)
+            {
+                assignment[1].is_owner = assignment[0].is_owner;
+            }
         }
 
         static void analyze_local_variable(Minion minion, Symbol symbol)
@@ -98,7 +104,7 @@ namespace imperative.render.artisan.targets.cpp
                         var end = arg.get_end();
                         if (end.type == Expression_Type.variable)
                         {
-                            var variable = (Variable) end;
+                            var variable = (Variable)end;
                             if (variable.symbol == symbol && method_call.minion.parameters[i].is_persistent)
                             {
                                 result = true;
@@ -111,6 +117,42 @@ namespace imperative.render.artisan.targets.cpp
             return result;
         }
 
+
+
+        static List<Symbol[]> get_variable_to_variable_assignments(List<Expression> expressions)
+        {
+            var result = new List<Symbol[]>();
+            Crawler.analyze_expressions(expressions, expression =>
+            {
+                if (expression.type == Expression_Type.assignment)
+                {
+                    var assignment = (Assignment)expression;
+                    if (assignment.target.type == Expression_Type.variable
+                        && assignment.expression.type == Expression_Type.variable)
+                    {
+                        result.Add(new []
+                        {
+                            ((Variable)assignment.target).symbol,
+                            ((Variable)assignment.expression).symbol
+                        });
+                    }
+                }
+                else if (expression.type == Expression_Type.declare_variable)
+                {
+                    var declaration = ((Declare_Variable) expression);
+                    if (declaration.expression != null && declaration.expression.type == Expression_Type.variable)
+                    {
+                        result.Add(new[]
+                        {
+                            declaration.symbol,
+                            ((Variable)declaration.expression).symbol
+                        });
+                    }
+                }
+            });
+
+            return result;
+        }
         static void analyze_constructor(Minion constructor)
         {
             Crawler.analyze_expressions(constructor.expressions, expression =>

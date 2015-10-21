@@ -99,7 +99,7 @@ namespace imperative.render.artisan.targets.cpp
 
         public static Stroke unique_pointer(Stroke type, Stroke expression)
         {
-            return new Stroke_Token("&*std::unique_ptr<") + type + new Stroke_Token(">(") + expression + new Stroke_Token(")");
+            return new Stroke_Token("std::unique_ptr<") + type + new Stroke_Token(">(") + expression + new Stroke_Token(")");
         }
 
         public static Stroke render_dungeon_path2(IDungeon dungeon, Render_Context context)
