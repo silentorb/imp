@@ -576,6 +576,9 @@ namespace imperative.summoner
                 case "foreach_statement":
                     return process_iterator(source, context);
 
+                case "break":
+                    return new Statement("break");
+
                 case "return_statement":
                     return new Statement("return", parts[0] == null
                                                        ? null

@@ -60,6 +60,7 @@ statement =
 	| if_chain
 	| while_statement
 	| return_statement
+	| break
 	| foreach_statement
 	| for_statement
 	| preprocessor

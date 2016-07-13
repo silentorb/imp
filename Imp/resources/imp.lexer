@@ -13,7 +13,8 @@ path_separator = "."
 arrow = "=>"
 insert = /\$\w*/
 complex_set_operator = '+=' | '-=' | '*=' | '/=' | '@='
-operator_token = '+' | '-' | '/' | '*' | '<=' | '>=' | '<' | '>' | '==' | '!=' | '&&' | '||'
+minus = '-'
+operator_token = '+' | minus | '/' | '*' | '<=' | '>=' | '<' | '>' | '==' | '!=' | '&&' | '||'
 set_operator = equals | complex_set_operator
 equals = "="
 
